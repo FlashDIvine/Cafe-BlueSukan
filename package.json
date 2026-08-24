@@ -1,24 +1,21 @@
 {
   "name": "bluesukan-monorepo",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "type": "module",
-  "description": "Bantu Cafe Self-Order — Monorepo (Client + Server)",
+  "workspaces": [
+    "client",
+    "server"
+  ],
   "scripts": {
-    "dev": "concurrently -n client,server -c cyan,green \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
-    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
-    "dev:client": "npm run dev --prefix client",
-    "dev:server": "npm run dev --prefix server"
-  },
-  "devDependencies": {
-    "concurrently": "^9.1.2",
-    "prisma": "^6.19.3"
+    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --workspace=client",
+    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --workspace=client"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "cors": "^2.8.5",
-    "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "prisma": "^6.19.3"
   }
 }
