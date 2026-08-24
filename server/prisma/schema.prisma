@@ -5,8 +5,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Menu {
@@ -35,6 +36,7 @@ model Order {
   total_price    Int
   payment_method String?     // 'cash' | 'qris' | 'debit'
   status         String      @default("waiting_payment") // 'waiting_payment' | 'paid_processing' | 'completed' | 'cancelled'
+  paid_at        DateTime?
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
   items          OrderItem[]
@@ -54,4 +56,12 @@ model OrderItem {
   subtotal   Int
 
   @@map("order_items")
+}
+
+model Category {
+  id         String   @id // e.g. 'coffee', 'non-coffee', 'snacks', 'food' or custom id
+  name       String
+  created_at DateTime @default(now())
+
+  @@map("categories")
 }

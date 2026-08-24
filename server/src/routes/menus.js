@@ -3,19 +3,31 @@ import prisma from '../prisma.js';
 
 const router = Router();
 
-const CATEGORIES = [
-  { id: 'coffee', name: 'Kopi & Espresso' },
-  { id: 'non-coffee', name: 'Non-Coffee' },
-  { id: 'snacks', name: 'Makanan Ringan' },
-  { id: 'food', name: 'Makanan Utama' },
-];
+import { DEFAULT_CATEGORIES } from './categories.js';
 
-const CATEGORIES_MAP = {
-  coffee: 'Kopi & Espresso',
-  'non-coffee': 'Non-Coffee',
-  snacks: 'Makanan Ringan',
-  food: 'Makanan Utama',
-};
+async function getCategoriesMap() {
+  try {
+    const cats = await prisma.category.findMany();
+    if (!cats || cats.length === 0) {
+      const map = {};
+      DEFAULT_CATEGORIES.forEach((c) => {
+        map[c.id] = c.name;
+      });
+      return { map, list: DEFAULT_CATEGORIES };
+    }
+    const map = {};
+    cats.forEach((c) => {
+      map[c.id] = c.name;
+    });
+    return { map, list: cats };
+  } catch {
+    const map = {};
+    DEFAULT_CATEGORIES.forEach((c) => {
+      map[c.id] = c.name;
+    });
+    return { map, list: DEFAULT_CATEGORIES };
+  }
+}
 
 /**
  * GET /api/menus
@@ -27,20 +39,23 @@ router.get('/', async (req, res) => {
     const { category } = req.query;
     const where = category && category !== 'all' ? { category_id: category } : {};
 
-    const rawMenus = await prisma.menu.findMany({
-      where,
-      orderBy: { id: 'asc' },
-    });
+    const [rawMenus, { map: catMap, list: catList }] = await Promise.all([
+      prisma.menu.findMany({
+        where,
+        orderBy: { id: 'asc' },
+      }),
+      getCategoriesMap(),
+    ]);
 
     const result = rawMenus.map((m) => ({
       ...m,
-      category_name: CATEGORIES_MAP[m.category_id] || m.category_id,
+      category_name: catMap[m.category_id] || m.category_id,
     }));
 
     res.json({
       success: true,
       data: result,
-      categories: [{ id: 'all', name: 'Semua' }, ...CATEGORIES],
+      categories: [{ id: 'all', name: 'Semua' }, ...catList],
     });
   } catch (err) {
     console.error('Error fetching menus:', err);

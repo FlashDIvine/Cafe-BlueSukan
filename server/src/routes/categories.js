@@ -1,0 +1,135 @@
+import { Router } from 'express';
+import prisma from '../prisma.js';
+
+const router = Router();
+
+export const DEFAULT_CATEGORIES = [
+  { id: 'coffee', name: 'Kopi & Espresso' },
+  { id: 'non-coffee', name: 'Non-Coffee' },
+  { id: 'snacks', name: 'Makanan Ringan' },
+  { id: 'food', name: 'Makanan Utama' },
+];
+
+/**
+ * Ensure default categories exist in DB
+ */
+async function ensureDefaultCategories() {
+  const count = await prisma.category.count();
+  if (count === 0) {
+    for (const cat of DEFAULT_CATEGORIES) {
+      await prisma.category.upsert({
+        where: { id: cat.id },
+        update: {},
+        create: { id: cat.id, name: cat.name },
+      });
+    }
+  }
+}
+
+/**
+ * Helper to slugify category name to a clean id
+ */
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+}
+
+/**
+ * GET /api/categories
+ * List all categories
+ */
+router.get('/', async (req, res) => {
+  try {
+    await ensureDefaultCategories();
+    const categories = await prisma.category.findMany({
+      orderBy: { created_at: 'asc' },
+    });
+    res.json({ success: true, data: categories });
+  } catch (err) {
+    console.error('Error fetching categories:', err);
+    res.status(500).json({ success: false, message: 'Gagal mengambil data kategori' });
+  }
+});
+
+/**
+ * POST /api/categories
+ * Add a new category
+ */
+router.post('/', async (req, res) => {
+  try {
+    const { name, id } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Nama kategori wajib diisi' });
+    }
+
+    const trimmedName = name.trim();
+    let targetId = id ? slugify(id) : slugify(trimmedName);
+    if (!targetId) {
+      targetId = `cat-${Date.now()}`;
+    }
+
+    // Check if ID already exists
+    const existingById = await prisma.category.findUnique({ where: { id: targetId } });
+    if (existingById) {
+      // Append random suffix if generated slug exists
+      targetId = `${targetId}-${Math.floor(Math.random() * 1000)}`;
+    }
+
+    const created = await prisma.category.create({
+      data: {
+        id: targetId,
+        name: trimmedName,
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: `Kategori "${created.name}" berhasil ditambahkan`,
+      data: created,
+    });
+  } catch (err) {
+    console.error('Error creating category:', err);
+    res.status(500).json({ success: false, message: 'Gagal menambahkan kategori baru' });
+  }
+});
+
+/**
+ * DELETE /api/categories/:id
+ * Delete a category (checks if any menus are using it)
+ */
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const category = await prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      return res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });
+    }
+
+    // Check if any menu uses this category
+    const menuCount = await prisma.menu.count({ where: { category_id: id } });
+    if (menuCount > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Kategori "${category.name}" tidak dapat dihapus karena sedang digunakan oleh ${menuCount} menu. Pindahkan menu ke kategori lain terlebih dahulu.`,
+      });
+    }
+
+    await prisma.category.delete({ where: { id } });
+
+    res.json({
+      success: true,
+      message: `Kategori "${category.name}" berhasil dihapus`,
+      data: category,
+    });
+  } catch (err) {
+    console.error('Error deleting category:', err);
+    res.status(500).json({ success: false, message: 'Gagal menghapus kategori' });
+  }
+});
+
+export default router;

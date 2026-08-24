@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import menusRouter from './routes/menus.js';
 import ordersRouter from './routes/orders.js';
+import categoriesRouter from './routes/categories.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -23,6 +24,7 @@ if (process.env.NODE_ENV !== 'production') {
 // ─── API Routes ───────────────────────────────────────────────
 app.use('/api/menus', menusRouter);
 app.use('/api/orders', ordersRouter);
+app.use('/api/categories', categoriesRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -34,12 +36,16 @@ app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Endpoint tidak ditemukan' });
 });
 
-// ─── Start server ─────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n  🚀 Bantu Cafe API Server running at http://localhost:${PORT}`);
-  console.log(`  📋 Endpoints:`);
-  console.log(`     GET  /api/menus`);
-  console.log(`     POST /api/orders`);
-  console.log(`     GET  /api/orders/:order_code/status`);
-  console.log(`     PATCH /api/orders/:id/approve\n`);
-});
+// ─── Start server in standalone mode ──────────────────────────
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n  🚀 Bantu Cafe API Server running at http://localhost:${PORT}`);
+    console.log(`  📋 Endpoints:`);
+    console.log(`     GET  /api/menus`);
+    console.log(`     POST /api/orders`);
+    console.log(`     GET  /api/orders/:order_code/status`);
+    console.log(`     PATCH /api/orders/:id/approve\n`);
+  });
+}
+
+export default app;

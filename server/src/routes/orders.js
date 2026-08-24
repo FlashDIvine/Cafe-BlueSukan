@@ -274,6 +274,7 @@ router.patch('/:id/approve', async (req, res) => {
         data: {
           status: 'paid_processing',
           payment_method: paymentMethod,
+          paid_at: new Date(),
         },
         include: { items: true },
       });
@@ -287,6 +288,44 @@ router.patch('/:id/approve', async (req, res) => {
   } catch (err) {
     console.error('Error approving order:', err);
     res.status(409).json({ success: false, message: err.message || 'Gagal menyetujui pesanan' });
+  }
+});
+
+/**
+ * PATCH /api/orders/:id/complete
+ * Mark a processing order as completed
+ */
+router.patch('/:id/complete', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  try {
+    const order = await prisma.order.findUnique({ where: { id } });
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    }
+
+    if (order.status === 'completed') {
+      return res.json({
+        success: true,
+        message: `Pesanan ${order.order_code} sudah dalam status selesai`,
+        data: order,
+      });
+    }
+
+    const completed = await prisma.order.update({
+      where: { id },
+      data: { status: 'completed' },
+      include: { items: true },
+    });
+
+    res.json({
+      success: true,
+      message: `Pesanan ${completed.order_code} telah diselesaikan`,
+      data: completed,
+    });
+  } catch (err) {
+    console.error('Error completing order:', err);
+    res.status(500).json({ success: false, message: 'Gagal menyelesaikan pesanan' });
   }
 });
 
@@ -327,3 +366,4 @@ router.patch('/:id/cancel', async (req, res) => {
 });
 
 export default router;
+
