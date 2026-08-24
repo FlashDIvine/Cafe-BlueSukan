@@ -3,13 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "client",
-    "server"
-  ],
   "scripts": {
-    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --workspace=client",
-    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --workspace=client"
+    "dev": "concurrently -n client,server -c cyan,green \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
+    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -17,5 +16,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "prisma": "^6.19.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }
