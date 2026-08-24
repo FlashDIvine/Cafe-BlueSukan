@@ -61,6 +61,7 @@ model OrderItem {
 model Category {
   id         String   @id // e.g. 'coffee', 'non-coffee', 'snacks', 'food' or custom id
   name       String
+  image      String?  // WebP image URL
   created_at DateTime @default(now())
 
   @@map("categories")

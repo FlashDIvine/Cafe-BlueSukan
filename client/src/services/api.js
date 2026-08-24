@@ -284,6 +284,24 @@ export async function createCategoryApi(categoryData) {
 }
 
 /**
+ * Update a category (PATCH /api/categories/:id)
+ * @param {string} categoryId
+ * @param {{ name?: string, image?: string }} categoryData
+ * @returns {Promise<Object>}
+ */
+export async function updateCategoryApi(categoryId, categoryData) {
+  const res = await fetch(`${API_BASE}/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(categoryData),
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal memperbarui kategori');
+  return json.data;
+}
+
+/**
  * Delete a category (DELETE /api/categories/:id)
  * @param {string} categoryId
  * @returns {Promise<Object>}

@@ -4,14 +4,30 @@ import prisma from '../prisma.js';
 const router = Router();
 
 export const DEFAULT_CATEGORIES = [
-  { id: 'coffee', name: 'Kopi & Espresso' },
-  { id: 'non-coffee', name: 'Non-Coffee' },
-  { id: 'snacks', name: 'Makanan Ringan' },
-  { id: 'food', name: 'Makanan Utama' },
+  {
+    id: 'coffee',
+    name: 'Kopi & Espresso',
+    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
+  {
+    id: 'non-coffee',
+    name: 'Non-Coffee',
+    image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
+  {
+    id: 'snacks',
+    name: 'Makanan Ringan',
+    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
+  {
+    id: 'food',
+    name: 'Makanan Utama',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
 ];
 
 /**
- * Ensure default categories exist in DB
+ * Ensure default categories exist in DB with default images
  */
 async function ensureDefaultCategories() {
   const count = await prisma.category.count();
@@ -20,7 +36,7 @@ async function ensureDefaultCategories() {
       await prisma.category.upsert({
         where: { id: cat.id },
         update: {},
-        create: { id: cat.id, name: cat.name },
+        create: { id: cat.id, name: cat.name, image: cat.image },
       });
     }
   }
@@ -58,11 +74,11 @@ router.get('/', async (req, res) => {
 
 /**
  * POST /api/categories
- * Add a new category
+ * Add a new category with optional WebP image
  */
 router.post('/', async (req, res) => {
   try {
-    const { name, id } = req.body;
+    const { name, id, image } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Nama kategori wajib diisi' });
     }
@@ -76,7 +92,6 @@ router.post('/', async (req, res) => {
     // Check if ID already exists
     const existingById = await prisma.category.findUnique({ where: { id: targetId } });
     if (existingById) {
-      // Append random suffix if generated slug exists
       targetId = `${targetId}-${Math.floor(Math.random() * 1000)}`;
     }
 
@@ -84,6 +99,7 @@ router.post('/', async (req, res) => {
       data: {
         id: targetId,
         name: trimmedName,
+        image: image && typeof image === 'string' ? image.trim() : null,
       },
     });
 
@@ -95,6 +111,44 @@ router.post('/', async (req, res) => {
   } catch (err) {
     console.error('Error creating category:', err);
     res.status(500).json({ success: false, message: 'Gagal menambahkan kategori baru' });
+  }
+});
+
+/**
+ * PATCH /api/categories/:id
+ * Update category name and/or image
+ */
+router.patch('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, image } = req.body;
+
+    const existing = await prisma.category.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Kategori tidak ditemukan' });
+    }
+
+    const updateData = {};
+    if (name !== undefined && name.trim()) {
+      updateData.name = name.trim();
+    }
+    if (image !== undefined) {
+      updateData.image = image && typeof image === 'string' ? image.trim() : null;
+    }
+
+    const updated = await prisma.category.update({
+      where: { id },
+      data: updateData,
+    });
+
+    res.json({
+      success: true,
+      message: `Kategori "${updated.name}" berhasil diperbarui`,
+      data: updated,
+    });
+  } catch (err) {
+    console.error('Error updating category:', err);
+    res.status(500).json({ success: false, message: 'Gagal memperbarui kategori' });
   }
 });
 

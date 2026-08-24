@@ -1,23 +1,20 @@
-import React from 'react';
-import { Coffee, CupSoda, UtensilsCrossed, Cookie, Sparkles, Layers } from 'lucide-react';
+import React, { useMemo } from 'react';
 import { CATEGORIES } from '../data/mockMenus';
 import '../styles/category-filter.css';
 
-const getCategoryIcon = (id) => {
-  switch (id) {
-    case 'coffee':
-      return <Coffee size={20} strokeWidth={2.2} />;
-    case 'non-coffee':
-      return <CupSoda size={20} strokeWidth={2.2} />;
-    case 'food':
-      return <UtensilsCrossed size={20} strokeWidth={2.2} />;
-    case 'snacks':
-      return <Cookie size={20} strokeWidth={2.2} />;
-    case 'all':
-      return <Sparkles size={20} strokeWidth={2.2} />;
-    default:
-      return <Layers size={20} strokeWidth={2.2} />;
+const DEFAULT_CATEGORY_IMAGES = {
+  all: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=160&q=80&fm=webp',
+  coffee: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=160&q=80&fm=webp',
+  'non-coffee': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=160&q=80&fm=webp',
+  snacks: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=160&q=80&fm=webp',
+  food: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=160&q=80&fm=webp',
+};
+
+const getCategoryImageUrl = (cat) => {
+  if (cat?.image && typeof cat.image === 'string' && cat.image.trim()) {
+    return cat.image.trim();
   }
+  return DEFAULT_CATEGORY_IMAGES[cat?.id] || DEFAULT_CATEGORY_IMAGES.all;
 };
 
 const getCategoryShortName = (cat) => {
@@ -36,7 +33,7 @@ export const CategoryFilter = ({
   menusCountByCategory = {},
 }) => {
   // Ensure 'all' option is available at the start if not present
-  const displayCategories = React.useMemo(() => {
+  const displayCategories = useMemo(() => {
     const hasAll = categories.some((c) => c.id === 'all');
     if (!hasAll) {
       return [{ id: 'all', name: 'All' }, ...categories];
@@ -45,15 +42,16 @@ export const CategoryFilter = ({
   }, [categories]);
 
   return (
-    <section className="stitch-categories-section" aria-label="Kategori Menu">
-      <div className="stitch-section-header">
-        <h2 className="stitch-section-title">Categories</h2>
+    <section className="food-category-section" aria-label="Kategori Menu">
+      <div className="food-category-header">
+        <h2 className="food-category-title">Category</h2>
       </div>
-      <div className="stitch-categories-scroll no-scrollbar" role="tablist">
+
+      <div className="food-category-scroll no-scrollbar" role="tablist">
         {displayCategories.map((cat) => {
           const isActive = activeCategory === cat.id;
-          const icon = getCategoryIcon(cat.id);
-          const shortLabel = getCategoryShortName(cat);
+          const imgUrl = getCategoryImageUrl(cat);
+          const label = getCategoryShortName(cat);
 
           return (
             <button
@@ -61,11 +59,22 @@ export const CategoryFilter = ({
               type="button"
               role="tab"
               aria-selected={isActive}
-              className={`stitch-category-card ${isActive ? 'active' : ''}`}
+              className={`food-category-item ${isActive ? 'active' : ''}`}
               onClick={() => onSelectCategory(isActive && cat.id !== 'all' ? 'all' : cat.id)}
             >
-              <div className="stitch-cat-icon-circle">{icon}</div>
-              <span className="stitch-cat-label">{shortLabel}</span>
+              <div className="food-category-circle">
+                <img
+                  src={imgUrl}
+                  alt={cat.name}
+                  className="food-category-img"
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = DEFAULT_CATEGORY_IMAGES[cat.id] || DEFAULT_CATEGORY_IMAGES.all;
+                  }}
+                />
+              </div>
+              <span className="food-category-name">{label}</span>
             </button>
           );
         })}
