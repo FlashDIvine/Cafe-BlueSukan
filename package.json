@@ -6,8 +6,8 @@
   "description": "Bantu Cafe Self-Order — Monorepo (Client + Server)",
   "scripts": {
     "dev": "concurrently -n client,server -c cyan,green \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --prefix client",
-    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm run build --prefix client",
+    "build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
+    "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run dev --prefix server"
   },
