@@ -14,13 +14,14 @@ import {
   ClipboardList,
   UtensilsCrossed,
 } from 'lucide-react';
-import { formatRupiah } from '../utils/formatters';
+import { formatRupiah, formatPaidTime } from '../utils/formatters';
 import {
   fetchOrdersApi,
   fetchMenusApi,
   updateOrderItemsApi,
   cancelOrderApi,
   approveOrderApi,
+  completeOrderApi,
 } from '../services/api';
 import { CashierOrderModal } from '../components/CashierOrderModal';
 import { MenuManagement } from '../components/MenuManagement';
@@ -127,6 +128,12 @@ export const CashierPage = () => {
     return updated;
   };
 
+  const handleCompleteOrder = async (orderId) => {
+    const updated = await completeOrderApi(orderId);
+    await loadData();
+    return updated;
+  };
+
   return (
     <div className="cashier-dashboard-container">
       {/* POS Top Header */}
@@ -222,15 +229,15 @@ export const CashierPage = () => {
           <div className="pos-controls-bar">
             {/* Metric Cards */}
             <div className="pos-metrics-grid" style={{ marginBottom: '8px' }}>
-              <div className="pos-metric-card highlight">
+              <div className="pos-metric-card waiting-metric">
                 <span className="pos-metric-label">Perlu Pembayaran</span>
                 <span className="pos-metric-value">{counts.waiting_payment}</span>
               </div>
-              <div className="pos-metric-card">
+              <div className="pos-metric-card processing-metric">
                 <span className="pos-metric-label">Sedang Diproses</span>
                 <span className="pos-metric-value">{counts.paid_processing}</span>
               </div>
-              <div className="pos-metric-card">
+              <div className="pos-metric-card total-metric">
                 <span className="pos-metric-label">Total Pesanan Hari Ini</span>
                 <span className="pos-metric-value">{counts.all}</span>
               </div>
@@ -330,6 +337,14 @@ export const CashierPage = () => {
                         <span>{order.customer_name}</span>
                       </div>
 
+                      {/* Payment Timestamp for processing orders */}
+                      {isProcessing && (order.paid_at || order.updated_at) && (
+                        <div className="pos-card-paid-time">
+                          <Clock size={12} />
+                          <span>{formatPaidTime(order.paid_at || order.updated_at)}</span>
+                        </div>
+                      )}
+
                       {order.notes && (
                         <div className="pos-card-notes-alert">
                           <strong>Catatan:</strong> {order.notes}
@@ -359,17 +374,34 @@ export const CashierPage = () => {
                           <div className="pos-card-total-price">{formatRupiah(order.total_price)}</div>
                         </div>
 
-                        <button
-                          type="button"
-                          className="btn-open-order"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedOrder(order);
-                          }}
-                        >
-                          <span>{isWaiting ? 'Verifikasi & Bayar' : 'Lihat Detail'}</span>
-                          <ChevronRight size={14} />
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          {isProcessing && (
+                            <button
+                              type="button"
+                              className="btn-complete-order"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCompleteOrder(order.id);
+                              }}
+                              title="Selesaikan Pesanan"
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>Selesai</span>
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            className="btn-open-order"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrder(order);
+                            }}
+                          >
+                            <span>{isWaiting ? 'Verifikasi & Bayar' : 'Detail'}</span>
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -397,9 +429,11 @@ export const CashierPage = () => {
             onUpdateItems={handleUpdateItems}
             onCancelOrder={handleCancelOrder}
             onApproveOrder={handleApproveOrder}
+            onCompleteOrder={handleCompleteOrder}
           />
         </>
       )}
     </div>
   );
 };
+

@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { getTableFromUrl } from '../utils/formatters';
-import { MOCK_MENUS } from '../data/mockMenus';
+import { MOCK_MENUS, CATEGORIES } from '../data/mockMenus';
 import { fetchMenusApi } from '../services/api';
 
 export const OrderContext = createContext(null);
@@ -8,6 +8,7 @@ export const OrderContext = createContext(null);
 export const OrderProvider = ({ children }) => {
   // Menu items state (initialized with mock data, fetches from backend)
   const [menus, setMenus] = useState(MOCK_MENUS);
+  const [categories, setCategories] = useState(CATEGORIES);
 
   // Fetch menus from backend API on mount & poll every 3s for realtime stock/menu updates
   useEffect(() => {
@@ -15,6 +16,7 @@ export const OrderProvider = ({ children }) => {
       fetchMenusApi()
         .then((res) => {
           if (res?.data?.length) setMenus(res.data);
+          if (res?.categories?.length) setCategories(res.categories);
         })
         .catch(() => {
           // Backend unavailable — keep using existing state
@@ -176,9 +178,11 @@ export const OrderProvider = ({ children }) => {
   }, [cartItems]);
 
   const value = {
-    // Menu
+    // Menu & Categories
     menus,
     setMenus,
+    categories,
+    setCategories,
     // Table & Customer info
     tableNumber,
     setTableNumber,

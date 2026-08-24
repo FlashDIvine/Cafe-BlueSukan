@@ -10,7 +10,7 @@ import { Toast } from '../components/Toast';
 import '../styles/menu-page.css';
 
 export const MenuPage = ({ onOpenCart }) => {
-  const { menus } = useOrder();
+  const { menus, categories = [] } = useOrder();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
@@ -23,6 +23,13 @@ export const MenuPage = ({ onOpenCart }) => {
     });
     return counts;
   }, [menus]);
+
+  // Dynamic active category title
+  const activeCategoryTitle = useMemo(() => {
+    if (activeCategory === 'all') return 'Daftar Menu';
+    const found = categories.find((c) => c.id === activeCategory);
+    return found ? found.name : 'Menu';
+  }, [categories, activeCategory]);
 
   // Filtered menu items by Category and Search Query
   const filteredMenus = useMemo(() => {
@@ -76,6 +83,7 @@ export const MenuPage = ({ onOpenCart }) => {
 
       {/* Category Pills Filter */}
       <CategoryFilter
+        categories={categories}
         activeCategory={activeCategory}
         onSelectCategory={setActiveCategory}
         menusCountByCategory={menusCountByCategory}
@@ -85,7 +93,7 @@ export const MenuPage = ({ onOpenCart }) => {
       <section className="menu-section" aria-label="Daftar Menu">
         <div className="menu-section-header">
           <h2 className="section-title">
-            {activeCategory === 'all' ? 'Daftar Menu' : CATEGORY_TITLES[activeCategory] || 'Menu'}
+            {activeCategoryTitle}
           </h2>
           <span className="section-counter">{filteredMenus.length} Menu</span>
         </div>
@@ -118,9 +126,3 @@ export const MenuPage = ({ onOpenCart }) => {
   );
 };
 
-const CATEGORY_TITLES = {
-  coffee: 'Kopi & Espresso',
-  'non-coffee': 'Non-Coffee',
-  snacks: 'Makanan Ringan',
-  food: 'Makanan Utama',
-};

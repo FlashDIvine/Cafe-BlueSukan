@@ -2,12 +2,17 @@ import React from 'react';
 import { CATEGORIES } from '../data/mockMenus';
 import '../styles/category-filter.css';
 
-export const CategoryFilter = ({ activeCategory, onSelectCategory, menusCountByCategory }) => {
+export const CategoryFilter = ({
+  categories = CATEGORIES,
+  activeCategory,
+  onSelectCategory,
+  menusCountByCategory = {},
+}) => {
   return (
     <div className="category-filter-wrapper">
       <div className="category-scroll-container no-scrollbar" role="tablist">
-        {CATEGORIES.map((cat) => {
-          const count = menusCountByCategory[cat.id] ?? cat.count;
+        {categories.map((cat) => {
+          const count = menusCountByCategory[cat.id] ?? 0;
           const isActive = activeCategory === cat.id;
 
           return (
@@ -27,3 +32,4 @@ export const CategoryFilter = ({ activeCategory, onSelectCategory, menusCountByC
     </div>
   );
 };
+

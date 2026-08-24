@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Plus,
@@ -13,8 +13,9 @@ import {
   QrCode,
   CreditCard,
   AlertTriangle,
+  Clock,
 } from 'lucide-react';
-import { formatRupiah } from '../utils/formatters';
+import { formatRupiah, formatPaidTime } from '../utils/formatters';
 import { CashierAddMenuModal } from './CashierAddMenuModal';
 
 export const CashierOrderModal = ({
@@ -25,6 +26,7 @@ export const CashierOrderModal = ({
   onUpdateItems,
   onCancelOrder,
   onApproveOrder,
+  onCompleteOrder,
 }) => {
   const [items, setItems] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -53,6 +55,8 @@ export const CashierOrderModal = ({
   if (!isOpen || !order) return null;
 
   const isWaitingPayment = order.status === 'waiting_payment';
+  const isProcessing = order.status === 'paid_processing';
+  const isCompleted = order.status === 'completed';
 
   // Calculate live total price from items
   const currentTotalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -136,6 +140,19 @@ export const CashierOrderModal = ({
     }
   };
 
+  const handleComplete = async () => {
+    if (!onCompleteOrder) return;
+    setIsSubmitting(true);
+    try {
+      await onCompleteOrder(order.id);
+      onClose();
+    } catch (err) {
+      alert(err.message || 'Gagal menyelesaikan pesanan');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleCancel = async () => {
     if (window.confirm(`Yakin ingin membatalkan pesanan ${order.order_code}?`)) {
       setIsSubmitting(true);
@@ -189,6 +206,32 @@ export const CashierOrderModal = ({
                 </span>
                 <strong style={{ color: 'var(--color-accent)' }}>Meja {order.table_number}</strong>
               </div>
+
+              {/* Payment Time & Method (if already paid) */}
+              {(order.paid_at || (isProcessing && order.updated_at)) && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: '#E0F2FE',
+                    border: '1px solid #BAE6FD',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '6px 10px',
+                    fontSize: '12px',
+                    color: '#0369A1',
+                    fontWeight: '700',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <Clock size={13} /> {formatPaidTime(order.paid_at || order.updated_at)}
+                  </span>
+                  <span style={{ textTransform: 'uppercase' }}>
+                    Metode: {order.payment_method || 'Tunai'}
+                  </span>
+                </div>
+              )}
+
               {order.notes && (
                 <div style={{ marginTop: '4px', fontSize: '12px', color: '#92400E', backgroundColor: '#FEF3C7', padding: '6px 8px', borderRadius: '4px' }}>
                   <strong>Catatan Pelanggan:</strong> {order.notes}
@@ -317,31 +360,64 @@ export const CashierOrderModal = ({
           </div>
 
           {/* Footer Actions */}
-          {isWaitingPayment && (
-            <div className="cashier-modal-footer">
-              <button
-                type="button"
-                className="btn-cancel-order"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-              >
-                <Ban size={14} />
-                <span>Batalkan</span>
-              </button>
+          <div className="cashier-modal-footer">
+            {isWaitingPayment ? (
+              <>
+                <button
+                  type="button"
+                  className="btn-cancel-order"
+                  onClick={handleCancel}
+                  disabled={isSubmitting}
+                >
+                  <Ban size={14} />
+                  <span>Batalkan</span>
+                </button>
 
+                <button
+                  type="button"
+                  className="btn-approve-payment"
+                  onClick={handleConfirmAndApprove}
+                  disabled={isSubmitting || items.length === 0}
+                >
+                  <CheckCircle2 size={18} />
+                  <span>
+                    {isSubmitting ? 'Memproses...' : `Konfirmasi Bayar (${formatRupiah(currentTotalPrice)})`}
+                  </span>
+                </button>
+              </>
+            ) : isProcessing ? (
+              <>
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onClose}
+                  style={{ width: 'auto', padding: '10px 18px' }}
+                >
+                  Tutup
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-complete-order"
+                  onClick={handleComplete}
+                  disabled={isSubmitting}
+                  style={{ flex: 1, padding: '12px 18px', fontSize: '14px', justifyContent: 'center' }}
+                >
+                  <CheckCircle2 size={18} />
+                  <span>{isSubmitting ? 'Memproses...' : 'Selesaikan Pesanan'}</span>
+                </button>
+              </>
+            ) : (
               <button
                 type="button"
-                className="btn-approve-payment"
-                onClick={handleConfirmAndApprove}
-                disabled={isSubmitting || items.length === 0}
+                className="btn-secondary"
+                onClick={onClose}
+                style={{ width: '100%', padding: '10px 18px' }}
               >
-                <CheckCircle2 size={18} />
-                <span>
-                  {isSubmitting ? 'Memproses...' : `Konfirmasi Bayar (${formatRupiah(currentTotalPrice)})`}
-                </span>
+                Tutup
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -356,3 +432,4 @@ export const CashierOrderModal = ({
     </>
   );
 };
+

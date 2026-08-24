@@ -24,10 +24,13 @@ export const MenuFormModal = ({ isOpen, onClose, onSubmit, initialMenu, categori
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const validCategories = (categories || []).filter((c) => c.id !== 'all');
+  const defaultCatId = validCategories.length > 0 ? validCategories[0].id : 'coffee';
+
   useEffect(() => {
     if (initialMenu) {
       setName(initialMenu.name || '');
-      setCategoryId(initialMenu.category_id || 'coffee');
+      setCategoryId(initialMenu.category_id || defaultCatId);
       setPrice(String(initialMenu.price || ''));
       setStock(String(initialMenu.stock ?? 10));
       setImageUrl(initialMenu.image_url || '');
@@ -36,7 +39,7 @@ export const MenuFormModal = ({ isOpen, onClose, onSubmit, initialMenu, categori
       setIsPopular(Boolean(initialMenu.is_popular));
     } else {
       setName('');
-      setCategoryId('coffee');
+      setCategoryId(defaultCatId);
       setPrice('');
       setStock('15');
       setImageUrl(PRESET_IMAGES[0].url);
@@ -45,7 +48,7 @@ export const MenuFormModal = ({ isOpen, onClose, onSubmit, initialMenu, categori
       setIsPopular(false);
     }
     setErrorMsg('');
-  }, [initialMenu, isOpen]);
+  }, [initialMenu, isOpen, defaultCatId]);
 
   if (!isOpen) return null;
 
@@ -138,10 +141,11 @@ export const MenuFormModal = ({ isOpen, onClose, onSubmit, initialMenu, categori
                 value={categoryId}
                 onChange={(e) => setCategoryId(e.target.value)}
               >
-                <option value="coffee">Kopi & Espresso</option>
-                <option value="non-coffee">Non-Coffee</option>
-                <option value="snacks">Makanan Ringan</option>
-                <option value="food">Makanan Utama</option>
+                {validCategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
 

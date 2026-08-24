@@ -10,6 +10,8 @@ import {
   Sparkles,
   Minus,
   Coffee,
+  Tag,
+  FolderPlus,
 } from 'lucide-react';
 import { formatRupiah } from '../utils/formatters';
 import { MenuFormModal } from './MenuFormModal';
@@ -19,15 +21,21 @@ import {
   updateMenuStockApi,
   toggleMenuAvailabilityApi,
   deleteMenuApi,
+  createCategoryApi,
+  deleteCategoryApi,
 } from '../services/api';
 
-export const MenuManagement = ({ menus, categories, onRefreshMenus }) => {
+export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState(null);
   const [deleteTargetMenu, setDeleteTargetMenu] = useState(null);
   const [toastMsg, setToastMsg] = useState(null);
+
+  // Category management state
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
 
   const showToast = (msg, type = 'info') => {
     setToastMsg({ msg, type });
@@ -56,7 +64,7 @@ export const MenuManagement = ({ menus, categories, onRefreshMenus }) => {
     });
   }, [menus, selectedCategory, searchQuery]);
 
-  // Actions
+  // Actions for Menus
   const handleOpenAddModal = () => {
     setEditingMenu(null);
     setIsFormModalOpen(true);
@@ -112,6 +120,39 @@ export const MenuManagement = ({ menus, categories, onRefreshMenus }) => {
     }
   };
 
+  // Actions for Categories
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+
+    setIsAddingCategory(true);
+    try {
+      await createCategoryApi({ name: newCategoryName.trim() });
+      showToast(`Kategori "${newCategoryName.trim()}" berhasil ditambahkan`, 'success');
+      setNewCategoryName('');
+      await onRefreshMenus();
+    } catch (err) {
+      showToast(err.message || 'Gagal menambahkan kategori', 'warning');
+    } finally {
+      setIsAddingCategory(false);
+    }
+  };
+
+  const handleDeleteCategory = async (catId, catName) => {
+    if (window.confirm(`Yakin ingin menghapus kategori "${catName}"?`)) {
+      try {
+        await deleteCategoryApi(catId);
+        showToast(`Kategori "${catName}" berhasil dihapus`, 'info');
+        if (selectedCategory === catId) {
+          setSelectedCategory('all');
+        }
+        await onRefreshMenus();
+      } catch (err) {
+        showToast(err.message || 'Gagal menghapus kategori', 'warning');
+      }
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 20px 40px' }}>
       {/* Toast */}
@@ -125,17 +166,69 @@ export const MenuManagement = ({ menus, categories, onRefreshMenus }) => {
 
       {/* Metrics Row */}
       <div className="pos-metrics-grid">
-        <div className="pos-metric-card">
+        <div className="pos-metric-card menu-total-metric">
           <span className="pos-metric-label">Total Menu</span>
           <span className="pos-metric-value">{stats.total}</span>
         </div>
-        <div className="pos-metric-card">
-          <span className="pos-metric-label" style={{ color: '#A7F3D0' }}>Menu Tersedia</span>
+        <div className="pos-metric-card menu-available-metric">
+          <span className="pos-metric-label">Menu Tersedia</span>
           <span className="pos-metric-value">{stats.available}</span>
         </div>
-        <div className="pos-metric-card highlight">
+        <div className="pos-metric-card waiting-metric">
           <span className="pos-metric-label">Stok Habis / Nonaktif</span>
           <span className="pos-metric-value">{stats.outOfStock}</span>
+        </div>
+      </div>
+
+      {/* Category Management Card */}
+      <div className="category-manager-card">
+        <div className="category-manager-header">
+          <div className="category-manager-title">
+            <Tag size={16} />
+            <span>Kelola Kategori Menu ({categories.filter((c) => c.id !== 'all').length})</span>
+          </div>
+
+          <form onSubmit={handleAddCategory} className="category-add-form">
+            <input
+              type="text"
+              className="category-add-input"
+              placeholder="Nama kategori baru (contoh: Dessert, Promo)..."
+              value={newCategoryName}
+              onChange={(e) => setNewCategoryName(e.target.value)}
+              disabled={isAddingCategory}
+            />
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{ width: 'auto', padding: '8px 14px', fontSize: '12px' }}
+              disabled={isAddingCategory || !newCategoryName.trim()}
+            >
+              <Plus size={14} />
+              <span>{isAddingCategory ? 'Menyimpan...' : 'Tambah Kategori'}</span>
+            </button>
+          </form>
+        </div>
+
+        <div className="category-chips-list">
+          {categories
+            .filter((c) => c.id !== 'all')
+            .map((cat) => {
+              const count = menus.filter((m) => m.category_id === cat.id).length;
+              return (
+                <div key={cat.id} className="category-chip-item">
+                  <span>{cat.name}</span>
+                  <span className="category-chip-count">{count} menu</span>
+                  <button
+                    type="button"
+                    className="category-chip-del-btn"
+                    onClick={() => handleDeleteCategory(cat.id, cat.name)}
+                    title={`Hapus kategori ${cat.name}`}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              );
+            })}
         </div>
       </div>
 
@@ -179,41 +272,16 @@ export const MenuManagement = ({ menus, categories, onRefreshMenus }) => {
         </div>
 
         <div className="pos-tab-filter-list no-scrollbar">
-          <button
-            type="button"
-            className={`pos-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('all')}
-          >
-            Semua
-          </button>
-          <button
-            type="button"
-            className={`pos-tab-btn ${selectedCategory === 'coffee' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('coffee')}
-          >
-            Kopi & Espresso
-          </button>
-          <button
-            type="button"
-            className={`pos-tab-btn ${selectedCategory === 'non-coffee' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('non-coffee')}
-          >
-            Non-Coffee
-          </button>
-          <button
-            type="button"
-            className={`pos-tab-btn ${selectedCategory === 'snacks' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('snacks')}
-          >
-            Makanan Ringan
-          </button>
-          <button
-            type="button"
-            className={`pos-tab-btn ${selectedCategory === 'food' ? 'active' : ''}`}
-            onClick={() => setSelectedCategory('food')}
-          >
-            Makanan Utama
-          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              className={`pos-tab-btn ${selectedCategory === cat.id ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat.id)}
+            >
+              {cat.name}
+            </button>
+          ))}
         </div>
       </div>
 

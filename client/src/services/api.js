@@ -234,3 +234,66 @@ export async function approveOrderApi(orderId, paymentMethod = 'cash') {
   if (!res.ok) throw new Error(json.message || 'Failed to approve order');
   return json.data;
 }
+
+/**
+ * Cashier marks order as completed (PATCH /api/orders/:id/complete)
+ * @param {number} orderId
+ * @returns {Promise<Object>}
+ */
+export async function completeOrderApi(orderId) {
+  const res = await fetch(`${API_BASE}/orders/${orderId}/complete`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal menyelesaikan pesanan');
+  return json.data;
+}
+
+/* ==========================================================================
+   CATEGORY APIS
+   ========================================================================== */
+
+/**
+ * Fetch all categories (GET /api/categories)
+ * @returns {Promise<Array<{ id: string, name: string }>>}
+ */
+export async function fetchCategoriesApi() {
+  const res = await fetch(`${API_BASE}/categories`);
+  if (!res.ok) throw new Error('Failed to fetch categories');
+  const json = await res.json();
+  return json.data;
+}
+
+/**
+ * Create a new category (POST /api/categories)
+ * @param {{ name: string, id?: string }} categoryData
+ * @returns {Promise<Object>}
+ */
+export async function createCategoryApi(categoryData) {
+  const res = await fetch(`${API_BASE}/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(categoryData),
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal menambahkan kategori');
+  return json.data;
+}
+
+/**
+ * Delete a category (DELETE /api/categories/:id)
+ * @param {string} categoryId
+ * @returns {Promise<Object>}
+ */
+export async function deleteCategoryApi(categoryId) {
+  const res = await fetch(`${API_BASE}/categories/${encodeURIComponent(categoryId)}`, {
+    method: 'DELETE',
+  });
+
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal menghapus kategori');
+  return json.data;
+}

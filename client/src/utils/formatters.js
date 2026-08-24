@@ -33,3 +33,18 @@ export function getTableFromUrl(fallback = '04') {
   }
   return fallback;
 }
+
+/**
+ * Format timestamp to payment time string (e.g. "Dibayar pukul 14:35 WIB")
+ * @param {string|Date} dateString
+ * @returns {string}
+ */
+export function formatPaidTime(dateString) {
+  if (!dateString) return '';
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `Dibayar pukul ${hours}:${minutes} WIB`;
+}
+
