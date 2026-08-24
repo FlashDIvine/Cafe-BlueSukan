@@ -1,0 +1,57 @@
+// Prisma Schema for Bantu Cafe Self-Order & Cashier POS System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Menu {
+  id           Int         @id @default(autoincrement())
+  category_id  String      // 'coffee' | 'non-coffee' | 'snacks' | 'food'
+  name         String
+  price        Int
+  stock        Int         @default(0)
+  is_available Boolean     @default(true)
+  image_url    String
+  description  String?
+  is_popular   Boolean     @default(false)
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
+  order_items  OrderItem[]
+
+  @@map("menus")
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  order_code     String      @unique // e.g. '#BC-101'
+  customer_name  String
+  table_number   String
+  notes          String?
+  total_price    Int
+  payment_method String?     // 'cash' | 'qris' | 'debit'
+  status         String      @default("waiting_payment") // 'waiting_payment' | 'paid_processing' | 'completed' | 'cancelled'
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  items          OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  order      Order    @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  menu_id    Int
+  menu       Menu     @relation(fields: [menu_id], references: [id])
+  name       String
+  price      Int
+  quantity   Int
+  subtotal   Int
+
+  @@map("order_items")
+}
