@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
-import { Plus, Minus, Lock, Heart } from 'lucide-react';
+import React from 'react';
+import { Plus, Minus, Lock, Star } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatRupiah } from '../utils/formatters';
-import '../styles/menu-card.css';
 
-export const MenuCard = ({ item }) => {
+export const RecommendedCard = ({ item }) => {
   const { addToCart, updateQty, getItemQtyInCart } = useOrder();
-  const [isLiked, setIsLiked] = useState(false);
 
   const isOutOfStock = !item.is_available || item.stock <= 0;
   const isLowStock = !isOutOfStock && item.stock <= 5;
@@ -30,22 +28,17 @@ export const MenuCard = ({ item }) => {
     updateQty(item.id, qtyInCart - 1);
   };
 
-  const toggleLike = (e) => {
-    e.stopPropagation();
-    setIsLiked((prev) => !prev);
-  };
-
   return (
     <article
-      className={`stitch-grid-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}
+      className={`stitch-recommended-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}
       aria-label={item.name}
     >
       {/* Product Image & Badges */}
-      <div className="stitch-grid-image-wrap">
+      <div className="stitch-rec-image-wrap">
         <img
           src={item.image_url}
           alt={item.name}
-          className="stitch-grid-image"
+          className="stitch-rec-image"
           loading="lazy"
           onError={(e) => {
             e.target.onerror = null;
@@ -53,83 +46,78 @@ export const MenuCard = ({ item }) => {
               'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=400&q=80';
           }}
         />
-
-        {/* Status badges */}
         {isOutOfStock ? (
-          <span className="stitch-grid-badge-out">Habis</span>
+          <span className="stitch-badge-out">Habis</span>
         ) : item.is_popular ? (
-          <span className="stitch-grid-badge-new">Favorit</span>
+          <span className="stitch-badge-bestseller">BESTSELLER</span>
         ) : null}
 
-        {/* Favorite Heart Button */}
-        <button
-          type="button"
-          className={`stitch-grid-heart-btn ${isLiked ? 'liked' : ''}`}
-          onClick={toggleLike}
-          aria-label={isLiked ? 'Hapus favorit' : 'Tambah favorit'}
-        >
-          <Heart
-            size={14}
-            fill={isLiked ? '#EF4444' : 'none'}
-            color={isLiked ? '#EF4444' : '#64748B'}
-            strokeWidth={2.2}
-          />
-        </button>
+        {/* Rating pill */}
+        {!isOutOfStock && (
+          <div className="stitch-rating-badge">
+            <Star size={11} fill="#F59E0B" color="#F59E0B" />
+            <span>4.9</span>
+          </div>
+        )}
       </div>
 
       {/* Product Information */}
-      <div className="stitch-grid-content">
-        <h3 className="stitch-grid-title" title={item.name}>
+      <div className="stitch-rec-content">
+        <h3 className="stitch-rec-title" title={item.name}>
           {item.name}
         </h3>
+        <p className="stitch-rec-desc">
+          {item.description || 'Pilihan menu istimewa Bantu Cafe'}
+        </p>
 
-        {isLowStock && (
-          <span className="stitch-grid-stock-warning">Sisa {item.stock} porsi</span>
-        )}
-
-        <div className="stitch-grid-footer">
-          <span className="stitch-grid-price">{formatRupiah(item.price)}</span>
+        <div className="stitch-rec-footer">
+          <div className="stitch-rec-price-wrap">
+            <span className="stitch-rec-price">{formatRupiah(item.price)}</span>
+            {isLowStock && (
+              <span className="stitch-low-stock-tag">Sisa {item.stock}</span>
+            )}
+          </div>
 
           {/* Action button / Stepper */}
-          <div className="stitch-grid-action">
+          <div className="stitch-rec-action">
             {isOutOfStock ? (
               <button
                 type="button"
-                className="stitch-btn-disabled-circle"
+                className="stitch-btn-disabled"
                 disabled
                 aria-label={`Menu ${item.name} habis`}
               >
-                <Lock size={11} />
+                <Lock size={12} />
               </button>
             ) : qtyInCart > 0 ? (
-              <div className="stitch-grid-stepper">
+              <div className="stitch-stepper-compact">
                 <button
                   type="button"
-                  className="stitch-grid-stepper-btn"
+                  className="stitch-stepper-btn"
                   onClick={handleDecrement}
                   aria-label={`Kurangi kuantitas ${item.name}`}
                 >
-                  <Minus size={11} />
+                  <Minus size={12} />
                 </button>
-                <span className="stitch-grid-stepper-val">{qtyInCart}</span>
+                <span className="stitch-stepper-val">{qtyInCart}</span>
                 <button
                   type="button"
-                  className="stitch-grid-stepper-btn"
+                  className="stitch-stepper-btn"
                   onClick={handleIncrement}
                   disabled={qtyInCart >= item.stock}
                   aria-label={`Tambah kuantitas ${item.name}`}
                 >
-                  <Plus size={11} />
+                  <Plus size={12} />
                 </button>
               </div>
             ) : (
               <button
                 type="button"
-                className="stitch-grid-btn-add"
+                className="stitch-btn-add-primary"
                 onClick={handleAdd}
                 aria-label={`Tambah ${item.name} ke keranjang`}
               >
-                <Plus size={14} strokeWidth={2.4} />
+                <Plus size={16} strokeWidth={2.6} />
               </button>
             )}
           </div>

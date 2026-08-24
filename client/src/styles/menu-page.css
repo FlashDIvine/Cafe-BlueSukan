@@ -1,90 +1,71 @@
-/* Menu Page Styles */
-.menu-page-container {
+/* ==========================================================================
+   Stitch-inspired Home / Menu Page Styles
+   ========================================================================== */
+
+.stitch-home-container {
   display: flex;
   flex-direction: column;
   flex: 1;
+  background-color: #F8FAFC;
+  min-height: 100%;
 }
 
-/* Welcome Banner */
-.welcome-banner {
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(15, 62, 125, 0.08) 0%, rgba(30, 96, 145, 0.04) 100%);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
+/* ─── 1. Top Search & Filter Bar ─────────────────────────────────────────── */
+.stitch-search-section {
+  padding: 14px 16px 4px 16px;
+}
+
+.stitch-search-row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
 }
 
-.welcome-title-wrap {
+.stitch-search-input-box {
+  flex: 1;
+  position: relative;
+  background-color: #FFFFFF;
+  border-radius: 999px;
+  border: 1px solid #F1F5F9;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   display: flex;
   align-items: center;
-  gap: 6px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.welcome-badge {
-  background-color: var(--color-sky);
-  color: var(--color-primary);
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: var(--radius-pill);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.stitch-search-input-box:focus-within {
+  border-color: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
-.welcome-title {
-  font-size: 19px;
-  font-weight: 800;
-  color: var(--color-primary);
-  line-height: 1.25;
-}
-
-.welcome-subtitle {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  line-height: 1.4;
-}
-
-/* Search Bar */
-.search-bar-container {
-  position: relative;
-  margin-top: 4px;
-}
-
-.search-icon {
+.stitch-search-icon {
   position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-slate-light);
+  left: 14px;
+  color: #94A3B8;
   pointer-events: none;
 }
 
-.search-input {
+.stitch-search-input {
   width: 100%;
-  padding: 10px 12px 10px 38px;
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border);
-  background-color: var(--color-white);
+  padding: 12px 38px 12px 42px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
   font-family: inherit;
-  font-size: 13px;
-  color: var(--color-text-main);
+  font-size: 13.5px;
+  color: #0F172A;
   outline: none;
-  transition: all var(--transition-fast);
-  box-shadow: var(--shadow-xs);
 }
 
-.search-input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-sky);
+.stitch-search-input::placeholder {
+  color: #94A3B8;
+  font-weight: 500;
 }
 
-.search-clear-btn {
+.stitch-search-clear-btn {
   position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #E2E8F0;
+  right: 12px;
+  background-color: #E2E8F0;
   border: none;
   border-radius: 50%;
   width: 20px;
@@ -92,71 +73,151 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-slate);
+  color: #475569;
   cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-/* Menu Section */
-.menu-section {
-  padding: 16px;
+.stitch-search-clear-btn:hover {
+  background-color: #CBD5E1;
+}
+
+/* Green Filter Action Button */
+.stitch-filter-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  color: #FFFFFF;
+  border: none;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
 }
 
-.menu-section-header {
+.stitch-filter-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.45);
+}
+
+.stitch-filter-btn:active {
+  transform: scale(0.95);
+}
+
+/* ─── 2. Section Header Common ────────────────────────────────────────────── */
+.stitch-section-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.section-title {
-  font-size: 15px;
+.stitch-section-title {
+  font-size: 17px;
   font-weight: 800;
-  color: var(--color-primary);
+  color: #0F172A;
+  letter-spacing: -0.02em;
 }
 
-.section-counter {
+.stitch-see-all-btn {
+  background: none;
+  border: none;
+  color: #0F6E94;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.stitch-see-all-btn:hover {
+  color: #16A34A;
+  transform: translateX(2px);
+}
+
+.stitch-section-count {
   font-size: 12px;
-  font-weight: 600;
-  color: var(--color-slate);
+  font-weight: 700;
+  color: #64748B;
 }
 
-.menu-list-grid {
+/* ─── 3. Recommended for You Section ──────────────────────────────────────── */
+.stitch-recommended-section {
+  padding: 8px 16px 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-/* Empty State */
-.empty-state {
-  padding: 48px 24px;
+.stitch-recommended-scroll {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 2px 2px 8px 2px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ─── 4. Popular Menu 2-Column Grid Section ───────────────────────────────── */
+.stitch-catalog-section {
+  padding: 6px 16px 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stitch-popular-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* ─── 5. Empty State ──────────────────────────────────────────────────────── */
+.stitch-empty-state {
+  padding: 40px 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  background-color: #FFFFFF;
+  border-radius: 18px;
+  border: 1px dashed #CBD5E1;
+  margin: 8px 0;
 }
 
-.empty-state-icon {
-  width: 56px;
-  height: 56px;
+.stitch-empty-icon {
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background-color: var(--color-sky);
-  color: var(--color-primary);
+  background-color: #F0FDF4;
+  color: #16A34A;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.empty-state-title {
-  font-size: 16px;
+.stitch-empty-title {
+  font-size: 15px;
   font-weight: 700;
-  color: var(--color-text-main);
+  color: #0F172A;
 }
 
-.empty-state-desc {
-  font-size: 13px;
-  color: var(--color-text-muted);
-  max-width: 260px;
+.stitch-empty-desc {
+  font-size: 12px;
+  color: #64748B;
+  max-width: 240px;
+  line-height: 1.4;
+}
+
+/* Responsive adjustments for tablet & desktop containers */
+@media (min-width: 481px) {
+  .stitch-popular-grid {
+    gap: 14px;
+  }
 }

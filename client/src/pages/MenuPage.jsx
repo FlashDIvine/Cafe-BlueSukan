@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Search, X, UtensilsCrossed, Sparkles } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ArrowRight, UtensilsCrossed } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { Navbar } from '../components/Navbar';
 import { CategoryFilter } from '../components/CategoryFilter';
+import { RecommendedCard } from '../components/RecommendedCard';
 import { MenuCard } from '../components/MenuCard';
 import { FloatingCartBar } from '../components/FloatingCartBar';
 import { TableModal } from '../components/TableModal';
@@ -24,64 +25,87 @@ export const MenuPage = ({ onOpenCart }) => {
     return counts;
   }, [menus]);
 
+  // Recommended / Featured items (e.g. popular items or top available picks)
+  const recommendedMenus = useMemo(() => {
+    const popular = menus.filter((item) => item.is_popular);
+    if (popular.length >= 2) return popular;
+    return menus.slice(0, 4);
+  }, [menus]);
+
   // Dynamic active category title
   const activeCategoryTitle = useMemo(() => {
-    if (activeCategory === 'all') return 'Daftar Menu';
+    if (activeCategory === 'all') return 'Popular Menu';
     const found = categories.find((c) => c.id === activeCategory);
-    return found ? found.name : 'Menu';
+    return found ? found.name : 'Popular Menu';
   }, [categories, activeCategory]);
 
   // Filtered menu items by Category and Search Query
   const filteredMenus = useMemo(() => {
     return menus.filter((item) => {
-      const matchCategory = activeCategory === 'all' || item.category_id === activeCategory;
+      const matchCategory =
+        activeCategory === 'all' || item.category_id === activeCategory;
       const matchSearch =
         searchQuery.trim() === '' ||
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchQuery.toLowerCase());
+        (item.description &&
+          item.description.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchCategory && matchSearch;
     });
   }, [menus, activeCategory, searchQuery]);
 
+  const handleSeeAll = () => {
+    setActiveCategory('all');
+    setSearchQuery('');
+  };
+
+  const handleFilterBtnClick = () => {
+    // Open table modal or toggle all categories
+    setIsTableModalOpen(true);
+  };
+
   return (
-    <main className="menu-page-container">
+    <main className="stitch-home-container">
       <Navbar onOpenTableModal={() => setIsTableModalOpen(true)} />
       <Toast />
 
-      {/* Welcome Banner */}
-      <section className="welcome-banner" aria-label="Sambutan Bantu Cafe">
-        <div className="welcome-title-wrap">
-          <span className="welcome-badge">Self-Order</span>
-        </div>
-        <h1 className="welcome-title">Mau pesan apa hari ini?</h1>
-        <p className="welcome-subtitle">
-          Pilih menu favoritmu, pesanan akan langsung diteruskan ke barista setelah verifikasi di kasir.
-        </p>
+      {/* Top Search Bar & Filter Button */}
+      <section className="stitch-search-section" aria-label="Pencarian Menu">
+        <div className="stitch-search-row">
+          <div className="stitch-search-input-box">
+            <Search size={18} className="stitch-search-icon" />
+            <input
+              type="text"
+              className="stitch-search-input"
+              placeholder="What are you craving today?"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              aria-label="Cari menu"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                className="stitch-search-clear-btn"
+                onClick={() => setSearchQuery('')}
+                aria-label="Hapus pencarian"
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
 
-        {/* Quick Search */}
-        <div className="search-bar-container">
-          <Search size={16} className="search-icon" />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Cari kopi, non-kopi, atau cemilan..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              className="search-clear-btn"
-              onClick={() => setSearchQuery('')}
-              aria-label="Hapus pencarian"
-            >
-              <X size={12} />
-            </button>
-          )}
+          <button
+            type="button"
+            className="stitch-filter-btn"
+            onClick={handleFilterBtnClick}
+            aria-label="Filter dan pengaturan meja"
+            title="Nomor meja & filter"
+          >
+            <SlidersHorizontal size={18} />
+          </button>
         </div>
       </section>
 
-      {/* Category Pills Filter */}
+      {/* Categories Horizontal Cards */}
       <CategoryFilter
         categories={categories}
         activeCategory={activeCategory}
@@ -89,28 +113,50 @@ export const MenuPage = ({ onOpenCart }) => {
         menusCountByCategory={menusCountByCategory}
       />
 
-      {/* Menu List Catalog */}
-      <section className="menu-section" aria-label="Daftar Menu">
-        <div className="menu-section-header">
-          <h2 className="section-title">
-            {activeCategoryTitle}
-          </h2>
-          <span className="section-counter">{filteredMenus.length} Menu</span>
+      {/* Recommended for You Section (Visible when not actively searching) */}
+      {!searchQuery && activeCategory === 'all' && recommendedMenus.length > 0 && (
+        <section className="stitch-recommended-section" aria-label="Rekomendasi Menu">
+          <div className="stitch-section-header-row">
+            <h2 className="stitch-section-title">Recommended for You</h2>
+            <button
+              type="button"
+              className="stitch-see-all-btn"
+              onClick={handleSeeAll}
+              aria-label="Lihat semua menu"
+            >
+              <span>See all</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+
+          <div className="stitch-recommended-scroll no-scrollbar">
+            {recommendedMenus.map((item) => (
+              <RecommendedCard key={`rec-${item.id}`} item={item} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Popular Menu / 2-Column Catalog Grid */}
+      <section className="stitch-catalog-section" aria-label="Katalog Menu">
+        <div className="stitch-section-header-row">
+          <h2 className="stitch-section-title">{activeCategoryTitle}</h2>
+          <span className="stitch-section-count">{filteredMenus.length} items</span>
         </div>
 
         {filteredMenus.length > 0 ? (
-          <div className="menu-list-grid">
+          <div className="stitch-popular-grid">
             {filteredMenus.map((item) => (
-              <MenuCard key={item.id} item={item} />
+              <MenuCard key={`menu-${item.id}`} item={item} />
             ))}
           </div>
         ) : (
-          <div className="empty-state">
-            <div className="empty-state-icon">
+          <div className="stitch-empty-state">
+            <div className="stitch-empty-icon">
               <UtensilsCrossed size={28} />
             </div>
-            <h3 className="empty-state-title">Menu tidak ditemukan</h3>
-            <p className="empty-state-desc">
+            <h3 className="stitch-empty-title">Menu tidak ditemukan</h3>
+            <p className="stitch-empty-desc">
               Coba kata kunci lain atau pilih kategori menu yang berbeda.
             </p>
           </div>
@@ -121,8 +167,10 @@ export const MenuPage = ({ onOpenCart }) => {
       <FloatingCartBar onOpenCart={onOpenCart} />
 
       {/* Table Selection Modal */}
-      <TableModal isOpen={isTableModalOpen} onClose={() => setIsTableModalOpen(false)} />
+      <TableModal
+        isOpen={isTableModalOpen}
+        onClose={() => setIsTableModalOpen(false)}
+      />
     </main>
   );
 };
-
