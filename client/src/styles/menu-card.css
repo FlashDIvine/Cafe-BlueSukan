@@ -242,6 +242,11 @@
   gap: 8px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .stitch-grid-card:hover {

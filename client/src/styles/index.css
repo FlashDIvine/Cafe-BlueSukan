@@ -74,6 +74,8 @@ html {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 body {
@@ -82,18 +84,23 @@ body {
   display: flex;
   justify-content: center;
   background-color: #ECEFF3;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Mobile-First App Shell Container (max-width: 480px) */
 #root {
   width: 100%;
   max-width: 480px;
+  min-width: 0;
   min-height: 100vh;
   background-color: var(--color-bg);
   position: relative;
   box-shadow: 0 0 40px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* Hide scrollbar utility */
@@ -110,6 +117,11 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
   padding-bottom: 90px; /* Space for FloatingCartBar */
 }
 

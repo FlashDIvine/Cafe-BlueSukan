@@ -68,7 +68,7 @@ export const MenuPage = ({ onOpenCart }) => {
       <Navbar onOpenTableModal={() => setIsTableModalOpen(true)} />
       <Toast />
 
-      {/* Top Search Bar & Filter Button */}
+      {/* Top Search Bar */}
       <section className="stitch-search-section" aria-label="Pencarian Menu">
         <div className="stitch-search-row">
           <div className="stitch-search-input-box">
@@ -92,16 +92,6 @@ export const MenuPage = ({ onOpenCart }) => {
               </button>
             )}
           </div>
-
-          <button
-            type="button"
-            className="stitch-filter-btn"
-            onClick={handleFilterBtnClick}
-            aria-label="Filter dan pengaturan meja"
-            title="Nomor meja & filter"
-          >
-            <SlidersHorizontal size={18} />
-          </button>
         </div>
       </section>
 

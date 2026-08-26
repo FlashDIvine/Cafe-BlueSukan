@@ -63,6 +63,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+async function getCategoryName(categoryId) {
+  const { map } = await getCategoriesMap();
+  return map[categoryId] || categoryId;
+}
+
+/**
+ * Validate WebP image (both URL and base64 data URL)
+ * Max size: 2MB (2 * 1024 * 1024 bytes)
+ */
+function validateWebpImage(image) {
+  if (!image || typeof image !== 'string') return { valid: true, sanitized: null };
+  const trimmed = image.trim();
+  if (!trimmed) return { valid: true, sanitized: null };
+
+  if (trimmed.startsWith('data:')) {
+    if (!trimmed.startsWith('data:image/webp;base64,')) {
+      return { valid: false, message: 'Format gambar harus WebP (.webp)' };
+    }
+    const base64Data = trimmed.replace(/^data:image\/webp;base64,/, '');
+    const byteLength = Buffer.from(base64Data, 'base64').length;
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    if (byteLength > MAX_SIZE) {
+      return { valid: false, message: 'Ukuran gambar maksimal 2 MB' };
+    }
+    return { valid: true, sanitized: trimmed };
+  }
+
+  // If it's a regular URL
+  return { valid: true, sanitized: trimmed };
+}
+
 /**
  * GET /api/menus/:id
  * Returns a single menu item by ID
@@ -76,14 +107,29 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
     }
 
+    const category_name = await getCategoryName(menu.category_id);
+
     res.json({
       success: true,
-      data: { ...menu, category_name: CATEGORIES_MAP[menu.category_id] || menu.category_id },
+      data: { ...menu, category_name },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Gagal mengambil data menu' });
   }
 });
+
+/**
+ * Sync PostgreSQL auto-increment sequence with max(id)
+ */
+async function syncMenuSequence() {
+  try {
+    await prisma.$executeRawUnsafe(
+      "SELECT setval(pg_get_serial_sequence('menus', 'id'), COALESCE((SELECT MAX(id) FROM menus), 0) + 1, false);"
+    );
+  } catch (e) {
+    // SQLite or other non-postgres DB fallback
+  }
+}
 
 /**
  * POST /api/menus
@@ -103,27 +149,52 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Harga menu harus berupa angka positif' });
     }
 
+    const defaultImage = 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=600&q=80&fm=webp';
+    let finalImageUrl = defaultImage;
+
+    if (image_url) {
+      const imgValidation = validateWebpImage(image_url);
+      if (!imgValidation.valid) {
+        return res.status(400).json({ success: false, message: imgValidation.message });
+      }
+      if (imgValidation.sanitized) {
+        finalImageUrl = imgValidation.sanitized;
+      }
+    }
+
     const initialStock = stock !== undefined ? Math.max(0, parseInt(stock, 10) || 0) : 10;
     const available = is_available !== undefined ? Boolean(is_available) : initialStock > 0;
-    const defaultImage = 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=600&q=80';
 
-    const newMenu = await prisma.menu.create({
-      data: {
-        category_id: category_id.trim(),
-        name: name.trim(),
-        price: parseInt(price, 10),
-        stock: initialStock,
-        is_available: initialStock > 0 ? available : false,
-        image_url: image_url?.trim() || defaultImage,
-        description: description?.trim() || '',
-        is_popular: Boolean(is_popular),
-      },
-    });
+    let newMenu;
+    const menuData = {
+      category_id: category_id.trim(),
+      name: name.trim(),
+      price: parseInt(price, 10),
+      stock: initialStock,
+      is_available: initialStock > 0 ? available : false,
+      image_url: finalImageUrl,
+      description: description?.trim() || '',
+      is_popular: Boolean(is_popular),
+    };
+
+    try {
+      newMenu = await prisma.menu.create({ data: menuData });
+    } catch (createErr) {
+      if (createErr?.code === 'P2002') {
+        // Sequence was behind max(id); synchronize sequence and retry
+        await syncMenuSequence();
+        newMenu = await prisma.menu.create({ data: menuData });
+      } else {
+        throw createErr;
+      }
+    }
+
+    const category_name = await getCategoryName(newMenu.category_id);
 
     res.status(201).json({
       success: true,
       message: `Menu "${newMenu.name}" berhasil ditambahkan`,
-      data: { ...newMenu, category_name: CATEGORIES_MAP[newMenu.category_id] || newMenu.category_id },
+      data: { ...newMenu, category_name },
     });
   } catch (err) {
     console.error('Error creating menu:', err);
@@ -151,8 +222,17 @@ router.put('/:id', async (req, res) => {
     if (category_id !== undefined) dataToUpdate.category_id = category_id.trim();
     if (price !== undefined && !isNaN(Number(price))) dataToUpdate.price = Math.max(0, parseInt(price, 10));
     if (description !== undefined) dataToUpdate.description = description.trim();
-    if (image_url !== undefined) dataToUpdate.image_url = image_url.trim();
     if (is_popular !== undefined) dataToUpdate.is_popular = Boolean(is_popular);
+
+    if (image_url !== undefined) {
+      if (image_url) {
+        const imgValidation = validateWebpImage(image_url);
+        if (!imgValidation.valid) {
+          return res.status(400).json({ success: false, message: imgValidation.message });
+        }
+        dataToUpdate.image_url = imgValidation.sanitized || existing.image_url;
+      }
+    }
 
     if (stock !== undefined && !isNaN(Number(stock))) {
       const parsedStock = Math.max(0, parseInt(stock, 10));
@@ -171,10 +251,12 @@ router.put('/:id', async (req, res) => {
       data: dataToUpdate,
     });
 
+    const category_name = await getCategoryName(updated.category_id);
+
     res.json({
       success: true,
       message: `Menu "${updated.name}" berhasil diperbarui`,
-      data: { ...updated, category_name: CATEGORIES_MAP[updated.category_id] || updated.category_id },
+      data: { ...updated, category_name },
     });
   } catch (err) {
     console.error('Error updating menu:', err);
@@ -221,10 +303,12 @@ router.patch('/:id/stock', async (req, res) => {
       },
     });
 
+    const category_name = await getCategoryName(updated.category_id);
+
     res.json({
       success: true,
       message: `Stok "${updated.name}" sekarang ${updated.stock}`,
-      data: { ...updated, category_name: CATEGORIES_MAP[updated.category_id] || updated.category_id },
+      data: { ...updated, category_name },
     });
   } catch (err) {
     console.error('Error updating stock:', err);
@@ -252,10 +336,12 @@ router.patch('/:id/toggle', async (req, res) => {
       },
     });
 
+    const category_name = await getCategoryName(updated.category_id);
+
     res.json({
       success: true,
       message: `Menu "${updated.name}" sekarang ${updated.is_available ? 'Tersedia' : 'Nonaktif/Habis'}`,
-      data: { ...updated, category_name: CATEGORIES_MAP[updated.category_id] || updated.category_id },
+      data: { ...updated, category_name },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Gagal mengubah status ketersediaan' });

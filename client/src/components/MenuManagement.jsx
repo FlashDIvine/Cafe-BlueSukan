@@ -16,8 +16,10 @@ import {
   Image as ImageIcon,
   X,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { formatRupiah } from '../utils/formatters';
+import { convertImageToWebP } from '../utils/imageConverter';
 import { MenuFormModal } from './MenuFormModal';
 import {
   createMenuApi,
@@ -45,6 +47,7 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryImage, setNewCategoryImage] = useState('');
   const [categoryImageError, setCategoryImageError] = useState('');
+  const [isConvertingCategory, setIsConvertingCategory] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const fileInputRef = useRef(null);
@@ -132,42 +135,24 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
     }
   };
 
-  // WebP Image File Validation & Processing for Category
-  const handleCategoryImageChange = (e) => {
+  // Client-side Image Conversion & Optimization to WebP for Category
+  const handleCategoryImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setCategoryImageError('');
+    setIsConvertingCategory(true);
 
-    // 1. Check file extension
-    const fileName = file.name || '';
-    if (!fileName.toLowerCase().endsWith('.webp')) {
-      setCategoryImageError('Format gambar harus WebP (.webp)');
+    try {
+      const result = await convertImageToWebP(file);
+      setNewCategoryImage(result.dataUrl);
+      setCategoryImageError('');
+    } catch (err) {
+      setCategoryImageError(err.message || 'Gagal memproses gambar');
       if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
+    } finally {
+      setIsConvertingCategory(false);
     }
-
-    // 2. Check MIME type
-    if (file.type && file.type !== 'image/webp') {
-      setCategoryImageError('Format gambar harus WebP');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-
-    // 3. Check file size (max 2MB = 2,097,152 bytes)
-    const MAX_SIZE = 2 * 1024 * 1024;
-    if (file.size > MAX_SIZE) {
-      setCategoryImageError('Ukuran maksimal 2MB');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-      return;
-    }
-
-    // Convert valid WebP to data URL for storage and preview
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setNewCategoryImage(event.target.result);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleClearCategoryImage = () => {
@@ -181,6 +166,7 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
     setNewCategoryName('');
     setNewCategoryImage('');
     setCategoryImageError('');
+    setIsConvertingCategory(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -189,12 +175,17 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
     setNewCategoryName(cat.name);
     setNewCategoryImage(cat.image || '');
     setCategoryImageError('');
+    setIsConvertingCategory(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
+    if (isConvertingCategory) {
+      showToast('Sedang mengonversi gambar, mohon tunggu sebentar', 'warning');
+      return;
+    }
 
     setIsAddingCategory(true);
     try {
@@ -282,21 +273,22 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                 placeholder="Nama kategori (contoh: Pastry, Dessert)..."
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                disabled={isAddingCategory}
+                disabled={isAddingCategory || isConvertingCategory}
                 style={{ flex: 1 }}
                 required
               />
             </div>
 
-            {/* WebP Image Upload input */}
+            {/* Image Upload input (JPG, PNG, WebP -> Auto Convert to WebP <= 2MB) */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/webp,.webp"
+                accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                 id="category-file-input"
                 style={{ display: 'none' }}
                 onChange={handleCategoryImageChange}
+                disabled={isConvertingCategory}
               />
               <button
                 type="button"
@@ -311,10 +303,11 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                   borderRadius: 'var(--radius-sm)',
                 }}
                 onClick={() => fileInputRef.current?.click()}
-                title="Pilih gambar WebP (maksimal 2MB)"
+                disabled={isConvertingCategory}
+                title="Pilih gambar (JPG, PNG, WebP) - otomatis dikonversi ke WebP maks. 2MB"
               >
-                <Upload size={14} />
-                <span>Upload WebP</span>
+                {isConvertingCategory ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                <span>{isConvertingCategory ? 'Mengonversi...' : 'Upload Foto'}</span>
               </button>
 
               {/* Circle Image Preview */}

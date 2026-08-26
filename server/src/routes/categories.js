@@ -73,6 +73,31 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * Validate WebP image (both URL and base64 data URL)
+ * Max size: 2MB (2 * 1024 * 1024 bytes)
+ */
+function validateWebpImage(image) {
+  if (!image || typeof image !== 'string') return { valid: true, sanitized: null };
+  const trimmed = image.trim();
+  if (!trimmed) return { valid: true, sanitized: null };
+
+  if (trimmed.startsWith('data:')) {
+    if (!trimmed.startsWith('data:image/webp;base64,')) {
+      return { valid: false, message: 'Format gambar harus WebP (.webp)' };
+    }
+    const base64Data = trimmed.replace(/^data:image\/webp;base64,/, '');
+    const byteLength = Buffer.from(base64Data, 'base64').length;
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    if (byteLength > MAX_SIZE) {
+      return { valid: false, message: 'Ukuran gambar maksimal 2 MB' };
+    }
+    return { valid: true, sanitized: trimmed };
+  }
+
+  return { valid: true, sanitized: trimmed };
+}
+
+/**
  * POST /api/categories
  * Add a new category with optional WebP image
  */
@@ -81,6 +106,15 @@ router.post('/', async (req, res) => {
     const { name, id, image } = req.body;
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Nama kategori wajib diisi' });
+    }
+
+    let finalImage = null;
+    if (image) {
+      const imgValidation = validateWebpImage(image);
+      if (!imgValidation.valid) {
+        return res.status(400).json({ success: false, message: imgValidation.message });
+      }
+      finalImage = imgValidation.sanitized;
     }
 
     const trimmedName = name.trim();
@@ -99,7 +133,7 @@ router.post('/', async (req, res) => {
       data: {
         id: targetId,
         name: trimmedName,
-        image: image && typeof image === 'string' ? image.trim() : null,
+        image: finalImage,
       },
     });
 
@@ -133,7 +167,15 @@ router.patch('/:id', async (req, res) => {
       updateData.name = name.trim();
     }
     if (image !== undefined) {
-      updateData.image = image && typeof image === 'string' ? image.trim() : null;
+      if (image) {
+        const imgValidation = validateWebpImage(image);
+        if (!imgValidation.valid) {
+          return res.status(400).json({ success: false, message: imgValidation.message });
+        }
+        updateData.image = imgValidation.sanitized;
+      } else {
+        updateData.image = null;
+      }
     }
 
     const updated = await prisma.category.update({

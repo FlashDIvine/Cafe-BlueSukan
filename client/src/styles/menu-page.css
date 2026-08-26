@@ -8,21 +8,35 @@
   flex: 1;
   background-color: #F8FAFC;
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* ─── 1. Top Search & Filter Bar ─────────────────────────────────────────── */
 .stitch-search-section {
   padding: 14px 16px 4px 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stitch-search-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stitch-search-input-box {
   flex: 1;
+  min-width: 0;
   position: relative;
   background-color: #FFFFFF;
   border-radius: 999px;
@@ -31,6 +45,7 @@
   display: flex;
   align-items: center;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
 }
 
 .stitch-search-input-box:focus-within {
@@ -55,6 +70,7 @@
   font-size: 13.5px;
   color: #0F172A;
   outline: none;
+  box-sizing: border-box;
 }
 
 .stitch-search-input::placeholder {
@@ -113,6 +129,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stitch-section-title {
@@ -133,6 +153,7 @@
   gap: 4px;
   cursor: pointer;
   transition: color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
 }
 
 .stitch-see-all-btn:hover {
@@ -144,6 +165,7 @@
   font-size: 12px;
   font-weight: 700;
   color: #64748B;
+  flex-shrink: 0;
 }
 
 /* ─── 3. Recommended for You Section ──────────────────────────────────────── */
@@ -152,6 +174,10 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stitch-recommended-scroll {
@@ -161,6 +187,10 @@
   padding: 2px 2px 8px 2px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* ─── 4. Popular Menu 2-Column Grid Section ───────────────────────────────── */
@@ -169,12 +199,20 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .stitch-popular-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* ─── 5. Empty State ──────────────────────────────────────────────────────── */
