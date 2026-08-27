@@ -153,6 +153,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
               </button>
             </div>
           </div>
+          <div className="hero-bottom-transition"></div>
         </div>
       </section>
 
