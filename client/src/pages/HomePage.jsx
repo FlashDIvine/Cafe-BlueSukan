@@ -67,7 +67,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
       <header className="boutique-nav-wrapper">
         <nav className="boutique-navbar">
           <div className="boutique-brand" onClick={() => scrollToSection('hero')}>
-            <span className="brand-wordmark">BANTU</span>
+            <span className="brand-wordmark">BLUESUKAN</span>
             <span className="brand-dot">•</span>
             <span className="brand-sub">COFFEE</span>
           </div>
@@ -276,7 +276,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
                     'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=800&q=80',
                     800
                   )}
-                  alt="Barista brewing coffee at Bantu Cafe"
+                  alt="Barista brewing coffee at BlueSukan Cafe"
                   className="story-main-img"
                   loading="lazy"
                   decoding="async"
@@ -286,7 +286,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
                 <p className="story-quote-text">
                   “Setiap cangkir adalah jembatan antara dedikasi petani lokal dan ketenangan momen Anda.”
                 </p>
-                <span className="story-quote-author">— Bantu Cafe Artisan Roastery</span>
+                <span className="story-quote-author">— BlueSukan Artisan Roastery</span>
               </div>
             </div>
 
@@ -298,7 +298,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
               </h2>
 
               <p className="story-paragraph">
-                Bantu Cafe didirikan dengan satu komitmen sederhana: menyajikan kopi berkualitas specialty tanpa pretensi, di dalam ruang yang memberikan ketenangan bagi pikiran dan inspirasi bagi setiap karya Anda.
+                BlueSukan Cafe didirikan dengan satu komitmen sederhana: menyajikan kopi berkualitas specialty tanpa pretensi, di dalam ruang yang memberikan ketenangan bagi pikiran dan inspirasi bagi setiap karya Anda.
               </p>
 
               <div className="story-pillars">
@@ -354,7 +354,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
                 <MapPin size={20} className="loc-card-icon" />
                 <span className="loc-card-label">ALAMAT</span>
               </div>
-              <h3 className="loc-card-value">Bantu Cafe Kemang</h3>
+              <h3 className="loc-card-value">BlueSukan Cafe Kemang</h3>
               <p className="loc-card-address">
                 Jl. Kemang Raya No. 42, RT.02/RW.02, Bangka, Mampang Prapatan, Jakarta Selatan 12730
               </p>
@@ -409,7 +409,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
                   className="loc-social-btn"
                 >
                   <Globe size={15} />
-                  <span>Instagram: @bantucafe.id</span>
+                  <span>Instagram: @bluesukancafe</span>
                 </a>
               </div>
             </div>
@@ -423,7 +423,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
           <div className="footer-main-grid">
             <div className="footer-brand-block">
               <div className="footer-brand-title">
-                <span>BANTU</span>
+                <span>BLUESUKAN</span>
                 <span className="brand-dot">•</span>
                 <span>CAFE</span>
               </div>
@@ -454,7 +454,7 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
 
           <div className="footer-bottom-bar">
             <span className="footer-copyright">
-              © {new Date().getFullYear()} Bantu Cafe (BlueSukan). All rights reserved.
+              © {new Date().getFullYear()} BlueSukan Cafe. All rights reserved.
             </span>
             <div className="footer-payment-chips">
               <span>QRIS</span>

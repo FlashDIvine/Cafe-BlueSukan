@@ -116,7 +116,7 @@ const INITIAL_MENUS = [
   {
     id: 11,
     category_id: 'food',
-    name: 'Nasi Goreng Spesial Bantu',
+    name: 'Nasi Goreng Spesial BlueSukan',
     price: 35000,
     stock: 9,
     is_available: true,

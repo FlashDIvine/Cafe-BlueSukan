@@ -41,7 +41,7 @@ app.use('/api/categories', categoriesRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'Bantu Cafe API', time: new Date().toISOString() });
+  res.json({ status: 'ok', service: 'BlueSukan Cafe API', time: new Date().toISOString() });
 });
 
 // ─── 404 fallback ─────────────────────────────────────────────
@@ -52,7 +52,7 @@ app.use((_req, res) => {
 // ─── Start server in standalone mode ──────────────────────────
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`\n  🚀 Bantu Cafe API Server running at http://localhost:${PORT}`);
+    console.log(`\n  🚀 BlueSukan Cafe API Server running at http://localhost:${PORT}`);
     console.log(`  📋 Endpoints:`);
     console.log(`     GET  /api/menus`);
     console.log(`     POST /api/orders`);

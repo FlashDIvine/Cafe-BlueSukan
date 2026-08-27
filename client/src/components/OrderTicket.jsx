@@ -129,7 +129,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
           <div className="ticket-cafe-logo">
             <Coffee size={24} color="#FFFFFF" />
           </div>
-          <span className="ticket-cafe-name">Bantu Cafe</span>
+          <span className="ticket-cafe-name">BlueSukan Cafe</span>
           <div className="ticket-order-code-badge" title="Kode Pesanan Anda">
             <span>{order?.order_code || '#BC-100'}</span>
           </div>
@@ -165,7 +165,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
                 <span>Pembayaran Sukses • Sedang Diproses</span>
               </div>
               <p className="status-desc-row">
-                Pesanan Anda telah dikonfirmasi dan sedang diracik oleh barista Bantu Cafe.
+                Pesanan Anda telah dikonfirmasi dan sedang diracik oleh barista BlueSukan Cafe.
               </p>
             </div>
           </div>

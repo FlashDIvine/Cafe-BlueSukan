@@ -18,7 +18,7 @@ export const Navbar = memo(({ onOpenTableModal, onGoHome }) => {
           <Coffee size={20} strokeWidth={2.4} />
         </div>
         <div className="brand-text">
-          <span className="brand-title">Bantu Cafe</span>
+          <span className="brand-title">BlueSukan Cafe</span>
           <span className="brand-subtitle">
             <span className="status-dot"></span>
             Guest Self-Order

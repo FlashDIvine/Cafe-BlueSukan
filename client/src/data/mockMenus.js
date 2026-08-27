@@ -136,7 +136,7 @@ export const MOCK_MENUS = [
     id: 11,
     category_id: 'food',
     category_name: 'Makanan Utama',
-    name: 'Nasi Goreng Spesial Bantu',
+    name: 'Nasi Goreng Spesial BlueSukan',
     price: 35000,
     stock: 9,
     is_available: true,

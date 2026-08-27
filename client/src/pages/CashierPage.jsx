@@ -208,7 +208,7 @@ export const CashierPage = () => {
               <Coffee size={22} color="#FFFFFF" />
             </div>
             <div className="pos-brand-text">
-              <h1>Bantu Cafe — POS Kasir</h1>
+              <h1>BlueSukan Cafe — POS Kasir</h1>
               <span>Manajemen Antrean & Inventori Menu</span>
             </div>
           </div>
