@@ -8,14 +8,18 @@ import {
   ShoppingBag,
   Sparkles,
   ChefHat,
+  Home,
+  Timer,
+  X,
 } from 'lucide-react';
 import { formatRupiah } from '../utils/formatters';
 import { fetchOrderStatusApi } from '../services/api';
 import '../styles/order-ticket.css';
 
-export const OrderTicket = ({ order, onBackToMenu }) => {
+export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
   const [currentStatus, setCurrentStatus] = useState(order?.status || 'waiting_payment');
-  const [pollCount, setPollCount] = useState(0);
+  const [countdown, setCountdown] = useState(null); // null when inactive
+  const [isCountdownCancelled, setIsCountdownCancelled] = useState(false);
 
   // Polling status interval (every 3 seconds per PRD Task 4)
   useEffect(() => {
@@ -26,8 +30,6 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
     const intervalId = setInterval(async () => {
       try {
         const result = await fetchOrderStatusApi(order.order_code);
-        setPollCount((prev) => prev + 1);
-
         if (result && result.status && result.status !== currentStatus) {
           setCurrentStatus(result.status);
         }
@@ -39,7 +41,27 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
     return () => clearInterval(intervalId);
   }, [order?.order_code, currentStatus]);
 
+  // Optional post-order countdown redirect when order is completed
+  useEffect(() => {
+    if (currentStatus === 'completed' && !isCountdownCancelled && countdown === null) {
+      setCountdown(5);
+    }
+  }, [currentStatus, isCountdownCancelled, countdown]);
 
+  useEffect(() => {
+    if (countdown === null || isCountdownCancelled) return;
+
+    if (countdown <= 0) {
+      if (onGoHome) onGoHome();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown, isCountdownCancelled, onGoHome]);
 
   const isProcessing = currentStatus === 'paid_processing' || currentStatus === 'completed';
 
@@ -58,14 +80,47 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
         <button
           type="button"
           className="ticket-back-btn"
-          onClick={onBackToMenu}
+          onClick={onGoHome || onBackToMenu}
           aria-label="Kembali ke Beranda"
         >
           <ArrowLeft size={16} />
-          <span>Menu Utama</span>
+          <span>Beranda</span>
         </button>
         <span className="ticket-header-title">Tiket Pesanan Digital</span>
       </header>
+
+      {/* Post-Order Success Confirmation Banner */}
+      <div className="ticket-success-alert">
+        <div className="ticket-success-icon">
+          <CheckCircle2 size={20} />
+        </div>
+        <div className="ticket-success-text">
+          <span className="ticket-success-title">Pesanan Berhasil Dibuat!</span>
+          <span className="ticket-success-desc">
+            Kode pesanan Anda adalah <strong>{order?.order_code}</strong>. Simpan tiket ini untuk verifikasi kasir.
+          </span>
+        </div>
+      </div>
+
+      {/* Auto-redirect countdown notification when completed */}
+      {countdown !== null && !isCountdownCancelled && (
+        <div className="ticket-countdown-bar">
+          <div className="countdown-info">
+            <Timer size={14} color="var(--color-royal-blue)" />
+            <span>
+              Kembali ke Beranda dalam <span className="countdown-number">{countdown}s</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            className="countdown-cancel-btn"
+            onClick={() => setIsCountdownCancelled(true)}
+          >
+            <X size={12} style={{ display: 'inline', marginRight: '2px' }} />
+            Tetap di sini
+          </button>
+        </div>
+      )}
 
       {/* Main Ticket */}
       <div className="ticket-card">
@@ -93,7 +148,7 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
             />
           </div>
           <p className="qr-scan-hint">
-            <Sparkles size={14} color="var(--color-accent)" />
+            <Sparkles size={14} color="var(--color-royal-blue)" />
             Tunjukkan QR ini ke kasir saat memesan
           </p>
         </div>
@@ -101,12 +156,12 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
         {/* Dynamic Status Box */}
         {isProcessing ? (
           <div className="ticket-status-box processing" role="status">
-            <div className="status-icon-wrap" style={{ color: '#059669' }}>
+            <div className="status-icon-wrap" style={{ color: '#2563EB' }}>
               <ChefHat size={18} />
             </div>
             <div className="status-text-content">
               <div className="status-title-row">
-                <CheckCircle2 size={16} color="#059669" />
+                <CheckCircle2 size={16} color="#2563EB" />
                 <span>Pembayaran Sukses • Sedang Diproses</span>
               </div>
               <p className="status-desc-row">
@@ -177,17 +232,26 @@ export const OrderTicket = ({ order, onBackToMenu }) => {
         </div>
       </div>
 
-
-
-      {/* Bottom Action */}
+      {/* Bottom Actions with Direct Redirection */}
       <div className="ticket-actions-bottom">
+        <button
+          type="button"
+          className="btn-go-home"
+          onClick={onGoHome || onBackToMenu}
+          aria-label="Kembali ke Halaman Utama"
+        >
+          <Home size={18} />
+          <span>Kembali ke Halaman Utama</span>
+        </button>
+
         <button
           type="button"
           className="btn-order-again"
           onClick={onBackToMenu}
+          aria-label="Pesan Menu Lain"
         >
-          <ShoppingBag size={18} />
-          <span>{isProcessing ? 'Pesan Menu Lain' : 'Kembali ke Katalog Menu'}</span>
+          <ShoppingBag size={17} />
+          <span>{isProcessing ? 'Pesan Menu Tambahan' : 'Kembali ke Katalog Menu'}</span>
         </button>
       </div>
     </div>

@@ -7,13 +7,20 @@
    ========================================================================== */
 
 :root {
-  /* Brand Colors */
+  /* Brand Colors: Blue & White Palette */
   --color-primary: #0F3E7D;
   --color-primary-dark: #09264D;
-  --color-primary-light: #18509C;
-  --color-accent: #1E6091;
+  --color-primary-light: #1D4ED8;
+  --color-royal-blue: #2563EB;
+  --color-royal-blue-hover: #1D4ED8;
+  --color-royal-blue-light: #DBEAFE;
+  --color-royal-blue-sky: #EFF6FF;
+  --color-accent: #2563EB;
+  --color-accent-hover: #1D4ED8;
   --color-sky: #EBF3FC;
   --color-sky-dark: #D4E5F9;
+  --color-navy: #0F172A;
+  --color-navy-card: #1E293B;
 
   /* Neutrals */
   --color-white: #FFFFFF;
@@ -32,19 +39,19 @@
   --color-warning: #F59E0B;
   --color-warning-light: #FEF3C7;
   --color-warning-dark: #B45309;
-  --color-success: #10B981;
-  --color-success-light: #D1FAE5;
-  --color-success-dark: #065F46;
+  --color-success: #2563EB;
+  --color-success-light: #DBEAFE;
+  --color-success-dark: #1E40AF;
 
   /* Typography */
   --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-sm: 0 2px 4px 0 rgba(15, 62, 125, 0.06), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
-  --shadow-md: 0 4px 12px -1px rgba(15, 62, 125, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-  --shadow-lg: 0 10px 25px -3px rgba(15, 62, 125, 0.12), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
-  --shadow-float: 0 12px 32px -4px rgba(15, 62, 125, 0.22), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 2px 6px 0 rgba(37, 99, 235, 0.08), 0 1px 2px 0 rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px -1px rgba(37, 99, 235, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-lg: 0 12px 28px -3px rgba(15, 62, 125, 0.15), 0 4px 10px -2px rgba(15, 23, 42, 0.05);
+  --shadow-float: 0 12px 32px -4px rgba(37, 99, 235, 0.28), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
 
   /* Border Radii */
   --radius-sm: 8px;
@@ -69,13 +76,14 @@
 
 html {
   font-family: var(--font-family);
-  background-color: #ECEFF3;
+  background-color: #F8FAFC;
   color: var(--color-text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   max-width: 100vw;
   overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -83,22 +91,21 @@ body {
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  background-color: #ECEFF3;
+  background-color: #F8FAFC;
   max-width: 100vw;
   overflow-x: hidden;
 }
 
-/* Mobile-First App Shell Container (max-width: 480px) */
+/* Root App Shell Container */
 #root {
   width: 100%;
-  max-width: 480px;
   min-width: 0;
   min-height: 100vh;
   background-color: var(--color-bg);
   position: relative;
-  box-shadow: 0 0 40px rgba(15, 23, 42, 0.08);
   display: flex;
   flex-direction: column;
+  align-items: center;
   overflow-x: hidden;
   box-sizing: border-box;
 }
@@ -118,11 +125,14 @@ body {
   flex-direction: column;
   flex: 1;
   width: 100%;
-  max-width: 100%;
+  max-width: 480px;
   min-width: 0;
+  margin: 0 auto;
   overflow-x: hidden;
   box-sizing: border-box;
   padding-bottom: 90px; /* Space for FloatingCartBar */
+  background-color: var(--color-bg);
+  box-shadow: 0 0 40px rgba(15, 23, 42, 0.06);
 }
 
 /* Toast Notification */

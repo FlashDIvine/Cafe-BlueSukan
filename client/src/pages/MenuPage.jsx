@@ -10,7 +10,7 @@ import { TableModal } from '../components/TableModal';
 import { Toast } from '../components/Toast';
 import '../styles/menu-page.css';
 
-export const MenuPage = ({ onOpenCart }) => {
+export const MenuPage = ({ onOpenCart, onGoHome }) => {
   const { menus, categories = [] } = useOrder();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,7 +65,10 @@ export const MenuPage = ({ onOpenCart }) => {
 
   return (
     <main className="stitch-home-container">
-      <Navbar onOpenTableModal={() => setIsTableModalOpen(true)} />
+      <Navbar
+        onOpenTableModal={() => setIsTableModalOpen(true)}
+        onGoHome={onGoHome}
+      />
       <Toast />
 
       {/* Top Search Bar */}

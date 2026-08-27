@@ -3,12 +3,17 @@ import { Coffee, MapPin, Edit3 } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import '../styles/navbar.css';
 
-export const Navbar = memo(({ onOpenTableModal }) => {
+export const Navbar = memo(({ onOpenTableModal, onGoHome }) => {
   const { tableNumber } = useOrder();
 
   return (
     <header className="navbar-header">
-      <div className="brand-container">
+      <div
+        className="brand-container"
+        onClick={onGoHome}
+        style={{ cursor: onGoHome ? 'pointer' : 'default' }}
+        title="Kembali ke Halaman Utama"
+      >
         <div className="brand-logo-icon">
           <Coffee size={20} strokeWidth={2.4} />
         </div>

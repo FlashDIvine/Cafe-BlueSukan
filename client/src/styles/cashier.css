@@ -78,9 +78,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #A7F3D0;
+  background: rgba(37, 99, 235, 0.25);
+  border: 1px solid rgba(37, 99, 235, 0.5);
+  color: #DBEAFE;
   font-size: 12px;
   font-weight: 700;
   padding: 4px 10px;
@@ -175,18 +175,18 @@
   color: #0F3E7D;
 }
 
-/* Card 3: Total Hari Ini / Default (Fresh Green) */
+/* Card 3: Total Hari Ini / Default (Royal Blue Accent) */
 .pos-metric-card.total-metric,
 .pos-metric-card.menu-total-metric {
-  background-color: #DCFCE7;
-  border: 1.5px solid #86EFAC;
+  background-color: #EFF6FF;
+  border: 1.5px solid #BFDBFE;
 }
 
 .pos-metric-card.total-metric .pos-metric-label,
 .pos-metric-card.menu-total-metric .pos-metric-label {
   font-size: 11.5px;
   font-weight: 700;
-  color: #15803D;
+  color: #1E40AF;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -195,7 +195,7 @@
 .pos-metric-card.menu-total-metric .pos-metric-value {
   font-size: 22px;
   font-weight: 800;
-  color: #14532D;
+  color: #1E3A8A;
 }
 
 .pos-metric-label {
@@ -336,7 +336,7 @@
 }
 
 .pos-order-card.processing {
-  border-left: 4px solid #10B981;
+  border-left: 4px solid #2563EB;
 }
 
 .pos-order-card.cancelled {
@@ -716,7 +716,7 @@
 
 .btn-approve-payment {
   flex: 1;
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   border: none;
   color: var(--color-white);
   font-family: inherit;
@@ -729,13 +729,13 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
   transition: all var(--transition-fast);
 }
 
 .btn-approve-payment:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
 }
 
 .btn-approve-payment:disabled {
@@ -761,7 +761,7 @@
 
 /* Selesaikan Pesanan Quick Button */
 .btn-complete-order {
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: var(--color-white);
   border: none;
   font-family: inherit;
@@ -773,13 +773,13 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
   transition: all var(--transition-fast);
 }
 
 .btn-complete-order:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
   transform: translateY(-1px);
 }
 

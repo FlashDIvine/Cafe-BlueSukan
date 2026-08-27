@@ -51,14 +51,14 @@
   position: absolute;
   top: 8px;
   left: 8px;
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: #FFFFFF;
   font-size: 9.5px;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 999px;
   letter-spacing: 0.04em;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.35);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
 }
 
 .stitch-rating-badge {
@@ -148,25 +148,25 @@
   width: fit-content;
 }
 
-/* Primary Green Add Button */
+/* Primary Royal Blue Add Button */
 .stitch-btn-add-primary {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: #FFFFFF;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .stitch-btn-add-primary:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.45);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.45);
 }
 
 .stitch-btn-add-primary:active {
@@ -190,8 +190,8 @@
 .stitch-stepper-compact {
   display: flex;
   align-items: center;
-  background-color: #F0FDF4;
-  border: 1px solid #BBF7D0;
+  background-color: #EFF6FF;
+  border: 1px solid #DBEAFE;
   border-radius: 999px;
   padding: 2px;
   gap: 4px;
@@ -202,7 +202,7 @@
   height: 24px;
   border-radius: 50%;
   background-color: #FFFFFF;
-  color: #16A34A;
+  color: #2563EB;
   border: none;
   display: flex;
   align-items: center;
@@ -213,7 +213,7 @@
 }
 
 .stitch-stepper-btn:hover:not(:disabled) {
-  background-color: #16A34A;
+  background-color: #2563EB;
   color: #FFFFFF;
 }
 
@@ -225,7 +225,7 @@
 .stitch-stepper-val {
   font-size: 12px;
   font-weight: 800;
-  color: #15803D;
+  color: #1E40AF;
   min-width: 14px;
   text-align: center;
 }

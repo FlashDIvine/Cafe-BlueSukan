@@ -157,9 +157,9 @@
 }
 
 .ticket-status-box.processing {
-  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-  border: 1px solid #6EE7B7;
-  color: #065F46;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #93C5FD;
+  color: #1E40AF;
   animation: pulseHighlight 1s ease-in-out;
 }
 
@@ -346,32 +346,146 @@
 /* Demo Simulation Action Bar — removed, status transitions via cashier polling only */
 
 
+/* Post-Order Success Banner */
+.ticket-success-alert {
+  margin: 0 16px 12px;
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid #BFDBFE;
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.ticket-success-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--color-royal-blue);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ticket-success-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ticket-success-title {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--color-navy);
+}
+
+.ticket-success-desc {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+/* Post-Order Auto-Redirect Countdown Bar */
+.ticket-countdown-bar {
+  margin: 0 16px 14px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.countdown-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.countdown-number {
+  font-weight: 800;
+  color: var(--color-royal-blue);
+  background: #EFF6FF;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.countdown-cancel-btn {
+  background: none;
+  border: none;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--color-royal-blue);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.countdown-cancel-btn:hover {
+  background-color: #EFF6FF;
+}
+
 /* Action Buttons Bottom */
 .ticket-actions-bottom {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 14px;
 }
 
-.btn-order-again {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+.btn-go-home {
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-royal-blue) 100%);
   color: var(--color-white);
   border: none;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 800;
-  padding: 13px 20px;
+  padding: 14px 20px;
   border-radius: var(--radius-pill);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 12px rgba(15, 62, 125, 0.25);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  transition: all var(--transition-fast);
+}
+
+.btn-go-home:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+}
+
+.btn-order-again {
+  background-color: #FFFFFF;
+  color: var(--color-royal-blue);
+  border: 1.5px solid var(--color-royal-blue-light);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   transition: all var(--transition-fast);
 }
 
 .btn-order-again:hover {
-  opacity: 0.95;
+  background-color: #EFF6FF;
+  border-color: var(--color-royal-blue);
   transform: translateY(-1px);
 }

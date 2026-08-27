@@ -49,8 +49,8 @@
 }
 
 .stitch-search-input-box:focus-within {
-  border-color: #16A34A;
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .stitch-search-icon {
@@ -98,26 +98,26 @@
   background-color: #CBD5E1;
 }
 
-/* Green Filter Action Button */
+/* Primary Royal Blue Filter Action Button */
 .stitch-filter-btn {
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: #FFFFFF;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   flex-shrink: 0;
 }
 
 .stitch-filter-btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(22, 163, 74, 0.45);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
 }
 
 .stitch-filter-btn:active {
@@ -145,7 +145,7 @@
 .stitch-see-all-btn {
   background: none;
   border: none;
-  color: #0F6E94;
+  color: #2563EB;
   font-size: 13px;
   font-weight: 700;
   display: flex;
@@ -157,7 +157,7 @@
 }
 
 .stitch-see-all-btn:hover {
-  color: #16A34A;
+  color: #1D4ED8;
   transform: translateX(2px);
 }
 
@@ -233,8 +233,8 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background-color: #F0FDF4;
-  color: #16A34A;
+  background-color: #EFF6FF;
+  color: #2563EB;
   display: flex;
   align-items: center;
   justify-content: center;
