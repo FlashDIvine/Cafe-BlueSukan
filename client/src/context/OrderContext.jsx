@@ -13,10 +13,43 @@ export const OrderProvider = ({ children }) => {
   // Fetch menus from backend API on mount & poll every 3s for realtime stock/menu updates
   useEffect(() => {
     const fetchLatestMenus = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+
       fetchMenusApi()
         .then((res) => {
-          if (res?.data?.length) setMenus(res.data);
-          if (res?.categories?.length) setCategories(res.categories);
+          if (res?.data?.length) {
+            setMenus((prev) => {
+              if (prev.length === res.data.length) {
+                const isIdentical = prev.every((pItem, idx) => {
+                  const nItem = res.data[idx];
+                  return (
+                    pItem.id === nItem.id &&
+                    pItem.stock === nItem.stock &&
+                    pItem.is_available === nItem.is_available &&
+                    pItem.price === nItem.price &&
+                    pItem.name === nItem.name &&
+                    pItem.category_id === nItem.category_id &&
+                    pItem.is_popular === nItem.is_popular &&
+                    pItem.image_url === nItem.image_url
+                  );
+                });
+                if (isIdentical) return prev;
+              }
+              return res.data;
+            });
+          }
+          if (res?.categories?.length) {
+            setCategories((prev) => {
+              if (prev.length === res.categories.length) {
+                const isIdentical = prev.every((pCat, idx) => {
+                  const nCat = res.categories[idx];
+                  return pCat.id === nCat.id && pCat.name === nCat.name && pCat.image === nCat.image;
+                });
+                if (isIdentical) return prev;
+              }
+              return res.categories;
+            });
+          }
         })
         .catch(() => {
           // Backend unavailable — keep using existing state
@@ -25,7 +58,22 @@ export const OrderProvider = ({ children }) => {
 
     fetchLatestMenus();
     const interval = setInterval(fetchLatestMenus, 3000);
-    return () => clearInterval(interval);
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        fetchLatestMenus();
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
   }, []);
 
   // Customer & Table state

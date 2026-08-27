@@ -5,7 +5,21 @@ const router = Router();
 
 import { DEFAULT_CATEGORIES } from './categories.js';
 
+let cachedCatResult = null;
+let lastCatFetchTime = 0;
+const CAT_CACHE_TTL = 30000; // 30 seconds cache
+
+export function invalidateCategoriesCache() {
+  cachedCatResult = null;
+  lastCatFetchTime = 0;
+}
+
 async function getCategoriesMap() {
+  const now = Date.now();
+  if (cachedCatResult && now - lastCatFetchTime < CAT_CACHE_TTL) {
+    return cachedCatResult;
+  }
+
   try {
     const cats = await prisma.category.findMany();
     if (!cats || cats.length === 0) {
@@ -13,13 +27,17 @@ async function getCategoriesMap() {
       DEFAULT_CATEGORIES.forEach((c) => {
         map[c.id] = c.name;
       });
-      return { map, list: DEFAULT_CATEGORIES };
+      cachedCatResult = { map, list: DEFAULT_CATEGORIES };
+      lastCatFetchTime = now;
+      return cachedCatResult;
     }
     const map = {};
     cats.forEach((c) => {
       map[c.id] = c.name;
     });
-    return { map, list: cats };
+    cachedCatResult = { map, list: cats };
+    lastCatFetchTime = now;
+    return cachedCatResult;
   } catch {
     const map = {};
     DEFAULT_CATEGORIES.forEach((c) => {
@@ -29,6 +47,8 @@ async function getCategoriesMap() {
   }
 }
 
+import { menus as memoryMenus, categories as memoryCategories, findMenuById } from '../db.js';
+
 /**
  * GET /api/menus
  * Returns all menus with realtime stock and category name.
@@ -37,6 +57,19 @@ async function getCategoriesMap() {
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
+
+    if (!process.env.DATABASE_URL) {
+      let filtered = memoryMenus;
+      if (category && category !== 'all') {
+        filtered = memoryMenus.filter((m) => m.category_id === category);
+      }
+      return res.json({
+        success: true,
+        data: filtered,
+        categories: [{ id: 'all', name: 'Semua' }, ...memoryCategories],
+      });
+    }
+
     const where = category && category !== 'all' ? { category_id: category } : {};
 
     const [rawMenus, { map: catMap, list: catList }] = await Promise.all([
@@ -58,8 +91,17 @@ router.get('/', async (req, res) => {
       categories: [{ id: 'all', name: 'Semua' }, ...catList],
     });
   } catch (err) {
-    console.error('Error fetching menus:', err);
-    res.status(500).json({ success: false, message: 'Gagal mengambil data menu' });
+    console.error('Database unreachable, using memory store for menus:', err.message);
+    const { category } = req.query;
+    let filtered = memoryMenus;
+    if (category && category !== 'all') {
+      filtered = memoryMenus.filter((m) => m.category_id === category);
+    }
+    res.json({
+      success: true,
+      data: filtered,
+      categories: [{ id: 'all', name: 'Semua' }, ...memoryCategories],
+    });
   }
 });
 

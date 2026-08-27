@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { ShoppingBag, ChevronRight } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatRupiah } from '../utils/formatters';
 import '../styles/floating-cart.css';
 
-export const FloatingCartBar = ({ onOpenCart }) => {
+export const FloatingCartBar = memo(({ onOpenCart }) => {
   const { totalItemsCount, grandTotalPrice, cartItems } = useOrder();
 
   if (cartItems.length === 0) {
@@ -37,4 +37,6 @@ export const FloatingCartBar = ({ onOpenCart }) => {
       </div>
     </aside>
   );
-};
+});
+
+FloatingCartBar.displayName = 'FloatingCartBar';

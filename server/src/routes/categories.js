@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import prisma from '../prisma.js';
+import { invalidateCategoriesCache } from './menus.js';
 
 const router = Router();
 
@@ -137,6 +138,8 @@ router.post('/', async (req, res) => {
       },
     });
 
+    invalidateCategoriesCache();
+
     res.status(201).json({
       success: true,
       message: `Kategori "${created.name}" berhasil ditambahkan`,
@@ -183,6 +186,8 @@ router.patch('/:id', async (req, res) => {
       data: updateData,
     });
 
+    invalidateCategoriesCache();
+
     res.json({
       success: true,
       message: `Kategori "${updated.name}" berhasil diperbarui`,
@@ -216,6 +221,8 @@ router.delete('/:id', async (req, res) => {
     }
 
     await prisma.category.delete({ where: { id } });
+
+    invalidateCategoriesCache();
 
     res.json({
       success: true,

@@ -1,23 +1,23 @@
-/* Floating Cart Bar Styling */
 .floating-cart-wrapper {
   position: fixed;
   bottom: 16px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate3d(-50%, 0, 0);
   width: calc(100% - 32px);
   max-width: 448px;
   z-index: 95;
+  will-change: transform, opacity;
   animation: slideUpFloatingBar 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 @keyframes slideUpFloatingBar {
   from {
     opacity: 0;
-    transform: translate(-50%, 25px);
+    transform: translate3d(-50%, 25px, 0);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate3d(-50%, 0, 0);
   }
 }
 

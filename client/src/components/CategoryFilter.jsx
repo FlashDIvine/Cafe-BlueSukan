@@ -1,20 +1,22 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 import { CATEGORIES } from '../data/mockMenus';
+import { getOptimizedImageUrl } from '../utils/imageOptimizer';
 import '../styles/category-filter.css';
 
 const DEFAULT_CATEGORY_IMAGES = {
-  all: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=160&q=80&fm=webp',
-  coffee: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=160&q=80&fm=webp',
-  'non-coffee': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=160&q=80&fm=webp',
-  snacks: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=160&q=80&fm=webp',
-  food: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=160&q=80&fm=webp',
+  all: 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=120&q=70&fm=webp',
+  coffee: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=120&q=70&fm=webp',
+  'non-coffee': 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=120&q=70&fm=webp',
+  snacks: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=120&q=70&fm=webp',
+  food: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=120&q=70&fm=webp',
 };
 
 const getCategoryImageUrl = (cat) => {
   if (cat?.image && typeof cat.image === 'string' && cat.image.trim()) {
-    return cat.image.trim();
+    return getOptimizedImageUrl(cat.image.trim(), { width: 120, quality: 70 });
   }
-  return DEFAULT_CATEGORY_IMAGES[cat?.id] || DEFAULT_CATEGORY_IMAGES.all;
+  const fallback = DEFAULT_CATEGORY_IMAGES[cat?.id] || DEFAULT_CATEGORY_IMAGES.all;
+  return getOptimizedImageUrl(fallback, { width: 120, quality: 70 });
 };
 
 const getCategoryShortName = (cat) => {
@@ -26,7 +28,7 @@ const getCategoryShortName = (cat) => {
   return cat.name;
 };
 
-export const CategoryFilter = ({
+export const CategoryFilter = memo(({
   categories = CATEGORIES,
   activeCategory,
   onSelectCategory,
@@ -68,6 +70,7 @@ export const CategoryFilter = ({
                   alt={cat.name}
                   className="food-category-img"
                   loading="lazy"
+                  decoding="async"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.src = DEFAULT_CATEGORY_IMAGES[cat.id] || DEFAULT_CATEGORY_IMAGES.all;
@@ -81,4 +84,6 @@ export const CategoryFilter = ({
       </div>
     </section>
   );
-};
+});
+
+CategoryFilter.displayName = 'CategoryFilter';

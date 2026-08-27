@@ -6,6 +6,25 @@ export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
+    cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('qrcode.react')) {
+              return 'vendor-qrcode';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            return 'vendor-misc';
+          }
+        },
+      },
+    },
   },
   server: {
     proxy: {

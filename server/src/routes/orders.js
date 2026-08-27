@@ -1,11 +1,18 @@
 import { Router } from 'express';
 import prisma from '../prisma.js';
+import {
+  orders as memoryOrders,
+  generateOrderCode,
+  findOrderByCode,
+  findOrderById,
+  findMenuById,
+} from '../db.js';
 
 const router = Router();
 
 /**
  * POST /api/orders
- * Create a new customer self-order using Prisma transaction
+ * Create a new customer self-order using Prisma transaction (with memory fallback)
  */
 router.post('/', async (req, res) => {
   const { customer_name, table_number, notes, items } = req.body;
@@ -18,6 +25,61 @@ router.post('/', async (req, res) => {
   }
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, message: 'Pesanan harus memiliki minimal 1 item' });
+  }
+
+  // Memory store path
+  if (!process.env.DATABASE_URL) {
+    try {
+      let totalPrice = 0;
+      const orderItemsData = [];
+
+      for (const item of items) {
+        const menu = findMenuById(item.menu_id);
+        if (!menu) {
+          return res.status(400).json({ success: false, message: `Menu dengan ID ${item.menu_id} tidak ditemukan` });
+        }
+        if (!menu.is_available || menu.stock < item.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: `Stok "${menu.name}" tidak mencukupi (sisa: ${menu.stock}, dipesan: ${item.quantity})`,
+          });
+        }
+        const subtotal = menu.price * item.quantity;
+        totalPrice += subtotal;
+        orderItemsData.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          menu_id: menu.id,
+          name: menu.name,
+          price: menu.price,
+          quantity: item.quantity,
+          subtotal,
+        });
+      }
+
+      const orderCode = generateOrderCode();
+      const newOrder = {
+        id: memoryOrders.length + 1,
+        order_code: orderCode,
+        customer_name: customer_name.trim(),
+        table_number: String(table_number).trim(),
+        notes: notes?.trim() || null,
+        total_price: totalPrice,
+        payment_method: null,
+        status: 'waiting_payment',
+        created_at: new Date().toISOString(),
+        items: orderItemsData,
+      };
+
+      memoryOrders.unshift(newOrder);
+
+      return res.status(201).json({
+        success: true,
+        message: 'Pesanan berhasil dibuat',
+        data: newOrder,
+      });
+    } catch (err) {
+      return res.status(400).json({ success: false, message: err.message || 'Gagal membuat pesanan' });
+    }
   }
 
   try {
@@ -81,10 +143,18 @@ router.post('/', async (req, res) => {
  * List all orders with optional status filter, sorted newest first
  */
 router.get('/', async (req, res) => {
-  try {
-    const { status } = req.query;
-    const where = status && status !== 'all' ? { status } : {};
+  const { status } = req.query;
 
+  if (!process.env.DATABASE_URL) {
+    let list = memoryOrders;
+    if (status && status !== 'all') {
+      list = memoryOrders.filter((o) => o.status === status);
+    }
+    return res.json({ success: true, data: list });
+  }
+
+  try {
+    const where = status && status !== 'all' ? { status } : {};
     const orders = await prisma.order.findMany({
       where,
       include: { items: true },
@@ -92,9 +162,12 @@ router.get('/', async (req, res) => {
     });
 
     res.json({ success: true, data: orders });
-  } catch (err) {
-    console.error('Error fetching orders:', err);
-    res.status(500).json({ success: false, message: 'Gagal mengambil data pesanan' });
+  } catch {
+    let list = memoryOrders;
+    if (status && status !== 'all') {
+      list = memoryOrders.filter((o) => o.status === status);
+    }
+    res.json({ success: true, data: list });
   }
 });
 
@@ -103,8 +176,15 @@ router.get('/', async (req, res) => {
  * Fetch single order by numeric ID
  */
 router.get('/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    return res.json({ success: true, data: order });
+  }
+
   try {
-    const id = parseInt(req.params.id, 10);
     const order = await prisma.order.findUnique({
       where: { id },
       include: { items: true },
@@ -115,8 +195,10 @@ router.get('/:id', async (req, res) => {
     }
 
     res.json({ success: true, data: order });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Gagal mengambil detail pesanan' });
+  } catch {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    res.json({ success: true, data: order });
   }
 });
 
@@ -125,6 +207,12 @@ router.get('/:id', async (req, res) => {
  * Fetch single order by order code
  */
 router.get('/code/:order_code', async (req, res) => {
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderByCode(req.params.order_code);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    return res.json({ success: true, data: order });
+  }
+
   try {
     const order = await prisma.order.findUnique({
       where: { order_code: req.params.order_code },
@@ -136,8 +224,10 @@ router.get('/code/:order_code', async (req, res) => {
     }
 
     res.json({ success: true, data: order });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Gagal mengambil detail pesanan' });
+  } catch {
+    const order = findOrderByCode(req.params.order_code);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    res.json({ success: true, data: order });
   }
 });
 
@@ -146,6 +236,20 @@ router.get('/code/:order_code', async (req, res) => {
  * Polling endpoint for frontend status check
  */
 router.get('/:order_code/status', async (req, res) => {
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderByCode(req.params.order_code);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    return res.json({
+      success: true,
+      data: {
+        order_code: order.order_code,
+        status: order.status,
+        customer_name: order.customer_name,
+        table_number: order.table_number,
+      },
+    });
+  }
+
   try {
     const order = await prisma.order.findUnique({
       where: { order_code: req.params.order_code },
@@ -164,14 +268,24 @@ router.get('/:order_code/status', async (req, res) => {
         table_number: order.table_number,
       },
     });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Gagal mengecek status pesanan' });
+  } catch {
+    const order = findOrderByCode(req.params.order_code);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    res.json({
+      success: true,
+      data: {
+        order_code: order.order_code,
+        status: order.status,
+        customer_name: order.customer_name,
+        table_number: order.table_number,
+      },
+    });
   }
 });
 
 /**
  * PUT /api/orders/:id/items
- * Cashier edits order items before approval (transactional)
+ * Cashier edits order items before approval (transactional with memory fallback)
  */
 router.put('/:id/items', async (req, res) => {
   const id = parseInt(req.params.id, 10);
@@ -179,6 +293,46 @@ router.put('/:id/items', async (req, res) => {
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, message: 'Pesanan harus memiliki minimal 1 item' });
+  }
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    if (order.status !== 'waiting_payment') {
+      return res.status(400).json({ success: false, message: `Pesanan berstatus "${order.status}" tidak dapat diubah` });
+    }
+
+    let totalPrice = 0;
+    const newItemsData = [];
+    for (const item of items) {
+      const menu = findMenuById(item.menu_id);
+      if (!menu) return res.status(400).json({ success: false, message: `Menu dengan ID ${item.menu_id} tidak ditemukan` });
+      if (!menu.is_available || menu.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Stok "${menu.name}" tidak mencukupi (sisa: ${menu.stock}, diminta: ${item.quantity})`,
+        });
+      }
+      const subtotal = menu.price * item.quantity;
+      totalPrice += subtotal;
+      newItemsData.push({
+        id: Date.now() + Math.floor(Math.random() * 1000),
+        menu_id: menu.id,
+        name: menu.name,
+        price: menu.price,
+        quantity: item.quantity,
+        subtotal,
+      });
+    }
+
+    order.items = newItemsData;
+    order.total_price = totalPrice;
+
+    return res.json({
+      success: true,
+      message: `Menu pesanan ${order.order_code} berhasil diperbarui`,
+      data: order,
+    });
   }
 
   try {
@@ -189,7 +343,6 @@ router.put('/:id/items', async (req, res) => {
         throw new Error(`Pesanan berstatus "${order.status}" tidak dapat diubah`);
       }
 
-      // Delete existing order items
       await tx.orderItem.deleteMany({ where: { order_id: id } });
 
       let totalPrice = 0;
@@ -237,10 +390,46 @@ router.put('/:id/items', async (req, res) => {
 
 /**
  * PATCH /api/orders/:id/approve
- * Cashier confirms payment & deducts stock atomically via transaction
+ * Cashier confirms payment & deducts stock atomically
  */
 router.patch('/:id/approve', async (req, res) => {
   const id = parseInt(req.params.id, 10);
+  const paymentMethod = req.body?.payment_method || 'cash';
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    if (order.status !== 'waiting_payment') {
+      return res.status(400).json({
+        success: false,
+        message: `Pesanan sudah dalam status "${order.status}", tidak dapat disetujui kembali`,
+      });
+    }
+
+    for (const item of order.items) {
+      const menu = findMenuById(item.menu_id);
+      if (!menu || menu.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Stok "${item.name}" tidak mencukupi (sisa: ${menu?.stock ?? 0}, diminta: ${item.quantity})`,
+        });
+      }
+      menu.stock -= item.quantity;
+      if (menu.stock === 0) {
+        menu.is_available = false;
+      }
+    }
+
+    order.status = 'paid_processing';
+    order.payment_method = paymentMethod;
+    order.paid_at = new Date().toISOString();
+
+    return res.json({
+      success: true,
+      message: `Pesanan ${order.order_code} telah dikonfirmasi & stok dipotong`,
+      data: order,
+    });
+  }
 
   try {
     const approvedOrder = await prisma.$transaction(async (tx) => {
@@ -251,7 +440,6 @@ router.patch('/:id/approve', async (req, res) => {
         throw new Error(`Pesanan sudah dalam status "${order.status}", tidak dapat disetujui kembali`);
       }
 
-      // Verify and deduct stock atomically
       for (const item of order.items) {
         const menu = await tx.menu.findUnique({ where: { id: item.menu_id } });
         if (!menu || menu.stock < item.quantity) {
@@ -268,7 +456,6 @@ router.patch('/:id/approve', async (req, res) => {
         });
       }
 
-      const paymentMethod = req.body?.payment_method || 'cash';
       return await tx.order.update({
         where: { id },
         data: {
@@ -297,6 +484,17 @@ router.patch('/:id/approve', async (req, res) => {
  */
 router.patch('/:id/complete', async (req, res) => {
   const id = parseInt(req.params.id, 10);
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    order.status = 'completed';
+    return res.json({
+      success: true,
+      message: `Pesanan ${order.order_code} telah diselesaikan`,
+      data: order,
+    });
+  }
 
   try {
     const order = await prisma.order.findUnique({ where: { id } });
@@ -335,6 +533,23 @@ router.patch('/:id/complete', async (req, res) => {
  */
 router.patch('/:id/cancel', async (req, res) => {
   const id = parseInt(req.params.id, 10);
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderById(id);
+    if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    if (order.status === 'completed' || order.status === 'cancelled') {
+      return res.status(400).json({
+        success: false,
+        message: `Pesanan berstatus "${order.status}" tidak dapat dibatalkan`,
+      });
+    }
+    order.status = 'cancelled';
+    return res.json({
+      success: true,
+      message: `Pesanan ${order.order_code} telah dibatalkan`,
+      data: order,
+    });
+  }
 
   try {
     const order = await prisma.order.findUnique({ where: { id } });

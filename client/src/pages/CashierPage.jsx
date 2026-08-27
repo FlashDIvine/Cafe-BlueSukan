@@ -8,8 +8,6 @@ import {
   AlertCircle,
   ShoppingBag,
   User,
-  MapPin,
-  FileText,
   ChevronRight,
   ClipboardList,
   UtensilsCrossed,
@@ -37,29 +35,95 @@ export const CashierPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load orders & menus
-  const loadData = useCallback(async () => {
-    setIsLoading(true);
+  // Load orders & menus without disruptive flickering on background poll
+  const loadData = useCallback(async (isSilent = false) => {
+    if (!isSilent) setIsLoading(true);
     try {
       const [ordersData, menusRes] = await Promise.all([
         fetchOrdersApi(),
         fetchMenusApi(),
       ]);
-      setOrders(ordersData || []);
-      if (menusRes?.data) setMenus(menusRes.data);
-      if (menusRes?.categories) setCategories(menusRes.categories);
+      
+      const newOrders = ordersData || [];
+      setOrders((prev) => {
+        if (prev.length === newOrders.length) {
+          const isIdentical = prev.every((p, idx) => {
+            const n = newOrders[idx];
+            return (
+              p.id === n.id &&
+              p.status === n.status &&
+              p.total_price === n.total_price &&
+              p.payment_method === n.payment_method &&
+              p.table_number === n.table_number &&
+              p.customer_name === n.customer_name &&
+              p.items?.length === n.items?.length
+            );
+          });
+          if (isIdentical) return prev;
+        }
+        return newOrders;
+      });
+
+      if (menusRes?.data) {
+        setMenus((prev) => {
+          if (prev.length === menusRes.data.length) {
+            const isIdentical = prev.every((p, idx) => {
+              const n = menusRes.data[idx];
+              return (
+                p.id === n.id &&
+                p.stock === n.stock &&
+                p.is_available === n.is_available &&
+                p.price === n.price &&
+                p.name === n.name
+              );
+            });
+            if (isIdentical) return prev;
+          }
+          return menusRes.data;
+        });
+      }
+
+      if (menusRes?.categories) {
+        setCategories((prev) => {
+          if (prev.length === menusRes.categories.length) {
+            const isIdentical = prev.every((p, idx) => p.id === menusRes.categories[idx].id);
+            if (isIdentical) return prev;
+          }
+          return menusRes.categories;
+        });
+      }
     } catch (err) {
       console.error('Error loading cashier data:', err);
     } finally {
-      setIsLoading(false);
+      if (!isSilent) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadData();
-    // Poll orders & menu stock every 3 seconds for real-time sync
-    const interval = setInterval(loadData, 3000);
-    return () => clearInterval(interval);
+    loadData(false);
+    
+    // Poll orders & menu stock every 3 seconds silently
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        loadData(true);
+      }
+    }, 3000);
+
+    const handleVisibilityChange = () => {
+      if (typeof document !== 'undefined' && !document.hidden) {
+        loadData(true);
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      }
+    };
   }, [loadData]);
 
   // Keep selected order synced with fresh polled data

@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Coffee, MapPin, Edit3 } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import '../styles/navbar.css';
 
-export const Navbar = ({ onOpenTableModal }) => {
+export const Navbar = memo(({ onOpenTableModal }) => {
   const { tableNumber } = useOrder();
 
   return (
@@ -37,4 +37,6 @@ export const Navbar = ({ onOpenTableModal }) => {
       </div>
     </header>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';

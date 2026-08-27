@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Plus, Minus, Lock, Star } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatRupiah } from '../utils/formatters';
+import { getOptimizedImageUrl, FALLBACK_IMAGE } from '../utils/imageOptimizer';
 
-export const RecommendedCard = ({ item }) => {
+export const RecommendedCard = memo(({ item }) => {
   const { addToCart, updateQty, getItemQtyInCart } = useOrder();
 
   const isOutOfStock = !item.is_available || item.stock <= 0;
@@ -28,6 +29,8 @@ export const RecommendedCard = ({ item }) => {
     updateQty(item.id, qtyInCart - 1);
   };
 
+  const optimizedSrc = getOptimizedImageUrl(item.image_url, { width: 360, quality: 75 });
+
   return (
     <article
       className={`stitch-recommended-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}
@@ -36,14 +39,14 @@ export const RecommendedCard = ({ item }) => {
       {/* Product Image & Badges */}
       <div className="stitch-rec-image-wrap">
         <img
-          src={item.image_url}
+          src={optimizedSrc}
           alt={item.name}
           className="stitch-rec-image"
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src =
-              'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=400&q=80';
+            e.target.src = FALLBACK_IMAGE;
           }}
         />
         {isOutOfStock ? (
@@ -125,4 +128,6 @@ export const RecommendedCard = ({ item }) => {
       </div>
     </article>
   );
-};
+});
+
+RecommendedCard.displayName = 'RecommendedCard';
