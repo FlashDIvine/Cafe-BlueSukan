@@ -76,8 +76,8 @@ export const OrderProvider = ({ children }) => {
     };
   }, []);
 
-  // Customer & Table state
-  const [tableNumber, setTableNumber] = useState(() => getTableFromUrl('04'));
+  // Customer & Table/Seating Location state
+  const [tableNumber, setTableNumber] = useState(() => getTableFromUrl('Indoor'));
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -97,7 +97,7 @@ export const OrderProvider = ({ children }) => {
   // Listen to URL search param changes on initial load or popstate
   useEffect(() => {
     const handleUrlChange = () => {
-      const urlTable = getTableFromUrl(tableNumber || '04');
+      const urlTable = getTableFromUrl(tableNumber || 'Indoor');
       setTableNumber(urlTable);
     };
     window.addEventListener('popstate', handleUrlChange);

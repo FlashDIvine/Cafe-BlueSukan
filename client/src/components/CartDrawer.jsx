@@ -11,9 +11,13 @@ import {
   AlertCircle,
   ArrowRight,
   Info,
+  Coffee,
+  Trees,
+  Building2,
+  Check,
 } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
-import { formatRupiah } from '../utils/formatters';
+import { formatRupiah, SEATING_AREAS } from '../utils/formatters';
 import '../styles/cart-drawer.css';
 
 export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
@@ -243,34 +247,49 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
                   )}
                 </div>
 
-                {/* Input Nomor Meja */}
+                {/* Pilihan Lokasi Duduk (Model A: 3 Pilihan Murni) */}
                 <div className="form-group">
                   <div className="form-label-row">
-                    <label htmlFor="drawer-table-input" className="form-label">
-                      Nomor Meja <span className="required-star">*</span>
+                    <label className="form-label">
+                      Lokasi Duduk <span className="required-star">*</span>
                     </label>
-                    <span className="table-badge-tip">Sesuai stiker meja</span>
+                    <span className="table-badge-tip">Pilih area Anda</span>
                   </div>
-                  <div className="table-input-compact-wrap">
-                    <input
-                      id="drawer-table-input"
-                      type="text"
-                      className={`form-input table-input-compact ${
-                        touched.table && !isTableValid ? 'input-error' : ''
-                      }`}
-                      placeholder="04"
-                      maxLength={5}
-                      value={tableNumber}
-                      onChange={(e) => setTableNumber(e.target.value)}
-                      onBlur={() => setTouched((prev) => ({ ...prev, table: true }))}
-                      required
-                    />
-                    <span className="table-badge-tip">Otomatis dari scan QR</span>
+
+                  <div className="seating-selector-grid">
+                    {SEATING_AREAS.map((area) => {
+                      const isSelected = tableNumber === area.name;
+                      return (
+                        <button
+                          key={area.id}
+                          type="button"
+                          className={`seating-choice-card ${isSelected ? 'selected' : ''}`}
+                          onClick={() => setTableNumber(area.name)}
+                          aria-pressed={isSelected}
+                        >
+                          <div className="seating-choice-icon-wrap">
+                            {area.id === 'indoor' && <Coffee size={18} />}
+                            {area.id === 'outdoor' && <Trees size={18} />}
+                            {area.id === 'lt2' && <Building2 size={18} />}
+                          </div>
+                          <div className="seating-choice-text">
+                            <strong className="seating-choice-title">{area.label}</strong>
+                            <span className="seating-choice-desc">{area.desc}</span>
+                          </div>
+                          {isSelected && (
+                            <div className="seating-choice-check">
+                              <Check size={12} strokeWidth={3} />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
+
                   {touched.table && !isTableValid && (
                     <div className="form-error-msg" role="alert">
                       <AlertCircle size={13} />
-                      <span>Nomor meja wajib diisi</span>
+                      <span>Mohon pilih salah satu lokasi duduk</span>
                     </div>
                   )}
                 </div>

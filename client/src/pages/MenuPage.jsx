@@ -10,7 +10,7 @@ import { TableModal } from '../components/TableModal';
 import { Toast } from '../components/Toast';
 import '../styles/menu-page.css';
 
-export const MenuPage = ({ onOpenCart, onGoHome }) => {
+export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal }) => {
   const { menus, categories = [] } = useOrder();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +68,8 @@ export const MenuPage = ({ onOpenCart, onGoHome }) => {
       <Navbar
         onOpenTableModal={() => setIsTableModalOpen(true)}
         onGoHome={onGoHome}
+        activeOrder={activeOrder}
+        onOpenTicketModal={onOpenTicketModal}
       />
       <Toast />
 

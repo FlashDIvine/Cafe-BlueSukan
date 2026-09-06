@@ -1,0 +1,425 @@
+/* ==========================================================================
+   Active Order Tracker & Modal Styles — BlueSukan Cafe
+   Editorial Boutique & Glassmorphism Design
+   ========================================================================== */
+
+/* ─── 1. Floating Active Order Bar at Bottom of Homepage ─────────────────── */
+.active-order-floating-bar {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 600px;
+  z-index: 90;
+  pointer-events: auto;
+  animation: slideUpTracker 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpTracker {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 28px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.active-order-tracker-card {
+  background: rgba(10, 15, 29, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-xl);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 16px 36px -4px rgba(10, 15, 29, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.active-order-tracker-card:hover {
+  box-shadow: 0 20px 42px -4px rgba(10, 15, 29, 0.5), 0 0 0 1px rgba(219, 234, 254, 0.25);
+}
+
+/* Left Section: Live Pulse & Order Info */
+.tracker-left-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tracker-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
+  position: relative;
+}
+
+.tracker-icon-badge.processing {
+  background: linear-gradient(135deg, #2563EB 0%, #0284C7 100%);
+}
+
+.tracker-icon-badge.completed {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+}
+
+.tracker-icon-badge.cancelled {
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+}
+
+.tracker-text-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 3px;
+}
+
+/* Status Pill */
+.tracker-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.tracker-status-pill.waiting {
+  color: #FCD34D;
+}
+
+.tracker-status-pill.processing {
+  color: #93C5FD;
+}
+
+.tracker-status-pill.completed {
+  color: #6EE7B7;
+}
+
+.tracker-status-pill.cancelled {
+  color: #FCA5A5;
+}
+
+.tracker-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: currentColor;
+  display: inline-block;
+  animation: trackerBlink 1.4s ease-in-out infinite;
+}
+
+@keyframes trackerBlink {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+}
+
+.tracker-meta-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tracker-order-code {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #FFFFFF;
+}
+
+.tracker-sep {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+}
+
+.tracker-table-badge {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+}
+
+.tracker-total-price {
+  font-weight: 700;
+  color: #93C5FD;
+  font-size: 12.5px;
+}
+
+/* Right Section: Action Buttons */
+.tracker-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-tracker-view-ticket {
+  background: #FFFFFF;
+  color: #0A0F1D;
+  border: none;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 800;
+  padding: 10px 16px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-tracker-view-ticket:hover {
+  background-color: #DBEAFE;
+  color: #1E40AF;
+  transform: translateY(-1px);
+}
+
+.btn-tracker-view-ticket:active {
+  transform: translateY(0);
+}
+
+.btn-tracker-dismiss {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-tracker-dismiss:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+/* ─── 2. Homepage Header / Hero Active Order Chip ─────────────────────────── */
+.boutique-active-order-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(30, 64, 175, 0.15);
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  color: #1E40AF;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.boutique-active-order-chip:hover {
+  background: rgba(30, 64, 175, 0.25);
+  border-color: #1E40AF;
+  transform: translateY(-1px);
+}
+
+.hero-active-order-banner {
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  max-width: 100%;
+}
+
+.hero-active-order-banner:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.hero-order-badge-live {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #38BDF8;
+  animation: trackerBlink 1.4s infinite;
+}
+
+.hero-order-banner-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hero-order-banner-link {
+  font-size: 12px;
+  font-weight: 800;
+  color: #93C5FD;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 4px;
+}
+
+/* ─── 3. Modal Overlay for Digital Ticket ─────────────────────────────────── */
+.ticket-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(10, 15, 29, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeInModal 0.22s ease-out;
+  overflow-y: auto;
+}
+
+.ticket-modal-window {
+  background-color: #ECEFF3;
+  border-radius: var(--radius-2xl);
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px -8px rgba(10, 15, 29, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: scaleInModal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ticket-modal-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 12px;
+  position: sticky;
+  top: 0;
+  background: rgba(236, 239, 243, 0.94);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+}
+
+.ticket-modal-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-modal-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0A0F1D;
+  letter-spacing: -0.01em;
+}
+
+.ticket-modal-close-btn {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748B;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-xs);
+}
+
+.ticket-modal-close-btn:hover {
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border-color: #FCA5A5;
+}
+
+.ticket-modal-body {
+  padding: 14px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Compact adjustments when inside modal */
+.ticket-modal-body .ticket-page-container {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+}
+
+.ticket-modal-body .ticket-header-bar {
+  display: none; /* Hide internal header since modal top bar has close button */
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .active-order-floating-bar {
+    width: calc(100% - 24px);
+    bottom: 14px;
+  }
+
+  .active-order-tracker-card {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .tracker-icon-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .tracker-meta-line {
+    font-size: 12.5px;
+  }
+
+  .btn-tracker-view-ticket {
+    font-size: 11.5px;
+    padding: 8px 12px;
+  }
+
+  .ticket-modal-window {
+    max-height: 94vh;
+  }
+}

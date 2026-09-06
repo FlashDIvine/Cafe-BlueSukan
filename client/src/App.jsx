@@ -4,13 +4,11 @@ import { useOrder } from './hooks/useOrder';
 import { HomePage } from './pages/HomePage';
 import { MenuPage } from './pages/MenuPage';
 import { CartDrawer } from './components/CartDrawer';
+import { ActiveOrderModal } from './components/ActiveOrderModal';
 import { submitOrderApi } from './services/api';
 
 const CashierPage = lazy(() =>
   import('./pages/CashierPage').then((m) => ({ default: m.CashierPage }))
-);
-const OrderTicket = lazy(() =>
-  import('./components/OrderTicket').then((m) => ({ default: m.OrderTicket }))
 );
 
 const PageLoadingFallback = () => (
@@ -35,8 +33,37 @@ function AppContent() {
   });
 
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeOrder, setActiveOrder] = useState(null);
+  const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+
+  // Initialize activeOrder from localStorage for persistent tracking
+  const [activeOrder, setActiveOrder] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('bluesukan_active_order');
+        if (saved) return JSON.parse(saved);
+      } catch (err) {
+        console.error('Failed to load active order from localStorage', err);
+      }
+    }
+    return null;
+  });
+
   const { showToast, clearCart } = useOrder();
+
+  // Sync activeOrder changes to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        if (activeOrder) {
+          localStorage.setItem('bluesukan_active_order', JSON.stringify(activeOrder));
+        } else {
+          localStorage.removeItem('bluesukan_active_order');
+        }
+      } catch (err) {
+        console.error('Failed to save active order to localStorage', err);
+      }
+    }
+  }, [activeOrder]);
 
   // Listen to browser hash changes (e.g. #cashier, #menu, #home)
   useEffect(() => {
@@ -57,14 +84,12 @@ function AppContent() {
   }, []);
 
   const handleGoToMenu = () => {
-    setActiveOrder(null);
+    // Preserve activeOrder so customer can track their order or add additional items
     setAppMode('menu');
     window.location.hash = '#menu';
   };
 
   const handleGoToHome = () => {
-    setActiveOrder(null);
-    clearCart();
     setAppMode('home');
     if (window.location.hash) {
       try {
@@ -80,6 +105,7 @@ function AppContent() {
     window.location.hash = '#cashier';
   };
 
+  // Submit order & immediately transition back to Beranda (HomePage) with Ticket automatically opened
   const handleProceedToCheckout = async (orderPayload) => {
     try {
       setIsCartOpen(false);
@@ -87,15 +113,29 @@ function AppContent() {
       setActiveOrder(createdOrder);
       clearCart();
       showToast(`Pesanan ${createdOrder.order_code} berhasil dibuat!`, 'success');
+
+      // Direct transition to Beranda (HomePage) & automatically open Digital Ticket modal
+      setAppMode('home');
+      setIsTicketModalOpen(true);
+      if (window.location.hash) {
+        try {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        } catch {
+          window.location.hash = '';
+        }
+      }
     } catch (err) {
       console.error('Failed to submit order:', err);
       showToast(err.message || 'Terjadi kesalahan saat memproses pesanan.', 'warning');
     }
   };
 
-  const handleBackToMenu = () => {
+  const handleDismissActiveOrder = () => {
     setActiveOrder(null);
-    setAppMode('menu');
+  };
+
+  const handleOrderStatusChange = (newStatus) => {
+    setActiveOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
   };
 
   return (
@@ -108,35 +148,37 @@ function AppContent() {
       ) : appMode === 'menu' ? (
         /* 2. Customer Self-Order Menu Mode */
         <div className="app-container">
-          {activeOrder ? (
-            <Suspense fallback={<PageLoadingFallback />}>
-              <OrderTicket
-                order={activeOrder}
-                onBackToMenu={handleBackToMenu}
-                onGoHome={handleGoToHome}
-              />
-            </Suspense>
-          ) : (
-            <>
-              <MenuPage
-                onOpenCart={() => setIsCartOpen(true)}
-                onGoHome={handleGoToHome}
-              />
-              <CartDrawer
-                isOpen={isCartOpen}
-                onClose={() => setIsCartOpen(false)}
-                onProceedToCheckout={handleProceedToCheckout}
-              />
-            </>
-          )}
+          <MenuPage
+            onOpenCart={() => setIsCartOpen(true)}
+            onGoHome={handleGoToHome}
+            activeOrder={activeOrder}
+            onOpenTicketModal={() => setIsTicketModalOpen(true)}
+          />
+          <CartDrawer
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            onProceedToCheckout={handleProceedToCheckout}
+          />
         </div>
       ) : (
-        /* 3. Default Cafe Landing Page (Homepage) */
+        /* 3. Default Cafe Landing Page (Homepage) with Active Order Integration */
         <HomePage
           onGoToMenu={handleGoToMenu}
           onGoToCashier={handleGoToCashier}
+          activeOrder={activeOrder}
+          onOpenTicketModal={() => setIsTicketModalOpen(true)}
+          onDismissActiveOrder={handleDismissActiveOrder}
+          onStatusChange={handleOrderStatusChange}
         />
       )}
+
+      {/* Global Digital Ticket & QR Code Modal */}
+      <ActiveOrderModal
+        isOpen={isTicketModalOpen}
+        onClose={() => setIsTicketModalOpen(false)}
+        order={activeOrder}
+        onGoToMenu={handleGoToMenu}
+      />
     </div>
   );
 }

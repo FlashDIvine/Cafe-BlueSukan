@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   Clock,
 } from 'lucide-react';
-import { formatRupiah, formatPaidTime } from '../utils/formatters';
+import { formatRupiah, formatPaidTime, formatLocationDisplay } from '../utils/formatters';
 import { CashierAddMenuModal } from './CashierAddMenuModal';
 
 export const CashierOrderModal = ({
@@ -202,9 +202,9 @@ export const CashierOrderModal = ({
               </div>
               <div className="summary-meta-row">
                 <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--color-slate)' }}>
-                  <MapPin size={14} /> Nomor Meja:
+                  <MapPin size={14} /> Lokasi Duduk:
                 </span>
-                <strong style={{ color: 'var(--color-accent)' }}>Meja {order.table_number}</strong>
+                <strong style={{ color: 'var(--color-royal-blue)' }}>{formatLocationDisplay(order.table_number)}</strong>
               </div>
 
               {/* Payment Time & Method (if already paid) */}

@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { X, MapPin } from 'lucide-react';
+import { X, MapPin, Coffee, Trees, Building2, Check } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
+import { SEATING_AREAS } from '../utils/formatters';
 import '../styles/modal.css';
 
 export const TableModal = ({ isOpen, onClose }) => {
   const { tableNumber, setTableNumber, showToast } = useOrder();
-  const [tempTable, setTempTable] = useState(tableNumber || '');
+  const [selectedArea, setSelectedArea] = useState(tableNumber || 'Indoor');
 
   if (!isOpen) return null;
 
   const handleSave = (e) => {
     e.preventDefault();
-    const trimmed = tempTable.trim();
-    if (!trimmed) {
-      showToast('Nomor meja tidak boleh kosong', 'warning');
-      return;
-    }
-    setTableNumber(trimmed);
-    showToast(`Nomor meja diubah ke Meja ${trimmed}`, 'success');
+    setTableNumber(selectedArea);
+    showToast(`Lokasi duduk diubah ke ${selectedArea}`, 'success');
     onClose();
   };
 
@@ -26,8 +22,8 @@ export const TableModal = ({ isOpen, onClose }) => {
       <div className="modal-content-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-wrap">
-            <MapPin size={18} color="var(--color-primary)" />
-            <h2 className="modal-title">Ganti Nomor Meja</h2>
+            <MapPin size={18} color="var(--color-royal-blue)" />
+            <h2 className="modal-title">Pilih Lokasi Duduk</h2>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Tutup">
             <X size={16} />
@@ -37,20 +33,36 @@ export const TableModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSave}>
           <div className="modal-body">
             <p className="modal-desc">
-              Masukkan nomor meja sesuai dengan stiker QR code yang ada di meja tempat Anda duduk.
+              Pilih area tempat Anda duduk di BlueSukan Cafe untuk mempermudah barista mengantarkan pesanan.
             </p>
-            <div className="table-input-group">
-              <label htmlFor="table-input" className="table-input-label">Nomor Meja</label>
-              <input
-                id="table-input"
-                type="text"
-                className="table-input"
-                value={tempTable}
-                onChange={(e) => setTempTable(e.target.value)}
-                placeholder="Contoh: 04"
-                maxLength={5}
-                autoFocus
-              />
+            <div className="seating-selector-grid" style={{ marginBottom: '16px' }}>
+              {SEATING_AREAS.map((area) => {
+                const isSelected = selectedArea === area.name;
+                return (
+                  <button
+                    key={area.id}
+                    type="button"
+                    className={`seating-choice-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedArea(area.name)}
+                    aria-pressed={isSelected}
+                  >
+                    <div className="seating-choice-icon-wrap">
+                      {area.id === 'indoor' && <Coffee size={18} />}
+                      {area.id === 'outdoor' && <Trees size={18} />}
+                      {area.id === 'lt2' && <Building2 size={18} />}
+                    </div>
+                    <div className="seating-choice-text">
+                      <strong className="seating-choice-title">{area.label}</strong>
+                      <span className="seating-choice-desc">{area.desc}</span>
+                    </div>
+                    {isSelected && (
+                      <div className="seating-choice-check">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -59,7 +71,7 @@ export const TableModal = ({ isOpen, onClose }) => {
               Batal
             </button>
             <button type="submit" className="btn-primary">
-              Simpan Meja
+              Simpan Lokasi
             </button>
           </div>
         </form>

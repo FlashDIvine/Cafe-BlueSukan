@@ -12,7 +12,7 @@ import {
   Timer,
   X,
 } from 'lucide-react';
-import { formatRupiah } from '../utils/formatters';
+import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import { fetchOrderStatusApi } from '../services/api';
 import '../styles/order-ticket.css';
 
@@ -198,8 +198,8 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
               <span className="meta-field-value">{order?.customer_name || 'Pelanggan'}</span>
             </div>
             <div className="meta-field">
-              <span className="meta-field-label">Nomor Meja</span>
-              <span className="meta-field-value">Meja {order?.table_number || '04'}</span>
+              <span className="meta-field-label">Lokasi Duduk</span>
+              <span className="meta-field-value">{formatLocationDisplay(order?.table_number)}</span>
             </div>
           </div>
 

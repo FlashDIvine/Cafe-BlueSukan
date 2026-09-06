@@ -12,7 +12,7 @@ import {
   ClipboardList,
   UtensilsCrossed,
 } from 'lucide-react';
-import { formatRupiah, formatPaidTime } from '../utils/formatters';
+import { formatRupiah, formatPaidTime, formatLocationDisplay } from '../utils/formatters';
 import {
   fetchOrdersApi,
   fetchMenusApi,
@@ -377,7 +377,7 @@ export const CashierPage = () => {
                       <div className="pos-card-header">
                         <div className="pos-card-code-table">
                           <span className="pos-order-code">{order.order_code}</span>
-                          <span className="pos-order-table-chip">Meja {order.table_number}</span>
+                          <span className="pos-order-table-chip">{formatLocationDisplay(order.table_number)}</span>
                         </div>
 
                         <span

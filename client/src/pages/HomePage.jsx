@@ -7,9 +7,11 @@ import {
   MessageCircle,
   Globe,
   Plus,
+  Sparkles,
 } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/imageOptimizer';
-import { formatRupiah } from '../utils/formatters';
+import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
+import { ActiveOrderTracker } from '../components/ActiveOrderTracker';
 import '../styles/home-page.css';
 
 const BENTO_HERO = {
@@ -53,7 +55,14 @@ const BENTO_SECONDARY = [
   },
 ];
 
-export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
+export const HomePage = ({
+  onGoToMenu,
+  onGoToCashier,
+  activeOrder,
+  onOpenTicketModal,
+  onDismissActiveOrder,
+  onStatusChange,
+}) => {
   const scrollToSection = (id) => {
     const el = document.getElementById(id);
     if (el) {
@@ -85,6 +94,18 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
           </div>
 
           <div className="boutique-nav-action">
+            {activeOrder && (
+              <button
+                type="button"
+                className="boutique-active-order-chip"
+                onClick={onOpenTicketModal}
+                title="Buka Tiket Pesanan Aktif"
+              >
+                <Sparkles size={13} />
+                <span>Tiket #{activeOrder.order_code}</span>
+              </button>
+            )}
+
             <button
               type="button"
               className="btn-boutique-order"
@@ -116,6 +137,25 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
           </div>
 
           <div className="hero-editorial-content">
+            {activeOrder && (
+              <div
+                className="hero-active-order-banner"
+                onClick={onOpenTicketModal}
+                role="button"
+                tabIndex={0}
+                title="Klik untuk membuka QR Tiket Kasir"
+              >
+                <span className="hero-order-badge-live"></span>
+                <span className="hero-order-banner-text">
+                  Pesanan Aktif: <strong>{activeOrder.order_code}</strong> ({formatLocationDisplay(activeOrder.table_number)})
+                </span>
+                <span className="hero-order-banner-link">
+                  <span>Lihat Tiket QR</span>
+                  <ArrowUpRight size={13} />
+                </span>
+              </div>
+            )}
+
             <div className="hero-meta-overline">
               <span>KEMANG, JAKARTA</span>
               <span className="meta-sep">•</span>
@@ -466,6 +506,16 @@ export const HomePage = ({ onGoToMenu, onGoToCashier }) => {
           </div>
         </div>
       </footer>
+
+      {/* ─── 7. Floating Active Order Live Tracker Bar ─────────────────── */}
+      {activeOrder && (
+        <ActiveOrderTracker
+          order={activeOrder}
+          onOpenTicket={onOpenTicketModal}
+          onDismiss={onDismissActiveOrder}
+          onStatusChange={onStatusChange}
+        />
+      )}
     </div>
   );
 };
