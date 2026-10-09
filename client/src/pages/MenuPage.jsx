@@ -117,10 +117,9 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
               type="button"
               className="stitch-see-all-btn"
               onClick={handleSeeAll}
-              aria-label="Lihat semua menu"
             >
               <span>See all</span>
-              <ArrowRight size={14} />
+              <ArrowRight size={14} aria-hidden="true" />
             </button>
           </div>
 

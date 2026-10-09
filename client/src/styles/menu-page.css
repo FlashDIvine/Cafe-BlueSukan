@@ -1,13 +1,18 @@
 /* ==========================================================================
-   Stitch-inspired Home / Menu Page Styles
+   BlueSukan Cafe - Menu Page Modern Editorial Styles
+   Palette: Ink, Bone, Accent, Accent Light, Muted, Border, Surface
+   Typography: Instrument Serif (Display), DM Sans (Body)
+   Tokens: --ink, --bone, --accent, --accent-light, --muted, --border, --surface, --e-out
    ========================================================================== */
 
 .stitch-home-container {
   display: flex;
   flex-direction: column;
   flex: 1;
-  background-color: #F8FAFC;
-  min-height: 100%;
+  background-color: var(--bone);
+  color: var(--ink);
+  font-family: var(--f-body);
+  min-height: 100vh;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -15,9 +20,9 @@
   box-sizing: border-box;
 }
 
-/* ─── 1. Top Search & Filter Bar ─────────────────────────────────────────── */
+/* ─── 1. Top Search Bar ──────────────────────────────────────────────────── */
 .stitch-search-section {
-  padding: 14px 16px 4px 16px;
+  padding: 14px 16px 6px;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -29,8 +34,6 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
@@ -38,90 +41,70 @@
   flex: 1;
   min-width: 0;
   position: relative;
-  background-color: #FFFFFF;
-  border-radius: 999px;
-  border: 1px solid #F1F5F9;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  background-color: var(--surface);
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(15, 18, 25, 0.03);
   display: flex;
   align-items: center;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-height: 44px;
   box-sizing: border-box;
 }
 
 .stitch-search-input-box:focus-within {
-  border-color: #2563EB;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .stitch-search-icon {
   position: absolute;
   left: 14px;
-  color: #94A3B8;
+  color: var(--muted);
   pointer-events: none;
 }
 
 .stitch-search-input {
   width: 100%;
-  padding: 12px 38px 12px 42px;
-  border-radius: 999px;
+  padding: 12px 42px 12px 42px;
+  border-radius: 9999px;
   border: none;
   background: transparent;
-  font-family: inherit;
-  font-size: 13.5px;
-  color: #0F172A;
+  font-family: var(--f-body);
+  font-size: 0.84375rem;
+  color: var(--ink);
   outline: none;
   box-sizing: border-box;
 }
 
 .stitch-search-input::placeholder {
-  color: #94A3B8;
-  font-weight: 500;
+  color: var(--muted);
+  font-weight: 400;
 }
 
 .stitch-search-clear-btn {
   position: absolute;
-  right: 12px;
-  background-color: #E2E8F0;
+  right: 2px;
+  background: transparent;
   border: none;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  min-width: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #475569;
+  color: var(--muted);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  padding: 0;
 }
 
 .stitch-search-clear-btn:hover {
-  background-color: #CBD5E1;
+  color: var(--ink);
 }
 
-/* Primary Royal Blue Filter Action Button */
-.stitch-filter-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-  color: #FFFFFF;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-  flex-shrink: 0;
-}
-
-.stitch-filter-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
-}
-
-.stitch-filter-btn:active {
-  transform: scale(0.95);
+.stitch-search-clear-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 50%;
 }
 
 /* ─── 2. Section Header Common ────────────────────────────────────────────── */
@@ -130,130 +113,132 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
+  gap: 8px;
 }
 
 .stitch-section-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: #0F172A;
-  letter-spacing: -0.02em;
+  font-family: var(--f-display);
+  font-size: clamp(1.35rem, 5vw, 1.6rem);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.015em;
+  line-height: 1.15;
 }
 
 .stitch-see-all-btn {
   background: none;
   border: none;
-  color: #2563EB;
-  font-size: 13px;
+  color: var(--accent);
+  font-family: var(--f-body);
+  font-size: 0.8125rem;
   font-weight: 700;
-  display: flex;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
   cursor: pointer;
-  transition: color 0.15s ease, transform 0.15s ease;
-  flex-shrink: 0;
+  padding: 0 4px;
 }
 
 .stitch-see-all-btn:hover {
-  color: #1D4ED8;
-  transform: translateX(2px);
+  color: var(--accent-hover);
+}
+
+.stitch-see-all-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .stitch-section-count {
-  font-size: 12px;
+  font-family: var(--f-body);
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #64748B;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
 /* ─── 3. Recommended for You Section ──────────────────────────────────────── */
 .stitch-recommended-section {
-  padding: 8px 16px 14px 16px;
+  padding: 8px 16px 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
 .stitch-recommended-scroll {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 2px 2px 8px 2px;
+  padding: 2px 2px 8px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
 /* ─── 4. Popular Menu 2-Column Grid Section ───────────────────────────────── */
 .stitch-catalog-section {
-  padding: 6px 16px 24px 16px;
+  padding: 6px 16px 32px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
 .stitch-popular-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
   box-sizing: border-box;
 }
 
 /* ─── 5. Empty State ──────────────────────────────────────────────────────── */
 .stitch-empty-state {
-  padding: 40px 16px;
+  padding: 36px 16px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  background-color: #FFFFFF;
-  border-radius: 18px;
-  border: 1px dashed #CBD5E1;
+  gap: 8px;
+  background-color: var(--surface);
+  border-radius: 16px 4px 16px 16px;
+  border: 1px dashed var(--border);
   margin: 8px 0;
 }
 
 .stitch-empty-icon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background-color: #EFF6FF;
-  color: #2563EB;
+  background-color: rgba(30, 86, 160, 0.08);
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .stitch-empty-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #0F172A;
+  font-family: var(--f-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  color: var(--ink);
 }
 
 .stitch-empty-desc {
-  font-size: 12px;
-  color: #64748B;
+  font-family: var(--f-body);
+  font-size: 0.8125rem;
+  color: var(--muted);
   max-width: 240px;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
-/* Responsive adjustments for tablet & desktop containers */
 @media (min-width: 481px) {
   .stitch-popular-grid {
     gap: 14px;

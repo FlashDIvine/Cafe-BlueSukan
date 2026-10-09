@@ -41,7 +41,6 @@ export const MenuCard = memo(({ item }) => {
   return (
     <article
       className={`stitch-grid-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}
-      aria-label={item.name}
     >
       {/* Product Image & Badges */}
       <div className="stitch-grid-image-wrap">
@@ -73,8 +72,7 @@ export const MenuCard = memo(({ item }) => {
         >
           <Heart
             size={14}
-            fill={isLiked ? '#EF4444' : 'none'}
-            color={isLiked ? '#EF4444' : '#64748B'}
+            className="stitch-heart-icon"
             strokeWidth={2.2}
           />
         </button>

@@ -34,7 +34,6 @@ export const RecommendedCard = memo(({ item }) => {
   return (
     <article
       className={`stitch-recommended-card ${isOutOfStock ? 'is-out-of-stock' : ''}`}
-      aria-label={item.name}
     >
       {/* Product Image & Badges */}
       <div className="stitch-rec-image-wrap">
@@ -58,8 +57,8 @@ export const RecommendedCard = memo(({ item }) => {
         {/* Rating pill */}
         {!isOutOfStock && (
           <div className="stitch-rating-badge">
-            <Star size={11} fill="#F59E0B" color="#F59E0B" />
-            <span>4.9</span>
+            <Star size={11} className="stitch-star-icon" aria-hidden="true" />
+            <span className="tabular">4.9</span>
           </div>
         )}
       </div>
