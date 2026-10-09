@@ -74,11 +74,11 @@ export const HomePage = ({
     <div className="boutique-page">
       {/* ─── 1. Minimalist Floating Glass Navbar ───────────────────────── */}
       <header className="boutique-nav-wrapper">
-        <nav className="boutique-navbar">
-          <div className="boutique-brand" onClick={() => scrollToSection('hero')}>
-            <span className="brand-wordmark">BLUESUKAN</span>
+        <nav className="boutique-navbar" aria-label="Navigasi Utama">
+          <div className="boutique-brand" onClick={() => scrollToSection('hero')} role="button" tabIndex={0} aria-label="BlueSukan Cafe Beranda">
+            <span className="brand-wordmark">BlueSukan</span>
             <span className="brand-dot">•</span>
-            <span className="brand-sub">COFFEE</span>
+            <span className="brand-sub">CAFE</span>
           </div>
 
           <div className="boutique-nav-links">
@@ -100,9 +100,10 @@ export const HomePage = ({
                 className="boutique-active-order-chip"
                 onClick={onOpenTicketModal}
                 title="Buka Tiket Pesanan Aktif"
+                aria-label={`Tiket pesanan nomor ${activeOrder.order_code}`}
               >
-                <Sparkles size={13} />
-                <span>Tiket #{activeOrder.order_code}</span>
+                <Sparkles size={13} aria-hidden="true" />
+                <span>Tiket <strong className="tabular">#{activeOrder.order_code}</strong></span>
               </button>
             )}
 
@@ -111,60 +112,52 @@ export const HomePage = ({
               className="btn-boutique-order"
               onClick={onGoToMenu}
               id="nav-cta-order"
+              aria-label="Pesan Mandiri"
             >
               <span>Pesan Mandiri</span>
-              <ArrowUpRight size={15} />
+              <ArrowUpRight size={15} aria-hidden="true" />
             </button>
           </div>
         </nav>
       </header>
 
-      {/* ─── 2. Immersive Editorial Hero Canvas ────────────────────────── */}
+      {/* ─── 2. Asymmetric Editorial Hero Canvas (Modern Editorial) ────── */}
       <section id="hero" className="boutique-hero">
         <div className="hero-editorial-canvas">
-          <div className="hero-backdrop-image-wrap">
-            <img
-              src={getOptimizedImageUrl(
-                'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1400&q=85',
-                1200
-              )}
-              alt="Bantu Cafe Interior & Atmosphere"
-              className="hero-backdrop-img"
-              loading="eager"
-              decoding="async"
-            />
-            <div className="hero-backdrop-scrim"></div>
-          </div>
+          {activeOrder && (
+            <div
+              className="hero-active-order-banner"
+              onClick={onOpenTicketModal}
+              role="button"
+              tabIndex={0}
+              title="Klik untuk membuka QR Tiket Kasir"
+              aria-label={`Pesanan aktif nomor ${activeOrder.order_code}`}
+            >
+              <span className="hero-order-badge-live" aria-hidden="true" />
+              <span className="hero-order-banner-text">
+                Pesanan Aktif: <strong className="tabular">{activeOrder.order_code}</strong> ({formatLocationDisplay(activeOrder.table_number)})
+              </span>
+              <span className="hero-order-banner-link">
+                <span>Lihat Tiket QR</span>
+                <ArrowUpRight size={13} aria-hidden="true" />
+              </span>
+            </div>
+          )}
 
-          <div className="hero-editorial-content">
-            {activeOrder && (
-              <div
-                className="hero-active-order-banner"
-                onClick={onOpenTicketModal}
-                role="button"
-                tabIndex={0}
-                title="Klik untuk membuka QR Tiket Kasir"
-              >
-                <span className="hero-order-badge-live"></span>
-                <span className="hero-order-banner-text">
-                  Pesanan Aktif: <strong>{activeOrder.order_code}</strong> ({formatLocationDisplay(activeOrder.table_number)})
-                </span>
-                <span className="hero-order-banner-link">
-                  <span>Lihat Tiket QR</span>
-                  <ArrowUpRight size={13} />
-                </span>
-              </div>
-            )}
-
+          <div className="hero-text-block">
             <div className="hero-meta-overline">
               <span>KEMANG, JAKARTA</span>
               <span className="meta-sep">•</span>
-              <span>SPECIALTY ROASTERS &amp; COFFEE BAR</span>
+              <span>SPECIALTY ROASTERS</span>
             </div>
 
             <h1 className="hero-editorial-heading">
-              Sensasi Kopi Artisan <br className="hero-break" />
-              <em className="hero-serif-accent">dalam Setiap Seduhan.</em>
+              <span className="hero-heading-line">
+                <span className="hero-heading-mask">Sensasi Kopi Artisan</span>
+              </span>
+              <span className="hero-heading-line">
+                <em className="hero-serif-accent hero-heading-mask">dalam Setiap Seduhan.</em>
+              </span>
             </h1>
 
             <p className="hero-editorial-sub">
@@ -178,22 +171,42 @@ export const HomePage = ({
                 className="btn-editorial-primary"
                 onClick={onGoToMenu}
                 id="hero-main-cta"
+                aria-label="Pesan Sekarang"
               >
-                <span>Jelajahi Menu &amp; Pesan</span>
-                <ArrowRight size={17} />
+                <span>Pesan Sekarang</span>
+                <ArrowRight size={17} className="btn-cta-arrow" aria-hidden="true" />
               </button>
 
               <button
                 type="button"
-                className="btn-editorial-ghost"
+                className="btn-editorial-secondary"
                 onClick={() => scrollToSection('story')}
+                aria-label="Pelajari Cerita & Filosofi Kami"
               >
-                <span>Cerita Kami</span>
-                <ArrowRight size={15} />
+                <span>Filosofi Rasa</span>
+                <ArrowRight size={15} className="btn-secondary-arrow" aria-hidden="true" />
               </button>
             </div>
           </div>
-          <div className="hero-bottom-transition"></div>
+
+          <div className="hero-media-asymmetric-wrap">
+            <div className="hero-media-frame">
+              <img
+                src={getOptimizedImageUrl(
+                  'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=85',
+                  800
+                )}
+                alt="BlueSukan Cafe Interior & Atmosphere"
+                className="hero-asymmetric-img"
+                loading="eager"
+                decoding="async"
+              />
+              <div className="hero-media-corner-badge">
+                <span className="badge-bullet">•</span>
+                <span>House Blend Gayo &amp; Flores</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -463,7 +476,7 @@ export const HomePage = ({
           <div className="footer-main-grid">
             <div className="footer-brand-block">
               <div className="footer-brand-title">
-                <span>BLUESUKAN</span>
+                <span>BlueSukan</span>
                 <span className="brand-dot">•</span>
                 <span>CAFE</span>
               </div>
