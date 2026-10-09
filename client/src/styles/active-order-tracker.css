@@ -21,10 +21,6 @@
     opacity: 0;
     transform: translate(-50%, 28px) scale(0.96);
   }
-  to {
-    opacity: 1;
-    transform: translate(-50%, 0) scale(1);
-  }
 }
 
 .active-order-tracker-card {
