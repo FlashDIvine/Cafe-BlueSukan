@@ -1,86 +1,90 @@
-/* ==========================================================================
-   Bantu Cafe Design System & Global Styles
-   Color Palette from PRD:
-   - Primary: Deep Navy Blue (#0F3E7D)
-   - Accent: Ocean Blue (#1E6091), Sky Blue (#EBF3FC)
-   - Neutral: Clean White (#FFFFFF), Slate Gray (#64748B), Background Off-White (#F8FAFC)
-   ========================================================================== */
-
 :root {
-  /* Brand Palette: Deep Cobalt, Ice Glass & Milk White */
-  --color-primary: #0A0F1D;
+  /* 1. Palette: Ink & Bone (Modern Editorial) */
+  --ink: #0F1219;
+  --bone: #F9F7F4;
+  --accent: #1E56A0;
+  --accent-light: #D4E2F4;
+  --muted: #525E71;
+  --border: rgba(15, 18, 25, 0.08);
+  --glass: rgba(249, 247, 244, 0.7);
+
+  /* 2. Typography */
+  --f-display: 'Instrument Serif', serif;
+  --f-body: 'DM Sans', sans-serif;
+  
+  --text-h1: clamp(3rem, 12vw, 4.5rem);
+  --text-h2: clamp(1.75rem, 6vw, 2.25rem);
+  --text-h3: clamp(1.25rem, 4vw, 1.5rem);
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* 3. Spacing & Radius */
+  --space-unit: 1rem;
+  --radius-sharp: 2px;
+  --radius-md: 12px;
+  --radius-pill: 9999px;
+
+  /* 4. Easing & Motion */
+  --e-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --e-in-out: cubic-bezier(0.76, 0, 0.24, 1);
+  --t-fast: 200ms;
+  --t-normal: 400ms;
+
+  /* 5. Temporary Aliases for backward compatibility */
+  --color-primary: var(--ink);
   --color-primary-dark: #050811;
   --color-primary-light: #1E293B;
-  
-  --color-cobalt: #1E40AF;
-  --color-cobalt-hover: #1D4ED8;
-  --color-cobalt-light: #DBEAFE;
-  --color-cobalt-mist: #EFF6FF;
-  --color-cobalt-glow: rgba(30, 64, 175, 0.25);
-
-  --color-royal-blue: #1E40AF;
-  --color-royal-blue-hover: #1D4ED8;
-  --color-royal-blue-light: #DBEAFE;
-  --color-royal-blue-sky: #EFF6FF;
-  --color-accent: #1E40AF;
-  --color-accent-hover: #1D4ED8;
-
-  --color-ink: #0A0F1D;
-  --color-navy: #0A0F1D;
-  --color-navy-card: #111827;
-  --color-mist: #E0E7FF;
-
-  /* Surfaces & Neutrals */
+  --color-ink: var(--ink);
+  --color-bg: var(--bone);
   --color-white: #FFFFFF;
-  --color-milk: #FFFFFF;
-  --color-bg: #F8FAFC;
-  --color-card-bg: #FFFFFF;
-  --color-text-main: #0A0F1D;
-  --color-text-muted: #64748B;
-  --color-text-subtle: #94A3B8;
-  --color-border: #E2E8F0;
-  --color-border-light: #F1F5F9;
-  --color-border-glass: rgba(255, 255, 255, 0.6);
+  --color-text-main: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: var(--border);
+  
+  --color-accent: var(--accent);
+  --color-royal-blue: var(--accent);
+  --color-cobalt: var(--accent);
+  --color-sky: var(--accent-light);
+  --color-sky-dark: #BAE6FD;
+  --color-slate: var(--muted);
+  --color-slate-light: #94A3B8;
 
-  /* State Colors */
+  /* State Colors (Kept for Functional UI like Cashier) */
   --color-danger: #EF4444;
   --color-danger-light: #FEE2E2;
   --color-danger-dark: #991B1B;
   --color-warning: #F59E0B;
   --color-warning-light: #FEF3C7;
   --color-warning-dark: #B45309;
-  --color-success: #1E40AF;
-  --color-success-light: #DBEAFE;
+  --color-success: #1E56A0;
+  --color-success-light: var(--accent-light);
   --color-success-dark: #1E3A8A;
 
-  /* Typography Hierarchy */
-  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
+  /* Font Aliases */
+  --font-display: var(--f-display);
+  --font-sans: var(--f-body);
+  --font-serif: var(--f-display);
 
-  /* Refined Editorial Shadows */
-  --shadow-xs: 0 1px 2px 0 rgba(10, 15, 29, 0.04);
-  --shadow-sm: 0 2px 8px 0 rgba(10, 15, 29, 0.05), 0 1px 2px 0 rgba(10, 15, 29, 0.03);
-  --shadow-md: 0 6px 20px -2px rgba(10, 15, 29, 0.07), 0 2px 6px -1px rgba(10, 15, 29, 0.03);
-  --shadow-lg: 0 16px 36px -4px rgba(10, 15, 29, 0.1), 0 6px 14px -2px rgba(10, 15, 29, 0.04);
-  --shadow-float: 0 20px 40px -6px rgba(30, 64, 175, 0.22), 0 8px 16px 0 rgba(10, 15, 29, 0.06);
-
-  /* Border Radii */
+  /* Radius Aliases */
   --radius-sm: 8px;
-  --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
   --radius-2xl: 32px;
-  --radius-pill: 9999px;
 
-  /* Transitions */
-  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-spring: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Shadow Placeholder Aliases */
+  --shadow-xs: 0 1px 2px rgba(15, 18, 25, 0.05);
+  --shadow-sm: 0 2px 8px rgba(15, 18, 25, 0.05);
+  --shadow-md: 0 6px 20px rgba(15, 18, 25, 0.07);
+  --shadow-lg: 0 16px 36px rgba(15, 18, 25, 0.1);
+  --shadow-float: 0 20px 40px rgba(15, 18, 25, 0.15);
+
+  /* Transition Aliases */
+  --transition-fast: var(--t-fast) var(--e-out);
+  --transition-normal: var(--t-normal) var(--e-out);
 }
 
-/* Base Reset */
+/* Base Reset & Core Styles */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -89,39 +93,60 @@
 }
 
 html {
-  font-family: var(--font-family);
-  background-color: #F8FAFC;
-  color: var(--color-text-main);
+  font-family: var(--f-body);
+  background-color: var(--bone);
+  color: var(--ink);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   max-width: 100vw;
   overflow-x: hidden;
-  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  background-color: #F8FAFC;
-  max-width: 100vw;
-  overflow-x: hidden;
+  background-color: var(--bone);
 }
 
-/* Root App Shell Container */
 #root {
   width: 100%;
-  min-width: 0;
+  max-width: 480px; /* Mobile-first constraint */
   min-height: 100vh;
-  background-color: var(--color-bg);
+  background-color: var(--bone);
   position: relative;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-  box-sizing: border-box;
+}
+
+/* Numerical Consistency */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Global Typography Helpers */
+h1, .h1 { font-family: var(--f-display); font-weight: 400; line-height: 0.9; }
+h2, .h2 { font-family: var(--f-display); font-weight: 400; line-height: 1.1; }
+h3, .h3 { font-family: var(--f-body); font-weight: 700; letter-spacing: -0.02em; }
+
+/* Interactive Targets */
+button, a, .clickable {
+  min-width: 44px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: all var(--t-fast) var(--e-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-delay: -1ms !important;
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    background-attachment: initial !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
 }
 
 /* Hide scrollbar utility */

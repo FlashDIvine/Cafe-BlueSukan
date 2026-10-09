@@ -7,56 +7,73 @@ import '../styles/navbar.css';
 export const Navbar = memo(({ onOpenTableModal, onGoHome, activeOrder, onOpenTicketModal }) => {
   const { tableNumber } = useOrder();
 
-  return (
-    <header className="navbar-header">
-      <div
-        className="brand-container"
-        onClick={onGoHome}
-        style={{ cursor: onGoHome ? 'pointer' : 'default' }}
-        title="Kembali ke Halaman Utama"
-      >
-        <div className="brand-logo-icon">
-          <Coffee size={20} strokeWidth={2.4} />
-        </div>
-        <div className="brand-text">
-          <span className="brand-title">BlueSukan Cafe</span>
-          <span className="brand-subtitle">
-            <span className="status-dot"></span>
-            Guest Self-Order
-          </span>
+  const brandContent = (
+    <>
+      <div className="brand-logo-icon" aria-hidden="true">
+        <Coffee size={19} strokeWidth={2.2} />
+      </div>
+      <div className="brand-text">
+        <span className="brand-title">
+          BlueSukan <span className="brand-title-accent">Cafe</span>
+        </span>
+        <div className="brand-subtitle">
+          <span className="status-dot" aria-hidden="true" />
+          <span className="brand-badge-text">Guest Self-Order</span>
         </div>
       </div>
+    </>
+  );
 
-      <div className="navbar-actions">
+  return (
+    <header className="navbar-header" role="banner">
+      {onGoHome ? (
+        <button
+          type="button"
+          className="brand-container brand-interactive"
+          onClick={onGoHome}
+          title="Kembali ke Halaman Utama"
+          aria-label="BlueSukan Cafe - Kembali ke Halaman Utama"
+        >
+          {brandContent}
+        </button>
+      ) : (
+        <div className="brand-container brand-static">
+          {brandContent}
+        </div>
+      )}
+
+      <div className="navbar-actions" role="toolbar" aria-label="Aksi Navigasi">
         {activeOrder && onOpenTicketModal && (
           <button
             type="button"
-            className="table-badge-btn"
+            className="navbar-ticket-btn table-badge-btn"
             onClick={onOpenTicketModal}
-            title="Lihat Tiket QR Pesanan Aktif"
-            style={{
-              background: 'linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%)',
-              color: '#FFFFFF',
-              borderColor: '#1E40AF',
-              boxShadow: '0 2px 8px rgba(30, 64, 175, 0.3)',
-            }}
+            title={`Lihat Tiket QR Pesanan Aktif (${activeOrder.order_code})`}
+            aria-label={`Lihat Tiket QR Pesanan Aktif nomor ${activeOrder.order_code}`}
           >
-            <QrCode size={13} />
-            <span>Tiket {activeOrder.order_code}</span>
+            <span className="ticket-icon-wrap" aria-hidden="true">
+              <QrCode size={15} strokeWidth={2.2} />
+            </span>
+            <span className="ticket-label">
+              Tiket <span className="tabular ticket-code">{activeOrder.order_code}</span>
+            </span>
+            <span className="ticket-pulse-beacon" aria-hidden="true" />
           </button>
         )}
 
         <button
           type="button"
-          className="table-badge-btn"
+          className="navbar-table-btn table-badge-btn"
           onClick={onOpenTableModal}
           title="Klik untuk mengubah lokasi duduk"
+          aria-label={`Ubah lokasi meja saat ini: ${formatLocationDisplay(tableNumber)}`}
         >
-          <MapPin size={14} className="text-primary" />
-          <span>
-            Area <strong className="table-number-val">{formatLocationDisplay(tableNumber)}</strong>
-          </span>
-          <Edit3 size={12} style={{ opacity: 0.6 }} />
+          <MapPin size={15} strokeWidth={2.2} className="table-pin-icon" aria-hidden="true" />
+          <div className="table-text-group">
+            <span className="table-prefix">Area</span>
+            <span className="table-number-val tabular">{formatLocationDisplay(tableNumber)}</span>
+          </div>
+          <Edit3 size={13} strokeWidth={2} className="table-edit-icon" aria-hidden="true" />
         </button>
       </div>
     </header>
