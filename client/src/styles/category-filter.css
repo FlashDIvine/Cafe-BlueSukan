@@ -1,9 +1,11 @@
 /* ==========================================================================
-   Food Delivery App Style Category Filter (Circular Images + Blue Active Ring)
+   BlueSukan Cafe - Category Filter Carousel Styles
+   Palette: Ink, Bone, Accent, Muted, Border, Surface
+   Tokens: --ink, --bone, --accent, --muted, --border, --surface, --e-out, --t-fast
    ========================================================================== */
 
 .food-category-section {
-  padding: 10px 16px 6px 16px;
+  padding: 10px 16px 6px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -20,17 +22,18 @@
 }
 
 .food-category-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: #0F172A;
-  letter-spacing: -0.02em;
+  font-family: var(--f-display);
+  font-size: clamp(1.2rem, 4vw, 1.35rem);
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -0.015em;
 }
 
 .food-category-scroll {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   overflow-x: auto;
-  padding: 10px 10px 14px 10px;
+  padding: 6px 2px 12px;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   width: 100%;
@@ -39,42 +42,43 @@
   box-sizing: border-box;
 }
 
-/* Individual Circular Category Item (No Card Container) */
+/* Individual Category Tab Button */
 .food-category-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px;
   flex-shrink: 0;
   scroll-snap-align: start;
-  outline: none;
   user-select: none;
-  transition: transform 0.2s ease;
   width: 68px;
+  min-height: 80px;
+  box-sizing: border-box;
 }
 
-.food-category-item:hover {
-  transform: translateY(-2px);
+.food-category-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
-/* Circular Image Container (66px Circle) */
+/* Circular Image Frame */
 .food-category-circle {
-  width: 66px;
-  height: 66px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   overflow: hidden;
-  background-color: #EBF3FC;
-  border: 2px solid #E2E8F0;
+  background-color: var(--bone);
+  border: 1.5px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 4%, transparent);
 }
 
 .food-category-img {
@@ -82,35 +86,47 @@
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  transition: transform 0.3s ease;
+  display: block;
 }
 
-.food-category-item:hover .food-category-img {
-  transform: scale(1.08);
-}
-
-/* Category Label Below Circle */
+/* Category Label */
 .food-category-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #475569;
+  font-family: var(--f-body);
+  font-size: 0.71875rem;
+  font-weight: 500;
+  color: var(--muted);
   text-align: center;
-  line-height: 1.15;
+  line-height: 1.2;
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  transition: color 0.2s ease, font-weight 0.2s ease;
+  transition: color var(--t-fast) var(--e-out);
 }
 
-/* ─── Active Category State: Blue Brand Highlight ─────────────────────────── */
+/* ─── Active Highlight State ──────────────────────────────────────────────── */
 .food-category-item.active .food-category-circle {
-  border: 2.5px solid #0F3E7D;
-  box-shadow: 0 0 0 3.5px rgba(15, 62, 125, 0.22), 0 6px 16px rgba(15, 62, 125, 0.2);
-  transform: translateY(-2px) scale(1.05);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .food-category-item.active .food-category-name {
-  color: #0F3E7D;
-  font-weight: 800;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ─── Motion & Hover ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .food-category-circle {
+    transition: border-color var(--t-fast) var(--e-out),
+                box-shadow var(--t-fast) var(--e-out);
+  }
+
+  .food-category-img {
+    transition: transform var(--t-fast) var(--e-out);
+  }
+
+  .food-category-item:hover .food-category-img {
+    transform: scale(1.05);
+  }
 }

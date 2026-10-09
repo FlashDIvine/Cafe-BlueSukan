@@ -194,35 +194,43 @@ button, a, .clickable {
   pointer-events: none;
   display: flex;
   justify-content: center;
-  animation: slideDownToast 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .toast-box {
-  background: rgba(15, 23, 42, 0.92);
-  color: var(--color-white);
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  color: var(--bone);
+  font-family: var(--f-body);
   padding: 10px 16px;
   border-radius: var(--radius-pill);
-  font-size: 13px;
+  font-size: 0.8125rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent);
   backdrop-filter: blur(8px);
 }
 
 .toast-box.warning {
-  background: rgba(180, 83, 9, 0.95);
+  background: color-mix(in srgb, var(--color-warning-dark) 95%, transparent);
+  color: var(--bone);
 }
 
 .toast-box.success {
-  background: rgba(15, 62, 125, 0.95);
-  border: 1px solid rgba(235, 243, 252, 0.3);
+  background: color-mix(in srgb, var(--accent) 95%, transparent);
+  color: var(--bone);
+  border: 1px solid color-mix(in srgb, var(--accent-light) 30%, transparent);
 }
 
-@keyframes slideDownToast {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -15px) scale(0.95);
+@media (prefers-reduced-motion: no-preference) {
+  .toast-container {
+    animation: slideDownToast 240ms var(--e-out) both;
+  }
+
+  @keyframes slideDownToast {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -15px) scale(0.95);
+    }
   }
 }

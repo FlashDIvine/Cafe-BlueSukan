@@ -1,3 +1,9 @@
+/* ==========================================================================
+   BlueSukan Cafe - Floating Bottom Cart Bar
+   Palette: Ink, Bone, Accent, Muted-on-ink, Surface
+   Tokens: --ink, --bone, --accent, --muted-on-ink, --e-out, --t-fast
+   ========================================================================== */
+
 .floating-cart-wrapper {
   position: fixed;
   bottom: 16px;
@@ -6,42 +12,38 @@
   width: calc(100% - 32px);
   max-width: 448px;
   z-index: 95;
-  will-change: transform, opacity;
-  animation: slideUpFloatingBar 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes slideUpFloatingBar {
-  from {
-    opacity: 0;
-    transform: translate3d(-50%, 25px, 0);
-  }
+  box-sizing: border-box;
 }
 
 .floating-cart-inner {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  border-radius: var(--radius-xl);
-  padding: 12px 18px;
+  background-color: var(--ink);
+  border-radius: 16px 4px 16px 16px;
+  padding: 12px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: var(--shadow-float);
-  color: var(--color-white);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  gap: 12px;
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--ink) 24%, transparent);
+  color: var(--bone);
+  border: 1px solid color-mix(in srgb, var(--bone) 12%, transparent);
   backdrop-filter: blur(12px);
+  box-sizing: border-box;
 }
 
 .cart-summary-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
 }
 
 .cart-icon-badge-container {
   position: relative;
   width: 42px;
   height: 42px;
-  border-radius: var(--radius-md);
-  background-color: rgba(255, 255, 255, 0.16);
+  border-radius: 10px 2px 8px 8px;
+  background-color: color-mix(in srgb, var(--bone) 10%, transparent);
+  color: var(--bone);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,74 +52,115 @@
 
 .cart-count-badge {
   position: absolute;
-  top: -4px;
-  right: -4px;
-  background-color: #EF4444;
-  color: var(--color-white);
-  font-size: 11px;
+  top: -5px;
+  right: -5px;
+  background-color: var(--color-danger);
+  color: var(--bone);
+  font-family: var(--f-body);
+  font-size: 0.6875rem;
   font-weight: 800;
+  font-variant-numeric: tabular-nums;
   min-width: 18px;
   height: 18px;
-  border-radius: var(--radius-pill);
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 2px solid var(--color-primary);
-  animation: popBadge 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-@keyframes popBadge {
-  0% { transform: scale(0.6); }
-  60% { transform: scale(1.2); }
-  100% { transform: scale(1); }
+  border: 2px solid var(--ink);
 }
 
 .cart-pricing-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .cart-items-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--color-sky-dark);
+  font-family: var(--f-body);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--muted-on-ink);
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cart-total-price {
-  font-size: 16px;
+  font-family: var(--f-body);
+  font-size: 1rem;
   font-weight: 800;
-  color: var(--color-white);
+  font-variant-numeric: tabular-nums;
+  color: var(--bone);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .btn-view-cart {
-  background-color: var(--color-white);
-  color: var(--color-primary);
+  background-color: var(--bone);
+  color: var(--ink);
   border: none;
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 800;
-  padding: 10px 16px;
-  border-radius: var(--radius-pill);
-  display: flex;
+  font-family: var(--f-body);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  min-height: 44px;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 12%, transparent);
+  flex-shrink: 0;
 }
 
-.btn-view-cart:hover, .btn-view-cart:active {
-  background-color: var(--color-sky);
-  transform: scale(1.03);
+.btn-view-cart:hover,
+.btn-view-cart:active {
+  background-color: var(--surface);
+  color: var(--accent);
 }
 
-.btn-view-cart svg {
-  transition: transform var(--transition-fast);
+.btn-view-cart:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 2px;
 }
 
-.btn-view-cart:hover svg {
-  transform: translateX(2px);
+/* ─── Motion & Animations ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  .floating-cart-wrapper {
+    animation: slideUpFloatingBar 260ms var(--e-out) both;
+  }
+
+  .cart-count-badge {
+    animation: popBadge 200ms var(--e-out) both;
+  }
+
+  .btn-view-cart {
+    transition: background-color var(--t-fast) var(--e-out),
+                color var(--t-fast) var(--e-out);
+  }
+
+  .btn-view-cart svg {
+    transition: transform var(--t-fast) var(--e-out);
+  }
+
+  .btn-view-cart:hover svg {
+    transform: translateX(2px);
+  }
+
+  @keyframes slideUpFloatingBar {
+    from {
+      opacity: 0;
+      transform: translate3d(-50%, 25px, 0);
+    }
+  }
+
+  @keyframes popBadge {
+    from {
+      opacity: 0;
+      transform: scale(0.65);
+    }
+  }
 }

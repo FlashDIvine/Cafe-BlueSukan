@@ -22,7 +22,7 @@ export const TableModal = ({ isOpen, onClose }) => {
       <div className="modal-content-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-wrap">
-            <MapPin size={18} color="var(--color-royal-blue)" />
+            <MapPin size={18} className="modal-title-icon" />
             <h2 className="modal-title">Pilih Lokasi Duduk</h2>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose} aria-label="Tutup">
@@ -35,7 +35,7 @@ export const TableModal = ({ isOpen, onClose }) => {
             <p className="modal-desc">
               Pilih area tempat Anda duduk di BlueSukan Cafe untuk mempermudah barista mengantarkan pesanan.
             </p>
-            <div className="seating-selector-grid" style={{ marginBottom: '16px' }}>
+            <div className="seating-selector-grid">
               {SEATING_AREAS.map((area) => {
                 const isSelected = selectedArea === area.name;
                 return (
