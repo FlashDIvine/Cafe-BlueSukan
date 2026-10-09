@@ -200,7 +200,7 @@
 .navbar-ticket-btn:hover {
   background-color: var(--accent, #1E56A0);
   border-color: var(--accent, #1E56A0);
-  color: #FFFFFF;
+  color: var(--bone);
   box-shadow: 0 4px 14px rgba(30, 86, 160, 0.24);
   transform: translateY(-1px);
 }
@@ -223,7 +223,7 @@
 .ticket-code {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--bone);
 }
 
 .ticket-pulse-beacon {
@@ -231,8 +231,8 @@
   height: 5px;
   min-width: 5px;
   border-radius: 50%;
-  background: #38BDF8;
-  box-shadow: 0 0 6px #38BDF8;
+  background: var(--accent-light);
+  box-shadow: 0 0 6px var(--accent-light);
   display: inline-block;
 }
 
@@ -249,7 +249,7 @@
 }
 
 .navbar-table-btn:hover {
-  background-color: #FFFFFF;
+  background-color: var(--surface);
   border-color: var(--accent, #1E56A0);
   box-shadow: 0 4px 14px rgba(30, 86, 160, 0.1);
   transform: translateY(-1px);

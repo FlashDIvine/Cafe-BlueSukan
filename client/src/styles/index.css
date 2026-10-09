@@ -2,7 +2,9 @@
   /* 1. Palette: Ink & Bone (Modern Editorial) */
   --ink: #0F1219;
   --bone: #F9F7F4;
+  --surface: #FFFFFF;
   --accent: #1E56A0;
+  --accent-hover: #16437E;
   --accent-light: #D4E2F4;
   --muted: #525E71;
   --border: rgba(15, 18, 25, 0.08);

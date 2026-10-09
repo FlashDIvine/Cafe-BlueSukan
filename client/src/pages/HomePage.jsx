@@ -75,11 +75,15 @@ export const HomePage = ({
       {/* ─── 1. Minimalist Floating Glass Navbar ───────────────────────── */}
       <header className="boutique-nav-wrapper">
         <nav className="boutique-navbar" aria-label="Navigasi Utama">
-          <div className="boutique-brand" onClick={() => scrollToSection('hero')} role="button" tabIndex={0} aria-label="BlueSukan Cafe Beranda">
+          <button
+            type="button"
+            className="boutique-brand"
+            onClick={() => scrollToSection('hero')}
+          >
             <span className="brand-wordmark">BlueSukan</span>
             <span className="brand-dot">•</span>
-            <span className="brand-sub">CAFE</span>
-          </div>
+            <span className="brand-sub">COFFEE</span>
+          </button>
 
           <div className="boutique-nav-links">
             <button type="button" className="boutique-link" onClick={() => scrollToSection('menu-bento')}>
@@ -100,7 +104,6 @@ export const HomePage = ({
                 className="boutique-active-order-chip"
                 onClick={onOpenTicketModal}
                 title="Buka Tiket Pesanan Aktif"
-                aria-label={`Tiket pesanan nomor ${activeOrder.order_code}`}
               >
                 <Sparkles size={13} aria-hidden="true" />
                 <span>Tiket <strong className="tabular">#{activeOrder.order_code}</strong></span>
@@ -112,7 +115,6 @@ export const HomePage = ({
               className="btn-boutique-order"
               onClick={onGoToMenu}
               id="nav-cta-order"
-              aria-label="Pesan Mandiri"
             >
               <span>Pesan Mandiri</span>
               <ArrowUpRight size={15} aria-hidden="true" />
@@ -125,13 +127,11 @@ export const HomePage = ({
       <section id="hero" className="boutique-hero">
         <div className="hero-editorial-canvas">
           {activeOrder && (
-            <div
+            <button
+              type="button"
               className="hero-active-order-banner"
               onClick={onOpenTicketModal}
-              role="button"
-              tabIndex={0}
               title="Klik untuk membuka QR Tiket Kasir"
-              aria-label={`Pesanan aktif nomor ${activeOrder.order_code}`}
             >
               <span className="hero-order-badge-live" aria-hidden="true" />
               <span className="hero-order-banner-text">
@@ -141,14 +141,14 @@ export const HomePage = ({
                 <span>Lihat Tiket QR</span>
                 <ArrowUpRight size={13} aria-hidden="true" />
               </span>
-            </div>
+            </button>
           )}
 
           <div className="hero-text-block">
             <div className="hero-meta-overline">
               <span>KEMANG, JAKARTA</span>
               <span className="meta-sep">•</span>
-              <span>SPECIALTY ROASTERS</span>
+              <span>SPECIALTY ROASTERS &amp; COFFEE BAR</span>
             </div>
 
             <h1 className="hero-editorial-heading">
@@ -171,9 +171,8 @@ export const HomePage = ({
                 className="btn-editorial-primary"
                 onClick={onGoToMenu}
                 id="hero-main-cta"
-                aria-label="Pesan Sekarang"
               >
-                <span>Pesan Sekarang</span>
+                <span>Jelajahi Menu &amp; Pesan</span>
                 <ArrowRight size={17} className="btn-cta-arrow" aria-hidden="true" />
               </button>
 
@@ -181,9 +180,8 @@ export const HomePage = ({
                 type="button"
                 className="btn-editorial-secondary"
                 onClick={() => scrollToSection('story')}
-                aria-label="Pelajari Cerita & Filosofi Kami"
               >
-                <span>Filosofi Rasa</span>
+                <span>Cerita Kami</span>
                 <ArrowRight size={15} className="btn-secondary-arrow" aria-hidden="true" />
               </button>
             </div>
@@ -201,10 +199,6 @@ export const HomePage = ({
                 loading="eager"
                 decoding="async"
               />
-              <div className="hero-media-corner-badge">
-                <span className="badge-bullet">•</span>
-                <span>House Blend Gayo &amp; Flores</span>
-              </div>
             </div>
           </div>
         </div>
@@ -247,7 +241,6 @@ export const HomePage = ({
                   <button
                     type="button"
                     className="bento-quick-add"
-                    aria-label={`Pesan ${BENTO_HERO.name}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToMenu();
