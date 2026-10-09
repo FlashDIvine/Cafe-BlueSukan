@@ -13,7 +13,7 @@
   background-color: var(--surface);
   border-radius: 12px 3px 12px 12px;
   border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(15, 18, 25, 0.04);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 4%, transparent);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -62,7 +62,7 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background-color: rgba(255, 255, 255, 0.94);
+  background-color: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(4px);
   padding: 2px 7px;
   border-radius: 9999px;
@@ -90,7 +90,7 @@
   position: absolute;
   top: 8px;
   left: 8px;
-  background-color: rgba(15, 18, 25, 0.88);
+  background-color: color-mix(in srgb, var(--ink) 88%, transparent);
   backdrop-filter: blur(4px);
   color: var(--bone);
   font-family: var(--f-body);
@@ -208,7 +208,7 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background-color: rgba(15, 18, 25, 0.04);
+  background-color: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--muted);
   border: 1px solid var(--border);
   display: flex;
@@ -292,7 +292,7 @@
   background-color: var(--surface);
   border-radius: 12px 3px 12px 12px;
   border: 1px solid var(--border);
-  box-shadow: 0 1px 4px rgba(15, 18, 25, 0.03);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 3%, transparent);
   padding: 8px;
   display: flex;
   flex-direction: column;
@@ -336,7 +336,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(4px);
   border: 1px solid var(--border);
   display: flex;
@@ -357,12 +357,12 @@
 
 .stitch-grid-heart-btn:hover {
   background-color: var(--surface);
-  border-color: rgba(15, 18, 25, 0.16);
+  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
 }
 
 .stitch-grid-heart-btn.liked {
   background-color: var(--color-danger-light);
-  border-color: rgba(239, 68, 68, 0.25);
+  border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
 }
 
 .stitch-heart-icon {
@@ -400,7 +400,7 @@
   position: absolute;
   top: 6px;
   left: 6px;
-  background-color: rgba(15, 18, 25, 0.88);
+  background-color: color-mix(in srgb, var(--ink) 88%, transparent);
   backdrop-filter: blur(4px);
   color: var(--bone);
   font-family: var(--f-body);
@@ -469,7 +469,7 @@
   border-radius: 50%;
   background-color: var(--accent-light);
   color: var(--accent);
-  border: 1px solid rgba(30, 86, 160, 0.16);
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -501,7 +501,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: rgba(15, 18, 25, 0.04);
+  background-color: color-mix(in srgb, var(--ink) 4%, transparent);
   color: var(--muted);
   border: 1px solid var(--border);
   display: flex;
@@ -612,24 +612,31 @@
     transform: scale(0.94);
   }
 
-  /* Stagger initial load ONLY for first-viewport items (cards 1-4, total duration < 400ms: 220ms + 120ms = 340ms) */
-  .stitch-grid-card:nth-child(1),
-  .stitch-recommended-card:nth-child(1) {
+  /* Stagger initial load ONLY during first mount (.is-first-load)
+     - Carousel recommendation limited to first 2 cards only
+     - 2-Column grid limited to first 4 cards
+     - Total duration < 400ms (220ms + 120ms = 340ms) with fill-mode: both */
+  .is-first-load .stitch-recommended-card:nth-child(1) {
     animation: menuCardFadeUp 220ms var(--e-out) 0ms both;
   }
 
-  .stitch-grid-card:nth-child(2),
-  .stitch-recommended-card:nth-child(2) {
+  .is-first-load .stitch-recommended-card:nth-child(2) {
+    animation: menuCardFadeUp 220ms var(--e-out) 50ms both;
+  }
+
+  .is-first-load .stitch-grid-card:nth-child(1) {
+    animation: menuCardFadeUp 220ms var(--e-out) 0ms both;
+  }
+
+  .is-first-load .stitch-grid-card:nth-child(2) {
     animation: menuCardFadeUp 220ms var(--e-out) 40ms both;
   }
 
-  .stitch-grid-card:nth-child(3),
-  .stitch-recommended-card:nth-child(3) {
+  .is-first-load .stitch-grid-card:nth-child(3) {
     animation: menuCardFadeUp 220ms var(--e-out) 80ms both;
   }
 
-  .stitch-grid-card:nth-child(4),
-  .stitch-recommended-card:nth-child(4) {
+  .is-first-load .stitch-grid-card:nth-child(4) {
     animation: menuCardFadeUp 220ms var(--e-out) 120ms both;
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, X, SlidersHorizontal, ArrowRight, UtensilsCrossed } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { Navbar } from '../components/Navbar';
@@ -15,6 +15,14 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsFirstLoad(false);
+    }, 600);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Dynamic count of menus per category
   const menusCountByCategory = useMemo(() => {
@@ -64,7 +72,7 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
   };
 
   return (
-    <main className="stitch-home-container">
+    <main className={`stitch-home-container ${isFirstLoad ? 'is-first-load' : ''}`}>
       <Navbar
         onOpenTableModal={() => setIsTableModalOpen(true)}
         onGoHome={onGoHome}
