@@ -451,7 +451,7 @@
 .bento-hero-image-wrap {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 240px;
   overflow: hidden;
   background-color: var(--accent-light);
 }
@@ -470,8 +470,8 @@
 
 .bento-badge-tag {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: 14px;
+  left: 14px;
   background: var(--ink);
   color: var(--bone);
   font-family: var(--f-body);
@@ -479,12 +479,12 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 9999px;
 }
 
 .bento-hero-body {
-  padding: 20px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -514,7 +514,7 @@
   font-weight: 600;
   color: var(--muted);
   background: rgba(30, 86, 160, 0.06);
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 4px;
   width: fit-content;
 }
@@ -1059,6 +1059,7 @@
 /* ─── 8. Focus-Visible Keyboard Ring Accessibility ───────────────────────── */
 .boutique-brand:focus-visible,
 .boutique-link:focus-visible,
+.boutique-active-order-chip:focus-visible,
 .btn-boutique-order:focus-visible,
 .hero-active-order-banner:focus-visible,
 .btn-editorial-primary:focus-visible,
@@ -1073,8 +1074,7 @@
 }
 
 /* High contrast outline for buttons over dark background */
-.footer-nav-list button:focus-visible,
-.boutique-active-order-chip:focus-visible {
+.footer-nav-list button:focus-visible {
   outline: 2px solid var(--bone);
   outline-offset: 2px;
 }
@@ -1094,7 +1094,7 @@
   }
 
   .hero-heading-mask {
-    animation: heroTextMaskIn 0.85s var(--e-out) forwards;
+    animation: heroTextMaskIn 0.85s var(--e-out) both;
   }
 
   .hero-heading-line:nth-child(2) .hero-heading-mask {
