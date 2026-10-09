@@ -1,8 +1,8 @@
 /* ==========================================================================
    BlueSukan Cafe - Modern Editorial Architecture
-   Palette: Ink, Bone, Accent, Accent Light, Muted, Border, Surface, Accent Hover
+   Palette: Ink, Bone, Accent, Accent Hover, Accent Light, Muted, Muted on Ink, Border, Surface
    Typography: Instrument Serif (Display), DM Sans (Body)
-   Tokens: --ink, --bone, --accent, --accent-hover, --accent-light, --muted, --border, --surface, --e-out
+   Tokens: --ink, --bone, --accent, --accent-hover, --accent-light, --muted, --muted-on-ink, --border, --surface, --e-out
    Standard: Mobile-first 480px, Touch Target >= 44px, Motion in prefers-reduced-motion
    ========================================================================== */
 
@@ -107,6 +107,10 @@
   min-height: 44px;
   display: inline-flex;
   align-items: center;
+}
+
+.boutique-link:hover {
+  color: var(--ink);
 }
 
 .boutique-nav-action {
@@ -268,9 +272,11 @@
   padding-bottom: 2px;
 }
 
+/* Base style: Fully visible without motion */
 .hero-heading-mask {
   display: inline-block;
-  transform: translateY(0);
+  transform: none;
+  opacity: 1;
 }
 
 .hero-serif-accent {
@@ -437,15 +443,15 @@
   flex-direction: column;
 }
 
+/* Bento Hero Big Feature Card (Restored Layout Rhythm) */
 .bento-hero-card {
   height: 100%;
 }
 
-/* Bento Hero Big Feature Card */
 .bento-hero-image-wrap {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
   background-color: var(--accent-light);
 }
@@ -478,9 +484,10 @@
 }
 
 .bento-hero-body {
-  padding: 18px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  flex: 1;
   gap: 8px;
 }
 
@@ -507,7 +514,7 @@
   font-weight: 600;
   color: var(--muted);
   background: rgba(30, 86, 160, 0.06);
-  padding: 4px 10px;
+  padding: 5px 12px;
   border-radius: 4px;
   width: fit-content;
 }
@@ -517,16 +524,17 @@
   font-size: 0.8125rem;
   color: var(--muted);
   line-height: 1.5;
-  margin-top: 2px;
+  margin-top: 4px;
+  flex: 1;
 }
 
 .bento-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 14px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .bento-price-tag {
@@ -936,7 +944,7 @@
   box-sizing: border-box;
 }
 
-/* ─── 7. Deep Ink Footer ─────────────────────────────────────────────────── */
+/* ─── 7. Deep Ink Footer (Enhanced WCAG Contrast >= 8.5:1) ───────────────── */
 .boutique-footer {
   background-color: var(--ink);
   color: var(--bone);
@@ -969,7 +977,7 @@
 .footer-brand-desc {
   font-family: var(--f-body);
   font-size: 0.8125rem;
-  color: var(--muted);
+  color: var(--muted-on-ink);
   line-height: 1.5;
 }
 
@@ -985,7 +993,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--muted-on-ink);
 }
 
 .footer-nav-list {
@@ -1025,7 +1033,7 @@
 .footer-copyright {
   font-family: var(--f-body);
   font-size: 0.75rem;
-  color: var(--muted);
+  color: var(--muted-on-ink);
   text-align: center;
 }
 
@@ -1048,9 +1056,32 @@
   border: 1px solid rgba(249, 247, 244, 0.1);
 }
 
-/* ─── 8. Motion & Micro-interactions Orchestration ───────────────────────── */
+/* ─── 8. Focus-Visible Keyboard Ring Accessibility ───────────────────────── */
+.boutique-brand:focus-visible,
+.boutique-link:focus-visible,
+.btn-boutique-order:focus-visible,
+.hero-active-order-banner:focus-visible,
+.btn-editorial-primary:focus-visible,
+.btn-editorial-secondary:focus-visible,
+.bento-card:focus-visible,
+.bento-quick-add:focus-visible,
+.bento-quick-add-sm:focus-visible,
+.btn-editorial-explore-menu:focus-visible,
+.loc-social-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* High contrast outline for buttons over dark background */
+.footer-nav-list button:focus-visible,
+.boutique-active-order-chip:focus-visible {
+  outline: 2px solid var(--bone);
+  outline-offset: 2px;
+}
+
+/* ─── 9. Motion & Micro-interactions Orchestration ───────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
-  /* Hero Heading Mask Reveal (Only on load) */
+  /* Hero Heading Mask Reveal (Only when motion is preferred) */
   @keyframes heroTextMaskIn {
     from {
       transform: translateY(105%);
@@ -1088,6 +1119,10 @@
   }
 
   /* Micro-interactions: Tactical Hover Feedback */
+  .boutique-link {
+    transition: color var(--t-fast) var(--e-out);
+  }
+
   .btn-editorial-primary {
     transition: transform var(--t-fast) var(--e-out),
                 background-color var(--t-fast) var(--e-out),
@@ -1143,6 +1178,14 @@
     box-shadow: 0 8px 24px rgba(15, 18, 25, 0.07);
   }
 
+  .bento-hero-img {
+    transition: transform var(--t-normal) var(--e-out);
+  }
+
+  .bento-card:hover .bento-hero-img {
+    transform: scale(1.03);
+  }
+
   .bento-quick-add:hover,
   .bento-quick-add-sm:hover {
     background: var(--accent);
@@ -1165,7 +1208,7 @@
   }
 }
 
-/* ─── 9. Strict Reduced Motion Guard ─────────────────────────────────────── */
+/* ─── 10. Strict Reduced Motion Guard ────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .hero-heading-mask,
   .indicator-dot,
@@ -1179,6 +1222,7 @@
   .btn-editorial-secondary,
   .btn-boutique-order,
   .bento-card,
+  .bento-hero-img,
   .btn-editorial-explore-menu,
   .loc-social-btn {
     transition: none !important;
