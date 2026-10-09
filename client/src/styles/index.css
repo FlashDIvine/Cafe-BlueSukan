@@ -44,11 +44,16 @@
   
   --color-accent: var(--accent);
   --color-royal-blue: var(--accent);
+  --color-royal-blue-light: var(--accent-light);
   --color-cobalt: var(--accent);
+  --color-cobalt-hover: #16437E;
+  --color-cobalt-glow: rgba(30, 86, 160, 0.25);
+  --color-navy: var(--ink);
   --color-sky: var(--accent-light);
   --color-sky-dark: #BAE6FD;
   --color-slate: var(--muted);
   --color-slate-light: #94A3B8;
+  --color-text-subtle: var(--muted);
 
   /* State Colors (Kept for Functional UI like Cashier) */
   --color-danger: #EF4444;
