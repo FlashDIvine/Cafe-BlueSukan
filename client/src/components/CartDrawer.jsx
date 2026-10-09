@@ -146,7 +146,7 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
               <p className="cart-drawer-empty-desc">
                 Yuk pilih menu kopi, minuman segar, atau makanan favoritmu dari katalog!
               </p>
-              <button type="button" className="btn-primary" onClick={onClose} style={{ marginTop: '8px' }}>
+              <button type="button" className="btn-primary" onClick={onClose}>
                 Lihat Menu
               </button>
             </div>
@@ -155,7 +155,7 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
               {/* Section 1: Selected Items */}
               <section aria-label="Daftar Menu yang Dipilih">
                 <h3 className="drawer-section-title">
-                  <ShoppingBag size={15} color="var(--color-primary)" />
+                  <ShoppingBag size={15} className="drawer-section-title-icon" />
                   Menu yang Dipilih
                 </h3>
                 <div className="cart-items-list">
@@ -216,8 +216,8 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
 
               {/* Section 2: Checkout Identity Form */}
               <form id="checkout-form" onSubmit={handleSubmit} className="checkout-form-container">
-                <h3 className="drawer-section-title" style={{ marginBottom: 0 }}>
-                  <User size={15} color="var(--color-primary)" />
+                <h3 className="drawer-section-title drawer-section-title-identity">
+                  <User size={15} className="drawer-section-title-icon" />
                   Informasi Pemesan
                 </h3>
 
