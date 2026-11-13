@@ -345,6 +345,127 @@ router.get('/summary/daily', async (req, res) => {
 });
 
 /**
+ * PATCH /api/orders/:order_code/confirm-qris
+ * Customer claims/confirms direct QRIS payment from digital ticket
+ */
+router.patch('/:order_code/confirm-qris', async (req, res) => {
+  const { order_code } = req.params;
+
+  if (!process.env.DATABASE_URL) {
+    const order = findOrderByCode(order_code);
+    if (!order) {
+      return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    }
+
+    if (order.status !== 'waiting_payment' && order.status !== 'waiting_qris_verification') {
+      return res.status(400).json({
+        success: false,
+        message: `Pesanan sudah dalam status "${order.status}"`,
+      });
+    }
+
+    order.status = 'waiting_qris_verification';
+    order.payment_method = 'QRIS';
+    order.updated_at = new Date().toISOString();
+
+    orderEvents.emit('order_changed', {
+      type: 'QRIS_CONFIRMED',
+      order_code: order.order_code,
+      status: order.status,
+      customer_name: order.customer_name,
+      table_number: order.table_number,
+      total_price: order.total_price,
+    });
+
+    return res.json({
+      success: true,
+      message: 'Klaim pembayaran QRIS berhasil dikirim ke kasir',
+      data: order,
+    });
+  }
+
+  try {
+    const existing = await prisma.order.findUnique({
+      where: { order_code },
+    });
+
+    if (!existing) {
+      return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+    }
+
+    if (existing.status !== 'waiting_payment' && existing.status !== 'waiting_qris_verification') {
+      return res.status(400).json({
+        success: false,
+        message: `Pesanan sudah dalam status "${existing.status}"`,
+      });
+    }
+
+    const updated = await prisma.order.update({
+      where: { order_code },
+      data: {
+        status: 'waiting_qris_verification',
+        payment_method: 'QRIS',
+      },
+      include: { items: true },
+    });
+
+    orderEvents.emit('order_changed', {
+      type: 'QRIS_CONFIRMED',
+      order_code: updated.order_code,
+      status: updated.status,
+      customer_name: updated.customer_name,
+      table_number: updated.table_number,
+      total_price: updated.total_price,
+    });
+
+    res.json({
+      success: true,
+      message: 'Klaim pembayaran QRIS berhasil dikirim ke kasir',
+      data: updated,
+    });
+  } catch (err) {
+    console.error('Error confirming QRIS payment:', err);
+    res.status(500).json({ success: false, message: 'Gagal mengonfirmasi pembayaran QRIS' });
+  }
+});
+
+/**
+ * POST /api/orders/:id/ring-customer
+ * Cashier sends instant ring / chime / vibration alert to customer phone
+ */
+router.post('/:id/ring-customer', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  let targetOrder = null;
+  if (!process.env.DATABASE_URL) {
+    targetOrder = findOrderById(id);
+  } else {
+    try {
+      targetOrder = await prisma.order.findUnique({ where: { id } });
+    } catch {
+      targetOrder = findOrderById(id);
+    }
+  }
+
+  if (!targetOrder) {
+    return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
+  }
+
+  orderEvents.emit('order_changed', {
+    type: 'RING_CUSTOMER',
+    order_code: targetOrder.order_code,
+    customer_name: targetOrder.customer_name,
+    table_number: targetOrder.table_number,
+    timestamp: new Date().toISOString(),
+  });
+
+  res.json({
+    success: true,
+    message: `Sinyal panggilan terkirim ke HP ${targetOrder.customer_name} (${targetOrder.order_code})`,
+  });
+});
+
+/**
  * GET /api/orders/:id
  * Fetch single order by numeric ID
  */
@@ -579,12 +700,12 @@ router.put('/:id/items', async (req, res) => {
  */
 router.patch('/:id/approve', async (req, res) => {
   const id = parseInt(req.params.id, 10);
-  const paymentMethod = req.body?.payment_method || 'cash';
+  const requestedMethod = req.body?.payment_method;
 
   if (!process.env.DATABASE_URL) {
     const order = findOrderById(id);
     if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
-    if (order.status !== 'waiting_payment') {
+    if (!['waiting_payment', 'waiting_qris_verification'].includes(order.status)) {
       return res.status(400).json({
         success: false,
         message: `Pesanan sudah dalam status "${order.status}", tidak dapat disetujui kembali`,
@@ -606,7 +727,7 @@ router.patch('/:id/approve', async (req, res) => {
     }
 
     order.status = 'paid_processing';
-    order.payment_method = paymentMethod;
+    order.payment_method = requestedMethod || order.payment_method || 'cash';
     order.paid_at = new Date().toISOString();
 
     orderEvents.emit('order_changed', {
@@ -627,7 +748,7 @@ router.patch('/:id/approve', async (req, res) => {
       const order = await tx.order.findUnique({ where: { id }, include: { items: true } });
 
       if (!order) throw new Error('Pesanan tidak ditemukan');
-      if (order.status !== 'waiting_payment') {
+      if (!['waiting_payment', 'waiting_qris_verification'].includes(order.status)) {
         throw new Error(`Pesanan sudah dalam status "${order.status}", tidak dapat disetujui kembali`);
       }
 
@@ -647,11 +768,13 @@ router.patch('/:id/approve', async (req, res) => {
         });
       }
 
+      const finalMethod = requestedMethod || order.payment_method || 'cash';
+
       return await tx.order.update({
         where: { id },
         data: {
           status: 'paid_processing',
-          payment_method: paymentMethod,
+          payment_method: finalMethod,
           paid_at: new Date(),
         },
         include: { items: true },

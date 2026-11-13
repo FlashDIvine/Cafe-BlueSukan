@@ -633,6 +633,26 @@ export const menus = [
 // ─── Orders store ──────────────────────────────────────────────
 export const orders = [];
 
+// ─── App Settings (QRIS & Store Configurations) ────────────────
+export const settings = {
+  qris_image: null,
+  qris_merchant_name: "Angkringan Blue'sukan Kopi",
+};
+
+export function getSettings() {
+  return { ...settings };
+}
+
+export function updateSettings(partial = {}) {
+  if (partial.qris_image !== undefined) {
+    settings.qris_image = partial.qris_image;
+  }
+  if (partial.qris_merchant_name !== undefined) {
+    settings.qris_merchant_name = partial.qris_merchant_name;
+  }
+  return { ...settings };
+}
+
 let nextOrderId = 1;
 
 /**

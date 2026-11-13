@@ -35,7 +35,7 @@ model Order {
   notes          String?
   total_price    Int
   payment_method String?     // 'cash' | 'qris' | 'debit'
-  status         String      @default("waiting_payment") // 'waiting_payment' | 'paid_processing' | 'completed' | 'cancelled'
+  status         String      @default("waiting_payment") // 'waiting_payment' | 'waiting_qris_verification' | 'paid_processing' | 'completed' | 'cancelled'
   paid_at        DateTime?
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
@@ -65,4 +65,12 @@ model Category {
   created_at DateTime @default(now())
 
   @@map("categories")
+}
+
+model Setting {
+  key        String   @id // e.g. 'qris_image', 'qris_merchant_name'
+  value      String?  @db.Text
+  updated_at DateTime @updatedAt
+
+  @@map("settings")
 }

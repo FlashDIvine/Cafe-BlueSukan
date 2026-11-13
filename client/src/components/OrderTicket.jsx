@@ -11,15 +11,37 @@ import {
   Home,
   Timer,
   X,
+  QrCode,
+  CreditCard,
 } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
-import { fetchOrderStatusApi } from '../services/api';
+import { fetchOrderStatusApi, fetchQrisSettingsApi, confirmQrisPaymentApi } from '../services/api';
 import '../styles/order-ticket.css';
 
 export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
   const [currentStatus, setCurrentStatus] = useState(order?.status || 'waiting_payment');
   const [countdown, setCountdown] = useState(null); // null when inactive
   const [isCountdownCancelled, setIsCountdownCancelled] = useState(false);
+  const [qrisSettings, setQrisSettings] = useState(null);
+  const [isConfirmingQris, setIsConfirmingQris] = useState(false);
+
+  // Fetch Merchant QRIS settings
+  useEffect(() => {
+    let isMounted = true;
+    fetchQrisSettingsApi()
+      .then((data) => {
+        if (isMounted && data) {
+          setQrisSettings(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load QRIS info:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Sync internal state when order prop changes (via SSE in parent)
   useEffect(() => {
@@ -71,6 +93,20 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
   }, [countdown, isCountdownCancelled, onGoHome]);
 
   const isProcessing = currentStatus === 'paid_processing' || currentStatus === 'completed';
+  const isQrisClaim = currentStatus === 'waiting_qris_verification';
+
+  const handleConfirmQrisPayment = async () => {
+    if (!order?.order_code) return;
+    try {
+      setIsConfirmingQris(true);
+      await confirmQrisPaymentApi(order.order_code);
+      setCurrentStatus('waiting_qris_verification');
+    } catch (err) {
+      alert(err.message || 'Gagal mengirim konfirmasi QRIS');
+    } finally {
+      setIsConfirmingQris(false);
+    }
+  };
 
   // Value encoded in the QR code for cashier scanning
   const qrPayload = JSON.stringify({
@@ -176,6 +212,34 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
               </p>
             </div>
           </div>
+        ) : isQrisClaim ? (
+          <div
+            className="ticket-status-box waiting"
+            role="status"
+            style={{
+              backgroundColor: '#FEF3C7',
+              borderColor: '#F59E0B',
+            }}
+          >
+            <div className="status-icon-wrap" style={{ color: '#B45309' }}>
+              <CreditCard size={18} />
+            </div>
+            <div className="status-text-content">
+              <div className="status-title-row">
+                <span
+                  className="live-poll-indicator"
+                  style={{ backgroundColor: '#F59E0B' }}
+                  title="Menunggu Kasir"
+                ></span>
+                <span style={{ color: '#92400E', fontWeight: '800' }}>
+                  Menunggu Verifikasi Pembayaran QRIS oleh Kasir
+                </span>
+              </div>
+              <p className="status-desc-row" style={{ color: '#B45309' }}>
+                Klaim pembayaran Anda telah dikirim ke kasir. Mohon tunggu sebentar selagi kasir memeriksa mutasi pembayaran.
+              </p>
+            </div>
+          </div>
         ) : (
           <div className="ticket-status-box waiting" role="status">
             <div className="status-icon-wrap" style={{ color: '#D97706' }}>
@@ -187,9 +251,116 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
                 <span>Menunggu Pembayaran di Kasir</span>
               </div>
               <p className="status-desc-row">
-                Silakan menuju ke kasir fisik untuk verifikasi pesanan dan melakukan pembayaran (Cash/QRIS).
+                Silakan bayar langsung lewat QRIS di bawah ini atau menuju kasir fisik (Tunai/Debit).
               </p>
             </div>
+          </div>
+        )}
+
+        {/* Direct Merchant QRIS Payment Box (when waiting_payment and QRIS image exists) */}
+        {currentStatus === 'waiting_payment' && qrisSettings?.qris_image && (
+          <div
+            style={{
+              margin: '14px 16px',
+              padding: '16px',
+              backgroundColor: '#FBF7EF',
+              border: '1.5px solid var(--color-border, #D5C7B2)',
+              borderRadius: '12px',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                color: 'var(--brand-navy, #1B3B64)',
+                fontWeight: '800',
+                fontSize: '13px',
+                marginBottom: '2px',
+              }}
+            >
+              <QrCode size={16} />
+              <span>Bayar Langsung via QRIS Dagang</span>
+            </div>
+            <span
+              style={{
+                fontSize: '11px',
+                color: 'var(--text-secondary, #5A4D41)',
+                display: 'block',
+                marginBottom: '10px',
+              }}
+            >
+              {qrisSettings.qris_merchant_name || "Angkringan Blue'sukan Kopi"}
+            </span>
+
+            <div
+              style={{
+                width: '180px',
+                height: '180px',
+                margin: '0 auto 10px',
+                backgroundColor: '#FFFFFF',
+                padding: '8px',
+                borderRadius: '10px',
+                border: '1.5px solid var(--color-border, #D5C7B2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)',
+              }}
+            >
+              <img
+                src={qrisSettings.qris_image}
+                alt="QRIS Dagang Blue'sukan Kopi"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <span style={{ fontSize: '11px', color: 'var(--text-secondary, #5A4D41)' }}>
+                Total Tagihan:
+              </span>
+              <div
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '800',
+                  color: 'var(--brand-navy, #1B3B64)',
+                  fontFamily: 'var(--font-mono, monospace)',
+                }}
+              >
+                {formatRupiah(order?.total_price || 0)}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleConfirmQrisPayment}
+              disabled={isConfirmingQris}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                backgroundColor: 'var(--accent-amber, #C96A2B)',
+                color: '#FFFFFF',
+                borderRadius: '8px',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: '800',
+                cursor: isConfirmingQris ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                boxShadow: '0 2px 6px rgba(201, 106, 43, 0.3)',
+              }}
+            >
+              <CheckCircle2 size={16} />
+              <span>
+                {isConfirmingQris ? 'Mengirim Konfirmasi...' : '✅ Konfirmasi Sudah Bayar QRIS'}
+              </span>
+            </button>
           </div>
         )}
 

@@ -7,6 +7,7 @@ import {
   QrCode,
   X,
   Sparkles,
+  CreditCard,
 } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import { fetchOrderStatusApi } from '../services/api';
@@ -72,6 +73,13 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
           pillClass: 'cancelled',
           label: 'Pesanan Dibatalkan',
           badgeClass: 'cancelled',
+        };
+      case 'waiting_qris_verification':
+        return {
+          icon: <CreditCard size={20} strokeWidth={2.2} />,
+          pillClass: 'waiting',
+          label: 'Verifikasi Pembayaran QRIS',
+          badgeClass: 'waiting',
         };
       case 'waiting_payment':
       default:

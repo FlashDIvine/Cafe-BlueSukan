@@ -15,6 +15,7 @@ dotenv.config();
 import menusRouter from './routes/menus.js';
 import ordersRouter from './routes/orders.js';
 import categoriesRouter from './routes/categories.js';
+import settingsRouter from './routes/settings.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +39,7 @@ if (process.env.NODE_ENV !== 'production') {
 app.use('/api/menus', menusRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/categories', categoriesRouter);
+app.use('/api/settings', settingsRouter);
 
 // Health & Lightweight Memory Diagnostic Endpoint
 app.get('/api/health', (_req, res) => {

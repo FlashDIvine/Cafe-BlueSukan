@@ -84,3 +84,64 @@ export function playCashierBell() {
   }
 }
 
+/**
+ * Unlock Web Audio Context on first customer interaction (e.g. clicking checkout)
+ * to comply with mobile browser autoplay policy.
+ */
+export function unlockAudioContext() {
+  try {
+    const ctx = getAudioContext();
+    if (ctx && ctx.state === 'suspended') {
+      ctx.resume().catch(() => {});
+    }
+  } catch (_) {}
+}
+
+/**
+ * Customer Alert Chime: Warm, melodic 3-tone chime (C5 -> E5 -> G5)
+ * Played when the barista or cashier rings the customer phone from POS.
+ */
+export function playCustomerChime() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+
+    // Harmonic 3-note arpeggio (C5: ~523.25, E5: ~659.25, G5: ~783.99)
+    const notes = [
+      { freq: 523.25, start: now, duration: 0.45, gain: 0.22 },
+      { freq: 659.25, start: now + 0.15, duration: 0.45, gain: 0.24 },
+      { freq: 783.99, start: now + 0.30, duration: 0.65, gain: 0.26 },
+    ];
+
+    notes.forEach(({ freq, start, duration, gain }) => {
+      const osc = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, start);
+
+      gainNode.gain.setValueAtTime(gain, start);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, start + duration);
+
+      osc.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      osc.start(start);
+      osc.stop(start + duration);
+
+      osc.onended = () => {
+        try {
+          osc.disconnect();
+          gainNode.disconnect();
+        } catch {
+          // Safe ignore
+        }
+      };
+    });
+  } catch (err) {
+    console.warn('Gagal memutar customer chime:', err);
+  }
+}
+

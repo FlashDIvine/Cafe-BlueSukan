@@ -328,3 +328,77 @@ export async function fetchDailySalesSummaryApi(date) {
   if (!res.ok) throw new Error(json.message || 'Gagal memuat ringkasan penjualan harian');
   return json;
 }
+
+/* ==========================================================================
+   QRIS SETTINGS & RING CUSTOMER APIS
+   ========================================================================== */
+
+/**
+ * Fetch Merchant QRIS Settings (GET /api/settings/qris)
+ * @returns {Promise<{ success: boolean, data: { qris_image: string|null, qris_merchant_name: string } }>}
+ */
+export async function fetchQrisSettingsApi() {
+  const res = await fetch(`${API_BASE}/settings/qris`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal memuat pengaturan QRIS');
+  return json.data;
+}
+
+/**
+ * Save / Update Merchant QRIS Settings (POST /api/settings/qris)
+ * @param {{ qris_image?: string|null, qris_merchant_name?: string }} payload
+ * @returns {Promise<Object>}
+ */
+export async function updateQrisSettingsApi(payload) {
+  const res = await fetch(`${API_BASE}/settings/qris`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal menyimpan pengaturan QRIS');
+  return json.data;
+}
+
+/**
+ * Delete / Reset Merchant QRIS Image (DELETE /api/settings/qris)
+ * @returns {Promise<Object>}
+ */
+export async function deleteQrisSettingsApi() {
+  const res = await fetch(`${API_BASE}/settings/qris`, {
+    method: 'DELETE',
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal menghapus gambar QRIS');
+  return json.data;
+}
+
+/**
+ * Customer confirms having made a direct QRIS payment (PATCH /api/orders/:order_code/confirm-qris)
+ * @param {string} orderCode
+ * @returns {Promise<Object>}
+ */
+export async function confirmQrisPaymentApi(orderCode) {
+  const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderCode)}/confirm-qris`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal mengonfirmasi pembayaran QRIS');
+  return json.data;
+}
+
+/**
+ * Cashier sends instant ring / chime signal to customer phone (POST /api/orders/:id/ring-customer)
+ * @param {number} orderId
+ * @returns {Promise<Object>}
+ */
+export async function ringCustomerApi(orderId) {
+  const res = await fetch(`${API_BASE}/orders/${orderId}/ring-customer`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal mengirim sinyal panggilan');
+  return json;
+}

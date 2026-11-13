@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatRupiah, SEATING_AREAS } from '../utils/formatters';
+import { unlockAudioContext } from '../utils/bellSound';
 import '../styles/cart-drawer.css';
 
 export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
@@ -67,6 +68,9 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
       showToast('Mohon masukkan nomor meja', 'warning');
       return;
     }
+
+    // Auto-unlock Web Audio context on user gesture so incoming bell/ring can sound
+    unlockAudioContext();
 
     const orderPayload = {
       customer_name: customerName.trim(),

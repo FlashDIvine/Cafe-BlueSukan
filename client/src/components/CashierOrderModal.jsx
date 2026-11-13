@@ -27,6 +27,7 @@ export const CashierOrderModal = ({
   onCancelOrder,
   onApproveOrder,
   onCompleteOrder,
+  onRingCustomer,
 }) => {
   const [items, setItems] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -45,7 +46,9 @@ export const CashierOrderModal = ({
         }))
       );
     }
-    if (order?.payment_method) {
+    if (order?.status === 'waiting_qris_verification' || order?.payment_method === 'QRIS' || order?.payment_method === 'qris') {
+      setPaymentMethod('qris');
+    } else if (order?.payment_method) {
       setPaymentMethod(order.payment_method);
     } else {
       setPaymentMethod('cash');
@@ -54,7 +57,8 @@ export const CashierOrderModal = ({
 
   if (!isOpen || !order) return null;
 
-  const isWaitingPayment = order.status === 'waiting_payment';
+  const isQrisClaim = order.status === 'waiting_qris_verification';
+  const isWaitingPayment = order.status === 'waiting_payment' || isQrisClaim;
   const isProcessing = order.status === 'paid_processing';
   const isCompleted = order.status === 'completed';
 
@@ -237,6 +241,30 @@ export const CashierOrderModal = ({
                   <strong>Catatan Pelanggan:</strong> {order.notes}
                 </div>
               )}
+
+              {isQrisClaim && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 14px',
+                    backgroundColor: '#FEF3C7',
+                    border: '1.5px solid #F59E0B',
+                    borderRadius: '8px',
+                    color: '#92400E',
+                    marginTop: '8px',
+                  }}
+                >
+                  <CreditCard size={18} />
+                  <div style={{ fontSize: '12px' }}>
+                    <strong>Klaim Bayar via QRIS Dagang</strong>
+                    <div style={{ opacity: 0.9 }}>
+                      Pelanggan telah menyatakan bayar QRIS. Mohon cek mutasi bank/e-wallet lalu konfirmasi di bawah.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Editable Items */}
@@ -396,6 +424,29 @@ export const CashierOrderModal = ({
                   Tutup
                 </button>
 
+                {onRingCustomer && (
+                  <button
+                    type="button"
+                    onClick={() => onRingCustomer(order)}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      backgroundColor: '#FEF3C7',
+                      border: '1.5px solid #F59E0B',
+                      color: '#92400E',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                    }}
+                    title="Kirim notifikasi bel/getar ke HP pemesan"
+                  >
+                    <span>📢 Panggil HP</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   className="btn-complete-order"
@@ -408,14 +459,40 @@ export const CashierOrderModal = ({
                 </button>
               </>
             ) : (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={onClose}
-                style={{ width: '100%', padding: '10px 18px' }}
-              >
-                Tutup
-              </button>
+              <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+                {onRingCustomer && isCompleted && (
+                  <button
+                    type="button"
+                    onClick={() => onRingCustomer(order)}
+                    style={{
+                      flex: 1,
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      backgroundColor: '#FEF3C7',
+                      border: '1.5px solid #F59E0B',
+                      color: '#92400E',
+                      fontSize: '13px',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                    }}
+                    title="Kirim notifikasi bel/getar ke HP pemesan"
+                  >
+                    <span>📢 Panggil HP Pembeli</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={onClose}
+                  style={{ flex: 1, padding: '10px 18px' }}
+                >
+                  Tutup
+                </button>
+              </div>
             )}
           </div>
         </div>

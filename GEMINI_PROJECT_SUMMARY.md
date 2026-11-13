@@ -166,6 +166,8 @@ Fitur pengalihan pasca-checkout ke Beranda telah selesai diimplementasikan:
 - [x] **Laporan Penjualan Harian Kasir (Daily Sales Summary Modal & `/api/orders/summary/daily`)** (Selesai)
 - [x] **Optimasi Penggunaan RAM & Anti-Memory Leak (Node.js Heap & Browser Kasir)** (Selesai)
 - [x] **Konfigurasi Production Deployment EthioDeploy / Node.js PaaS Container** (Selesai)
+- [x] **Pembayaran QRIS Dagang Langsung di Tiket Pelanggan (`/api/settings/qris` & `/confirm-qris`)** (Selesai)
+- [x] **Panggil HP Pembeli Realtime via SSE (Audio Chime & Getar HP `POST /ring-customer`)** (Selesai)
 
 ---
 
@@ -258,7 +260,38 @@ File [server.js](file:///home/najib/Projek/Bluesukan/server.js) di root proyek b
 
 ---
 
-## 10. Catatan Penting untuk AI Gemini Selanjutnya
+## 10. Fitur Pembayaran QRIS Dagang Langsung & Panggil HP Pembeli (Ring Customer)
+
+Untuk meningkatkan efisiensi transaksi mandiri tanpa antre di kasir fisik serta mempermudah pemanggilan pelanggan saat pesanan siap/diantar, dua fitur interaktif telah ditambahkan:
+
+### A. Manajemen QRIS Dagang & Pembayaran Mandiri di Tiket Pelanggan
+1. **Manajemen QRIS Merchant di Kasir (`QrisManagementModal.jsx`):**
+   - Admin/Kasir dapat mengunggah barcode QRIS dagang (statis/dinamis) toko via tombol **"🖼️ Atur QRIS"** di dashboard kasir.
+   - Dilengkapi kompresi gambar client-side otomatis menggunakan HTML5 `<canvas>` (maksimal resolusi lebar 500px, format WebP/JPEG, payload strict $\le$ 300KB) untuk mencegah pembengkakan memori server Node.js.
+   - Endpoint: `GET /api/settings/qris` (publik), `POST /api/settings/qris` (simpan gambar & nama merchant), dan `DELETE /api/settings/qris` (hapus QRIS).
+2. **Pembayaran Langsung di Layar Tiket Pelanggan (`OrderTicket.jsx`):**
+   - Saat pesanan berstatus `waiting_payment`, tiket digital menampilkan gambar QRIS toko resmi beserta total tagihan dan tombol **"✅ Konfirmasi Sudah Bayar QRIS"**.
+   - Pelanggan cukup melakukan scan QRIS via e-wallet (BCA, GoPay, OVO, Dana, ShopeePay, dsb.), lalu menekan tombol konfirmasi.
+   - Memanggil endpoint `PATCH /api/orders/:order_code/confirm-qris` yang mengubah status pesanan menjadi `waiting_qris_verification` dan menyiarkan event SSE `QRIS_CONFIRMED`.
+3. **Verifikasi Kasir Realtime:**
+   - Kasir menerima notifikasi bunyi bel kasir instan via SSE saat pelanggan mengonfirmasi pembayaran QRIS.
+   - Kartu pesanan di kasir diberi badge sorotan khusus: `💳 Klaim Bayar QRIS (Cek Mutasi)` dan default metode bayar otomatis terpilih `QRIS`.
+   - Kasir mengecek mutasi rekening/e-wallet lalu menekan *"Verifikasi & Terima Pesanan"*.
+
+### B. Panggil / Bunyikan HP Pembeli Realtime (Ring Customer via SSE)
+1. **Tombol "📢 Panggil HP" di Kasir (`CashierPage.jsx` & `CashierOrderModal.jsx`):**
+   - Tersedia pada pesanan yang sedang diproses (`paid_processing`) maupun selesai (`completed`).
+   - Menghubungi endpoint `POST /api/orders/:id/ring-customer` yang memancarkan event SSE `RING_CUSTOMER` langsung ke stream spesifik pesanan pelanggan.
+2. **Bypass Autoplay Policy Browser:**
+   - Saat pelanggan menekan tombol checkout *"Pesan Sekarang"* di `CartDrawer.jsx`, fungsi `unlockAudioContext()` dipicu untuk meresume `AudioContext` browser pelanggan melalui gestur sentuhan awal.
+3. **Respon Multimodal di HP Pelanggan (`App.jsx` & `bellSound.js`):**
+   - **Audio Chime:** Membunyikan arpeggio 3-nada harmonis (C5 523.25Hz $\rightarrow$ E5 659.25Hz $\rightarrow$ G5 783.99Hz) menggunakan Web Audio API murni tanpa file MP3 eksternal. Node audio otomatis dilepas (`disconnect()`) setelah selesai berbunyi.
+   - **Getaran Haptik:** Menggetarkan perangkat HP menggunakan pattern haptik `navigator.vibrate([300, 150, 300, 150, 400])` jika browser mendukung.
+   - **Modal Alert Interaktif:** Menampilkan dialog pop-up berdesain *Vintage Riverside*: *"🔔 Panggilan dari Kasir / Pelayan! Pesanan #{order_code} siap / menuju area {table_number}."* dengan tombol *"Oke, Mengerti"* yang mematikan getaran dan menutup dialog.
+
+---
+
+## 11. Catatan Penting untuk AI Gemini Selanjutnya
 
 1. **Selalu gunakan file ini (`GEMINI_PROJECT_SUMMARY.md`) sebagai rujukan utama** sebelum mengubah struktur data atau komponen.
 2. **Styling menggunakan CSS murni (Vanilla CSS):** Jangan memasukkan kelas utility TailwindCSS tanpa instruksi khusus dari user.

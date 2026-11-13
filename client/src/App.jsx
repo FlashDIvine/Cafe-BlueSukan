@@ -1,4 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+import { Bell } from 'lucide-react';
 import { OrderProvider } from './context/OrderContext';
 import { useOrder } from './hooks/useOrder';
 import { HomePage } from './pages/HomePage';
@@ -6,6 +7,8 @@ import { MenuPage } from './pages/MenuPage';
 import { CartDrawer } from './components/CartDrawer';
 import { ActiveOrderModal } from './components/ActiveOrderModal';
 import { submitOrderApi } from './services/api';
+import { playCustomerChime } from './utils/bellSound';
+import { formatLocationDisplay } from './utils/formatters';
 
 const CashierPage = lazy(() =>
   import('./pages/CashierPage').then((m) => ({ default: m.CashierPage }))
@@ -34,6 +37,7 @@ function AppContent() {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [ringNotification, setRingNotification] = useState(null);
 
   // Initialize activeOrder from localStorage for persistent tracking
   const [activeOrder, setActiveOrder] = useState(() => {
@@ -65,9 +69,9 @@ function AppContent() {
     }
   }, [activeOrder]);
 
-  // Realtime SSE stream for active order status updates
+  // Realtime SSE stream for active order status updates & ring customer alerts
   useEffect(() => {
-    if (!activeOrder?.order_code || activeOrder.status === 'completed' || activeOrder.status === 'cancelled') {
+    if (!activeOrder?.order_code || activeOrder.status === 'cancelled') {
       return;
     }
 
@@ -78,6 +82,24 @@ function AppContent() {
       eventSource.onmessage = (event) => {
         try {
           const payload = JSON.parse(event.data);
+
+          // 1. Ring customer signal from Cashier POS
+          if (payload?.type === 'RING_CUSTOMER' && payload.order_code === activeOrder.order_code) {
+            playCustomerChime();
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+              try {
+                navigator.vibrate([300, 150, 300, 150, 400]);
+              } catch (_) {}
+            }
+            setRingNotification({
+              order_code: payload.order_code,
+              customer_name: payload.customer_name || activeOrder.customer_name,
+              table_number: payload.table_number || activeOrder.table_number,
+              timestamp: Date.now(),
+            });
+          }
+
+          // 2. Order status update / QRIS confirmation
           if (
             payload?.order_code === activeOrder.order_code &&
             payload?.status &&
@@ -216,6 +238,105 @@ function AppContent() {
         order={activeOrder}
         onGoToMenu={handleGoToMenu}
       />
+
+      {/* Prominent Ring Customer Notification Dialog (Bell Chime & Vibrate alert from Cashier/Barista) */}
+      {ringNotification && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(15, 23, 42, 0.72)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 999999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            animation: 'fadeIn 0.25s ease',
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: 'var(--bg-surface, #FBF7EF)',
+              border: '2px solid var(--accent-amber, #C96A2B)',
+              borderRadius: '20px',
+              width: '100%',
+              maxWidth: '380px',
+              padding: '28px 22px 22px',
+              textAlign: 'center',
+              boxShadow: '0 25px 35px -5px rgba(0, 0, 0, 0.4)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '16px',
+            }}
+          >
+            <div
+              style={{
+                width: '70px',
+                height: '70px',
+                borderRadius: '50%',
+                backgroundColor: '#FEF3C7',
+                border: '2.5px solid #F59E0B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--accent-amber, #C96A2B)',
+                boxShadow: '0 0 25px rgba(201, 106, 43, 0.4)',
+              }}
+            >
+              <Bell size={36} />
+            </div>
+
+            <div>
+              <h3
+                style={{
+                  margin: '0 0 8px',
+                  fontSize: '19px',
+                  fontWeight: '800',
+                  color: 'var(--brand-navy, #1B3B64)',
+                  fontFamily: 'var(--font-display, serif)',
+                }}
+              >
+                Panggilan dari Kasir / Pelayan!
+              </h3>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: '13.5px',
+                  color: 'var(--text-secondary, #5A4D41)',
+                  lineHeight: 1.55,
+                }}
+              >
+                Pesanan <strong>{ringNotification.order_code}</strong> atas nama{' '}
+                <strong>{ringNotification.customer_name}</strong> siap diambil / sedang diantar menuju area{' '}
+                <strong>{formatLocationDisplay(ringNotification.table_number)}</strong>.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setRingNotification(null)}
+              style={{
+                width: '100%',
+                marginTop: '4px',
+                padding: '13px 20px',
+                backgroundColor: 'var(--accent-amber, #C96A2B)',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: '800',
+                cursor: 'pointer',
+                boxShadow: '0 4px 10px rgba(201, 106, 43, 0.35)',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              Oke, Mengerti
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

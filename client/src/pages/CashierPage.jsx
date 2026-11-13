@@ -14,6 +14,9 @@ import {
   Volume2,
   VolumeX,
   TrendingUp,
+  QrCode,
+  CreditCard,
+  Bell,
 } from 'lucide-react';
 import { formatRupiah, formatPaidTime, formatLocationDisplay } from '../utils/formatters';
 import {
@@ -23,11 +26,13 @@ import {
   cancelOrderApi,
   approveOrderApi,
   completeOrderApi,
+  ringCustomerApi,
 } from '../services/api';
 import { playCashierBell } from '../utils/bellSound';
 import { CashierOrderModal } from '../components/CashierOrderModal';
 import { MenuManagement } from '../components/MenuManagement';
 import { SalesSummaryModal } from '../components/SalesSummaryModal';
+import { QrisManagementModal } from '../components/QrisManagementModal';
 import '../styles/cashier.css';
 
 export const CashierPage = () => {
@@ -40,7 +45,9 @@ export const CashierPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSalesSummaryOpen, setIsSalesSummaryOpen] = useState(false);
+  const [isQrisModalOpen, setIsQrisModalOpen] = useState(false);
   const [showAllHistory, setShowAllHistory] = useState(false);
+  const [ringToast, setRingToast] = useState(null);
 
   // Cashier notification sound preference (defaults to true)
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -144,6 +151,11 @@ export const CashierPage = () => {
             if (soundEnabled) {
               playCashierBell();
             }
+          } else if (payload?.type === 'QRIS_CONFIRMED') {
+            loadData(true);
+            if (soundEnabled) {
+              playCashierBell();
+            }
           } else if (payload?.type === 'STATUS_UPDATED') {
             loadData(true);
           }
@@ -201,10 +213,16 @@ export const CashierPage = () => {
       paid_processing: 0,
       completed: 0,
       cancelled: 0,
+      qris_claims: 0,
       all: orders.length,
     };
     orders.forEach((o) => {
-      if (res[o.status] !== undefined) {
+      if (o.status === 'waiting_payment' || o.status === 'waiting_qris_verification') {
+        res.waiting_payment++;
+        if (o.status === 'waiting_qris_verification') {
+          res.qris_claims++;
+        }
+      } else if (res[o.status] !== undefined) {
         res[o.status]++;
       }
     });
@@ -216,7 +234,8 @@ export const CashierPage = () => {
     return orders.filter((o) => {
       const matchTab =
         activeTab === 'all' ||
-        (activeTab === 'waiting_payment' && o.status === 'waiting_payment') ||
+        (activeTab === 'waiting_payment' &&
+          (o.status === 'waiting_payment' || o.status === 'waiting_qris_verification')) ||
         (activeTab === 'paid_processing' && o.status === 'paid_processing') ||
         (activeTab === 'history' && (o.status === 'completed' || o.status === 'cancelled'));
 
@@ -266,6 +285,16 @@ export const CashierPage = () => {
     return updated;
   };
 
+  const handleRingCustomer = async (order) => {
+    try {
+      await ringCustomerApi(order.id);
+      setRingToast(`📢 Sinyal panggilan dikirim ke HP ${order.customer_name} (${order.order_code})!`);
+      setTimeout(() => setRingToast(null), 3500);
+    } catch (err) {
+      alert(err.message || 'Gagal mengirim panggilan');
+    }
+  };
+
   return (
     <div className="cashier-dashboard-container">
       {/* POS Top Header */}
@@ -303,6 +332,20 @@ export const CashierPage = () => {
             >
               <TrendingUp size={13} />
               <span>Laporan Hari Ini</span>
+            </button>
+            <button
+              type="button"
+              className="pos-btn-action"
+              onClick={() => setIsQrisModalOpen(true)}
+              title="Atur Barcode QRIS Dagang Toko"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                color: '#FFFFFF',
+                borderColor: 'rgba(255, 255, 255, 0.25)',
+              }}
+            >
+              <QrCode size={13} />
+              <span>Atur QRIS</span>
             </button>
             <button
               type="button"
@@ -416,7 +459,17 @@ export const CashierPage = () => {
                 }}
               >
                 <span>Menunggu Pembayaran</span>
-                <span className="pos-tab-badge">{counts.waiting_payment}</span>
+                <span
+                  className="pos-tab-badge"
+                  style={
+                    counts.qris_claims > 0
+                      ? { backgroundColor: '#F59E0B', color: '#1E1915', fontWeight: '800' }
+                      : {}
+                  }
+                >
+                  {counts.waiting_payment}
+                  {counts.qris_claims > 0 ? ` (${counts.qris_claims} QRIS)` : ''}
+                </span>
               </button>
 
               <button
@@ -462,14 +515,25 @@ export const CashierPage = () => {
             {displayedOrders.length > 0 ? (
               <div className="pos-orders-grid">
                 {displayedOrders.map((order) => {
-                  const isWaiting = order.status === 'waiting_payment';
+                  const isQrisClaim = order.status === 'waiting_qris_verification';
+                  const isWaiting = order.status === 'waiting_payment' || isQrisClaim;
                   const isProcessing = order.status === 'paid_processing';
                   const isCancelled = order.status === 'cancelled';
+                  const isCompleted = order.status === 'completed';
 
                   return (
                     <div
                       key={order.id}
                       className={`pos-order-card ${isWaiting ? 'waiting' : isProcessing ? 'processing' : isCancelled ? 'cancelled' : ''}`}
+                      style={
+                        isQrisClaim
+                          ? {
+                              borderColor: '#F59E0B',
+                              boxShadow: '0 0 0 1.5px #F59E0B, 0 4px 6px -1px rgba(245, 158, 11, 0.25)',
+                              backgroundColor: '#FFFDF9',
+                            }
+                          : {}
+                      }
                       onClick={() => setSelectedOrder(order)}
                     >
                       <div className="pos-card-header">
@@ -478,20 +542,36 @@ export const CashierPage = () => {
                           <span className="pos-order-table-chip">{formatLocationDisplay(order.table_number)}</span>
                         </div>
 
-                        <span
-                          className={`status-badge ${isProcessing ? 'processing' : isWaiting ? 'waiting' : isCancelled ? 'cancelled' : ''}`}
-                        >
-                          {isWaiting && <Clock size={12} />}
-                          {isProcessing && <CheckCircle2 size={12} />}
-                          {isCancelled && <AlertCircle size={12} />}
-                          {isWaiting
-                            ? 'Menunggu Bayar'
-                            : isProcessing
-                            ? 'Sedang Diproses'
-                            : isCancelled
-                            ? 'Dibatalkan'
-                            : 'Selesai'}
-                        </span>
+                        {isQrisClaim ? (
+                          <span
+                            className="status-badge"
+                            style={{
+                              backgroundColor: '#FEF3C7',
+                              color: '#92400E',
+                              border: '1.5px solid #F59E0B',
+                              fontWeight: '800',
+                              gap: '4px',
+                            }}
+                          >
+                            <CreditCard size={12} />
+                            <span>Klaim Bayar QRIS</span>
+                          </span>
+                        ) : (
+                          <span
+                            className={`status-badge ${isProcessing ? 'processing' : isWaiting ? 'waiting' : isCancelled ? 'cancelled' : ''}`}
+                          >
+                            {isWaiting && <Clock size={12} />}
+                            {isProcessing && <CheckCircle2 size={12} />}
+                            {isCancelled && <AlertCircle size={12} />}
+                            {isWaiting
+                              ? 'Menunggu Bayar'
+                              : isProcessing
+                              ? 'Sedang Diproses'
+                              : isCancelled
+                              ? 'Dibatalkan'
+                              : 'Selesai'}
+                          </span>
+                        )}
                       </div>
 
                       <div className="pos-card-customer-row">
@@ -536,7 +616,35 @@ export const CashierPage = () => {
                           <div className="pos-card-total-price">{formatRupiah(order.total_price)}</div>
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                          {(isProcessing || isCompleted) && (
+                            <button
+                              type="button"
+                              className="btn-ring-customer"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '6px 9px',
+                                borderRadius: '6px',
+                                backgroundColor: '#FEF3C7',
+                                border: '1px solid #F59E0B',
+                                color: '#92400E',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRingCustomer(order);
+                              }}
+                              title="Bunyikan nada panggilan di HP pembeli"
+                            >
+                              <Bell size={11} />
+                              <span>Panggil HP</span>
+                            </button>
+                          )}
+
                           {isProcessing && (
                             <button
                               type="button"
@@ -560,7 +668,7 @@ export const CashierPage = () => {
                               setSelectedOrder(order);
                             }}
                           >
-                            <span>{isWaiting ? 'Verifikasi & Bayar' : 'Detail'}</span>
+                            <span>{isQrisClaim ? 'Cek & Setujui' : isWaiting ? 'Verifikasi & Bayar' : 'Detail'}</span>
                             <ChevronRight size={14} />
                           </button>
                         </div>
@@ -621,6 +729,7 @@ export const CashierPage = () => {
             onCancelOrder={handleCancelOrder}
             onApproveOrder={handleApproveOrder}
             onCompleteOrder={handleCompleteOrder}
+            onRingCustomer={handleRingCustomer}
           />
 
           {/* Daily Sales Summary Modal */}
@@ -628,6 +737,39 @@ export const CashierPage = () => {
             isOpen={isSalesSummaryOpen}
             onClose={() => setIsSalesSummaryOpen(false)}
           />
+
+          {/* Merchant QRIS Management Modal */}
+          <QrisManagementModal
+            isOpen={isQrisModalOpen}
+            onClose={() => setIsQrisModalOpen(false)}
+          />
+
+          {/* Ring Customer Toast Feedback */}
+          {ringToast && (
+            <div
+              style={{
+                position: 'fixed',
+                bottom: '24px',
+                right: '24px',
+                backgroundColor: 'var(--brand-navy, #1B3B64)',
+                color: '#FFFFFF',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.35)',
+                zIndex: 99999,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '13px',
+                fontWeight: '700',
+                border: '1.5px solid var(--accent-amber, #C96A2B)',
+                animation: 'slideUp 0.25s ease',
+              }}
+            >
+              <Bell size={16} color="var(--accent-amber, #C96A2B)" />
+              <span>{ringToast}</span>
+            </div>
+          )}
         </>
       )}
     </div>
