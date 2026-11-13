@@ -511,3 +511,4 @@ export const QrisManagementModal = ({ isOpen, onClose, onSuccess }) => {
     </div>
   );
 };
+
