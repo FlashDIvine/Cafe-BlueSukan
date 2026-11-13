@@ -6,24 +6,29 @@ const router = Router();
 
 export const DEFAULT_CATEGORIES = [
   {
-    id: 'coffee',
-    name: 'Kopi & Espresso',
+    id: 'makanan-utama',
+    name: 'Makanan Utama',
+    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
+  {
+    id: 'cemilan-gorengan',
+    name: 'Cemilan & Gorengan',
+    image: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=200&q=80&fm=webp',
+  },
+  {
+    id: 'minuman-kopi',
+    name: 'Minuman Kopi',
     image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=200&q=80&fm=webp',
   },
   {
-    id: 'non-coffee',
-    name: 'Non-Coffee',
+    id: 'minuman-susu-coklat',
+    name: 'Minuman Susu & Coklat',
     image: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=200&q=80&fm=webp',
   },
   {
-    id: 'snacks',
-    name: 'Makanan Ringan',
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=200&q=80&fm=webp',
-  },
-  {
-    id: 'food',
-    name: 'Makanan Utama',
-    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=200&q=80&fm=webp',
+    id: 'minuman-teh-lainnya',
+    name: 'Minuman Teh & Lainnya',
+    image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=200&q=80&fm=webp',
   },
 ];
 

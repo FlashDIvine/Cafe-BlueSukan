@@ -1,91 +1,106 @@
 :root {
-  /* 1. Palette: Ink & Bone (Modern Editorial) */
-  --ink: #0F1219;
-  --bone: #F9F7F4;
-  --surface: #FFFFFF;
-  --accent: #1E56A0;
-  --accent-hover: #16437E;
-  --accent-light: #D4E2F4;
-  --muted: #525E71;
-  --muted-on-ink: #A7B0BF;
-  --border: rgba(15, 18, 25, 0.08);
-  --glass: rgba(249, 247, 244, 0.7);
+  /* 1. Palette: Vintage Riverside Angkringan & Retro Poster */
+  --bg-primary: #F4ECDC;           /* Aged Kraft Paper / Kertas Menu Vintage */
+  --bg-surface: #FBF7EF;           /* Vintage Card Background */
+  --brand-navy: #1B3B64;           /* Vintage Poster Navy Blue */
+  --brand-navy-dark: #102540;
+  --brand-navy-light: #2C5282;
+  --accent-amber: #C96A2B;         /* Lantern Amber / Genteng Terakota */
+  --accent-amber-hover: #AF581F;
+  --accent-amber-light: #FCEBDC;
+  --text-primary: #1E1915;         /* Dark Roasted Espresso */
+  --text-secondary: #5A4D41;       /* Weathered Wood */
+  --border-color: #D5C7B2;         /* Aged Kraft Border */
+  --border-subtle: rgba(90, 77, 65, 0.16);
+
+  /* Modern Editorial / Legacy mappings */
+  --ink: var(--text-primary);
+  --bone: var(--bg-primary);
+  --surface: var(--bg-surface);
+  --accent: var(--brand-navy);
+  --accent-hover: var(--brand-navy-dark);
+  --accent-light: rgba(27, 59, 100, 0.12);
+  --muted: var(--text-secondary);
+  --muted-on-ink: #C5BAAD;
+  --border: var(--border-color);
+  --glass: rgba(251, 247, 239, 0.92);
 
   /* 2. Typography */
-  --f-display: 'Instrument Serif', serif;
-  --f-body: 'DM Sans', sans-serif;
+  --f-display: 'Fraunces', serif;
+  --f-body: 'Plus Jakarta Sans', sans-serif;
+  --f-mono: 'JetBrains Mono', monospace;
   
-  --text-h1: clamp(3rem, 12vw, 4.5rem);
-  --text-h2: clamp(1.75rem, 6vw, 2.25rem);
-  --text-h3: clamp(1.25rem, 4vw, 1.5rem);
+  --text-h1: clamp(2.4rem, 7.5vw, 3.8rem);
+  --text-h2: clamp(1.65rem, 5vw, 2.25rem);
+  --text-h3: clamp(1.2rem, 3.5vw, 1.45rem);
   --text-base: 1rem;
   --text-sm: 0.875rem;
   --text-xs: 0.75rem;
 
   /* 3. Spacing & Radius */
   --space-unit: 1rem;
-  --radius-sharp: 2px;
+  --radius-sharp: 3px;
+  --radius-sm: 8px;
   --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
   --radius-pill: 9999px;
 
-  /* 4. Easing & Motion */
+  /* 4. Motion */
   --e-out: cubic-bezier(0.16, 1, 0.3, 1);
   --e-in-out: cubic-bezier(0.76, 0, 0.24, 1);
   --t-fast: 200ms;
   --t-normal: 400ms;
 
-  /* 5. Temporary Aliases for backward compatibility */
-  --color-primary: var(--ink);
-  --color-primary-dark: #050811;
-  --color-primary-light: #1E293B;
-  --color-ink: var(--ink);
-  --color-bg: var(--bone);
+  /* Aliases for compatibility across components */
+  --color-primary: var(--brand-navy);
+  --color-primary-dark: var(--brand-navy-dark);
+  --color-primary-light: var(--brand-navy-light);
+  --color-accent: var(--accent-amber);
+  --color-accent-hover: var(--accent-amber-hover);
+  --color-accent-light: var(--accent-amber-light);
+  --color-bg: var(--bg-primary);
+  --color-surface: var(--bg-surface);
   --color-white: #FFFFFF;
-  --color-text-main: var(--ink);
-  --color-text-muted: var(--muted);
-  --color-border: var(--border);
-  
-  --color-accent: var(--accent);
-  --color-royal-blue: var(--accent);
-  --color-royal-blue-light: var(--accent-light);
-  --color-cobalt: var(--accent);
-  --color-cobalt-hover: #16437E;
-  --color-cobalt-glow: rgba(30, 86, 160, 0.25);
-  --color-navy: var(--ink);
-  --color-sky: var(--accent-light);
-  --color-sky-dark: #BAE6FD;
-  --color-slate: var(--muted);
-  --color-slate-light: #94A3B8;
-  --color-text-subtle: var(--muted);
+  --color-text-main: var(--text-primary);
+  --color-text-muted: var(--text-secondary);
+  --color-border: var(--border-color);
+  --color-ink: var(--text-primary);
+  --color-royal-blue: var(--brand-navy);
+  --color-royal-blue-light: rgba(27, 59, 100, 0.12);
+  --color-cobalt: var(--brand-navy);
+  --color-cobalt-hover: var(--brand-navy-dark);
+  --color-cobalt-glow: rgba(27, 59, 100, 0.22);
+  --color-navy: var(--brand-navy);
+  --color-sky: var(--accent-amber-light);
+  --color-sky-dark: #F6D6BA;
+  --color-slate: var(--text-secondary);
+  --color-slate-light: #A39688;
+  --color-text-subtle: var(--text-secondary);
 
-  /* State Colors (Kept for Functional UI like Cashier) */
-  --color-danger: #EF4444;
+  /* Functional Status Colors */
+  --color-danger: #B91C1C;
   --color-danger-light: #FEE2E2;
-  --color-danger-dark: #991B1B;
-  --color-warning: #F59E0B;
+  --color-danger-dark: #7F1D1D;
+  --color-warning: #D97706;
   --color-warning-light: #FEF3C7;
-  --color-warning-dark: #B45309;
-  --color-success: #1E56A0;
-  --color-success-light: var(--accent-light);
-  --color-success-dark: #1E3A8A;
+  --color-warning-dark: #92400E;
+  --color-success: #15803D;
+  --color-success-light: #DCFCE7;
+  --color-success-dark: #14532D;
 
   /* Font Aliases */
   --font-display: var(--f-display);
   --font-sans: var(--f-body);
   --font-serif: var(--f-display);
+  --font-mono: var(--f-mono);
 
-  /* Radius Aliases */
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-  --radius-2xl: 32px;
-
-  /* Shadow Placeholder Aliases */
-  --shadow-xs: 0 1px 2px rgba(15, 18, 25, 0.05);
-  --shadow-sm: 0 2px 8px rgba(15, 18, 25, 0.05);
-  --shadow-md: 0 6px 20px rgba(15, 18, 25, 0.07);
-  --shadow-lg: 0 16px 36px rgba(15, 18, 25, 0.1);
-  --shadow-float: 0 20px 40px rgba(15, 18, 25, 0.15);
+  /* Shadow Aliases: Warm Kraft Paper Shadow */
+  --shadow-xs: 0 1px 3px rgba(30, 25, 21, 0.05);
+  --shadow-sm: 0 2px 8px rgba(30, 25, 21, 0.07);
+  --shadow-md: 0 6px 18px rgba(30, 25, 21, 0.09);
+  --shadow-lg: 0 14px 32px rgba(30, 25, 21, 0.12);
+  --shadow-float: 0 20px 42px rgba(30, 25, 21, 0.18);
 
   /* Transition Aliases */
   --transition-fast: var(--t-fast) var(--e-out);

@@ -165,6 +165,8 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
                         src={item.imageUrl}
                         alt={item.name}
                         className="cart-item-thumbnail"
+                        loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src =

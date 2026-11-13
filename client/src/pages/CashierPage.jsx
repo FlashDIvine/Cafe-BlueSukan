@@ -11,6 +11,9 @@ import {
   ChevronRight,
   ClipboardList,
   UtensilsCrossed,
+  Volume2,
+  VolumeX,
+  TrendingUp,
 } from 'lucide-react';
 import { formatRupiah, formatPaidTime, formatLocationDisplay } from '../utils/formatters';
 import {
@@ -21,8 +24,10 @@ import {
   approveOrderApi,
   completeOrderApi,
 } from '../services/api';
+import { playCashierBell } from '../utils/bellSound';
 import { CashierOrderModal } from '../components/CashierOrderModal';
 import { MenuManagement } from '../components/MenuManagement';
+import { SalesSummaryModal } from '../components/SalesSummaryModal';
 import '../styles/cashier.css';
 
 export const CashierPage = () => {
@@ -34,6 +39,30 @@ export const CashierPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSalesSummaryOpen, setIsSalesSummaryOpen] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+
+  // Cashier notification sound preference (defaults to true)
+  const [soundEnabled, setSoundEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('bluesukan_cashier_sound') !== 'false';
+    }
+    return true;
+  });
+
+  const toggleSound = () => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('bluesukan_cashier_sound', String(next));
+      }
+      if (next) {
+        // Unlock browser AudioContext and play quick sample chime
+        playCashierBell();
+      }
+      return next;
+    });
+  };
 
   // Load orders & menus without disruptive flickering on background poll
   const loadData = useCallback(async (isSilent = false) => {
@@ -101,13 +130,41 @@ export const CashierPage = () => {
 
   useEffect(() => {
     loadData(false);
-    
-    // Poll orders & menu stock every 3 seconds silently
-    const interval = setInterval(() => {
+
+    // Server-Sent Events (SSE) Listener for realtime cashier updates & chime
+    let eventSource = null;
+    try {
+      eventSource = new EventSource('/api/orders/stream');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (payload?.type === 'NEW_ORDER') {
+            loadData(true);
+            if (soundEnabled) {
+              playCashierBell();
+            }
+          } else if (payload?.type === 'STATUS_UPDATED') {
+            loadData(true);
+          }
+        } catch {
+          // Ignore comments or heartbeat
+        }
+      };
+
+      eventSource.onerror = () => {
+        // EventSource will auto-reconnect silently
+      };
+    } catch (err) {
+      console.warn('Failed to initialize SSE EventSource:', err);
+    }
+
+    // Relaxed 60-second fallback sync for edge cases / reconnection
+    const fallbackInterval = setInterval(() => {
       if (typeof document !== 'undefined' && !document.hidden) {
         loadData(true);
       }
-    }, 3000);
+    }, 60000);
 
     const handleVisibilityChange = () => {
       if (typeof document !== 'undefined' && !document.hidden) {
@@ -119,12 +176,13 @@ export const CashierPage = () => {
     }
 
     return () => {
-      clearInterval(interval);
+      if (eventSource) eventSource.close();
+      clearInterval(fallbackInterval);
       if (typeof document !== 'undefined') {
         document.removeEventListener('visibilitychange', handleVisibilityChange);
       }
     };
-  }, [loadData]);
+  }, [loadData, soundEnabled]);
 
   // Keep selected order synced with fresh polled data
   useEffect(() => {
@@ -173,6 +231,16 @@ export const CashierPage = () => {
     });
   }, [orders, activeTab, searchQuery]);
 
+  // DOM memory optimization: limit rendering completed/history orders to max 25 by default
+  const isHistoryTab = activeTab === 'history';
+  const hasExcessHistory = isHistoryTab && filteredOrders.length > 25;
+  const displayedOrders = useMemo(() => {
+    if (isHistoryTab && !showAllHistory && filteredOrders.length > 25) {
+      return filteredOrders.slice(0, 25);
+    }
+    return filteredOrders;
+  }, [filteredOrders, isHistoryTab, showAllHistory]);
+
   // Order Actions
   const handleUpdateItems = async (orderId, newItems) => {
     const updated = await updateOrderItemsApi(orderId, newItems);
@@ -208,16 +276,34 @@ export const CashierPage = () => {
               <Coffee size={22} color="#FFFFFF" />
             </div>
             <div className="pos-brand-text">
-              <h1>BlueSukan Cafe — POS Kasir</h1>
-              <span>Manajemen Antrean & Inventori Menu</span>
+              <h1>Blue'sukan Kopi — POS Kasir</h1>
+              <span>Manajemen Antrean &amp; Inventori Menu • Rawalo</span>
             </div>
           </div>
 
           <div className="pos-header-actions">
             <span className="pos-live-pill">
               <span className="status-dot"></span>
-              Live Sync (3s)
+              Live Sync (SSE)
             </span>
+            <button
+              type="button"
+              className={`pos-btn-action pos-btn-sound ${soundEnabled ? 'active' : ''}`}
+              onClick={toggleSound}
+              title={soundEnabled ? 'Matikan Suara Bel' : 'Nyalakan Suara Bel'}
+            >
+              {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              <span>{soundEnabled ? 'Suara Aktif' : 'Mute'}</span>
+            </button>
+            <button
+              type="button"
+              className="pos-btn-action pos-btn-summary"
+              onClick={() => setIsSalesSummaryOpen(true)}
+              title="Laporan Penjualan Hari Ini"
+            >
+              <TrendingUp size={13} />
+              <span>Laporan Hari Ini</span>
+            </button>
             <button
               type="button"
               className="pos-btn-refresh"
@@ -324,7 +410,10 @@ export const CashierPage = () => {
               <button
                 type="button"
                 className={`pos-tab-btn ${activeTab === 'waiting_payment' ? 'active' : ''}`}
-                onClick={() => setActiveTab('waiting_payment')}
+                onClick={() => {
+                  setActiveTab('waiting_payment');
+                  setShowAllHistory(false);
+                }}
               >
                 <span>Menunggu Pembayaran</span>
                 <span className="pos-tab-badge">{counts.waiting_payment}</span>
@@ -333,7 +422,10 @@ export const CashierPage = () => {
               <button
                 type="button"
                 className={`pos-tab-btn ${activeTab === 'paid_processing' ? 'active' : ''}`}
-                onClick={() => setActiveTab('paid_processing')}
+                onClick={() => {
+                  setActiveTab('paid_processing');
+                  setShowAllHistory(false);
+                }}
               >
                 <span>Sedang Diproses</span>
                 <span className="pos-tab-badge">{counts.paid_processing}</span>
@@ -342,7 +434,10 @@ export const CashierPage = () => {
               <button
                 type="button"
                 className={`pos-tab-btn ${activeTab === 'history' ? 'active' : ''}`}
-                onClick={() => setActiveTab('history')}
+                onClick={() => {
+                  setActiveTab('history');
+                  setShowAllHistory(false);
+                }}
               >
                 <span>Riwayat Selesai / Batal</span>
                 <span className="pos-tab-badge">{counts.completed + counts.cancelled}</span>
@@ -351,7 +446,10 @@ export const CashierPage = () => {
               <button
                 type="button"
                 className={`pos-tab-btn ${activeTab === 'all' ? 'active' : ''}`}
-                onClick={() => setActiveTab('all')}
+                onClick={() => {
+                  setActiveTab('all');
+                  setShowAllHistory(false);
+                }}
               >
                 <span>Semua Pesanan</span>
                 <span className="pos-tab-badge">{counts.all}</span>
@@ -361,9 +459,9 @@ export const CashierPage = () => {
 
           {/* Orders List Grid */}
           <main className="pos-orders-content">
-            {filteredOrders.length > 0 ? (
+            {displayedOrders.length > 0 ? (
               <div className="pos-orders-grid">
-                {filteredOrders.map((order) => {
+                {displayedOrders.map((order) => {
                   const isWaiting = order.status === 'waiting_payment';
                   const isProcessing = order.status === 'paid_processing';
                   const isCancelled = order.status === 'cancelled';
@@ -470,6 +568,35 @@ export const CashierPage = () => {
                     </div>
                   );
                 })}
+
+                {/* Optional Expand/Collapse Button for History (>25 orders) to Prevent DOM Bloating */}
+                {hasExcessHistory && (
+                  <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'center', padding: '16px 0' }}>
+                    <button
+                      type="button"
+                      className="pos-btn-action"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '10px 22px',
+                        backgroundColor: 'var(--brand-navy, #1B3B64)',
+                        color: '#FFFFFF',
+                        borderRadius: 'var(--radius-pill, 9999px)',
+                        border: 'none',
+                        fontSize: '13px',
+                        fontWeight: '700',
+                        cursor: 'pointer',
+                        boxShadow: 'var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1))',
+                      }}
+                      onClick={() => setShowAllHistory((prev) => !prev)}
+                    >
+                      {showAllHistory
+                        ? 'Tampilkan Lebih Sedikit (Maks 25 Pesanan)'
+                        : `Tampilkan Semua (${filteredOrders.length} Riwayat Selesai / Batal)`}
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="pos-empty-state">
@@ -494,6 +621,12 @@ export const CashierPage = () => {
             onCancelOrder={handleCancelOrder}
             onApproveOrder={handleApproveOrder}
             onCompleteOrder={handleCompleteOrder}
+          />
+
+          {/* Daily Sales Summary Modal */}
+          <SalesSummaryModal
+            isOpen={isSalesSummaryOpen}
+            onClose={() => setIsSalesSummaryOpen(false)}
           />
         </>
       )}

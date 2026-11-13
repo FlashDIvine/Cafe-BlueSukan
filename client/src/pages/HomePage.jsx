@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -8,50 +8,57 @@ import {
   Globe,
   Plus,
   Sparkles,
+  Coffee,
+  Heart,
+  Award,
+  Waves,
+  Sun,
+  Flame,
 } from 'lucide-react';
 import { getOptimizedImageUrl } from '../utils/imageOptimizer';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import { ActiveOrderTracker } from '../components/ActiveOrderTracker';
 import '../styles/home-page.css';
 
-const BENTO_HERO = {
-  id: 1,
-  name: 'Kopi Susu Gula Aren Artisan',
-  tagline: 'Signature House Blend',
-  category: 'Kopi & Espresso',
-  notes: 'Dark Cocoa • Organic Palm Sugar • Velvet Body',
-  price: 22000,
-  image_url: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80',
-  description: 'Espresso double shot dari biji arabika Gayo & Flores, dipadukan susu murni dan gula aren organik cair asli.',
+// Signature authentic menu picks for home display
+const SIGNATURE_HERO = {
+  id: 11,
+  name: 'Tempe Mendoan Hangat (1 Porsi)',
+  tagline: 'Signature Khas Banyumas',
+  category: 'Cemilan & Gorengan',
+  notes: 'Tempe Kedelai Asli • Daun Bawang • Sambal Kecap Rawit',
+  price: 10000,
+  image_url: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=800&q=80',
+  description: 'Tempe mendoan lembut khas Banyumas berbalut adonan tepung gurih, digoreng setengah matang disajikan hangat dengan sambal kecap cabai rawit pedas mantap.',
 };
 
-const BENTO_SECONDARY = [
-  {
-    id: 5,
-    name: 'Matcha Latte Uji',
-    tagline: 'Artisan Non-Coffee',
-    category: 'Non-Coffee',
-    notes: 'Kyoto First Harvest • Creamy Milk',
-    price: 26000,
-    image_url: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=600&q=80',
-  },
+const SIGNATURE_SECONDARY = [
   {
     id: 3,
-    name: 'Caramel Macchiato',
-    tagline: 'Espresso Specialty',
-    category: 'Kopi & Espresso',
-    notes: 'Madagascar Vanilla • Butter Caramel',
-    price: 28000,
-    image_url: 'https://images.unsplash.com/photo-1485808191679-5f86510681a2?auto=format&fit=crop&w=600&q=80',
+    name: 'Nasi Bakar Daun Pisang',
+    tagline: 'Makanan Utama',
+    category: 'Makanan Utama',
+    notes: 'Aroma Bakar • Suwir Ayam Gurih',
+    price: 6000,
+    image_url: 'https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=600&q=80',
   },
   {
-    id: 8,
-    name: 'Crispy Truffle Fries',
-    tagline: 'Gourmet Bites',
-    category: 'Makanan Ringan',
-    notes: 'White Truffle Oil • Aged Parmesan',
-    price: 24000,
-    image_url: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=600&q=80',
+    id: 16,
+    name: 'Kopi Tubruk Panas',
+    tagline: 'Kopi Otentik',
+    category: 'Minuman Kopi',
+    notes: 'Biji Pilihan • Hitam Pekat Mantap',
+    price: 5000,
+    image_url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=600&q=80',
+  },
+  {
+    id: 12,
+    name: 'Pisang Goreng Krispi',
+    tagline: 'Cemilan Favorit',
+    category: 'Cemilan & Gorengan',
+    notes: 'Pisang Kepok Manis • Renyah Legit',
+    price: 10000,
+    image_url: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80',
   },
 ];
 
@@ -70,9 +77,54 @@ export const HomePage = ({
     }
   };
 
+  // Dynamic Open / Closed schedule status calculation (WIB / UTC+7)
+  const shopStatus = useMemo(() => {
+    const now = new Date();
+    const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+    const wib = new Date(utc + 3600000 * 7);
+    const day = wib.getDay(); // 0 = Minggu, 1 = Senin, ... 6 = Sabtu
+    const hours = wib.getHours() + wib.getMinutes() / 60;
+
+    if (day === 1) {
+      return {
+        isOpen: false,
+        text: 'Hari Ini Libur (Senin Prei)',
+        detail: 'Buka kembali Selasa pukul 11.00 WIB',
+        isHoliday: true,
+      };
+    }
+
+    let openHour = 11;
+    let closeHour = 24; // 00:00 midnight
+
+    if (day >= 2 && day <= 4) {
+      openHour = 11;
+      closeHour = 24;
+    } else if (day === 5) {
+      openHour = 15;
+      closeHour = 24;
+    } else if (day === 6) {
+      openHour = 10;
+      closeHour = 24;
+    } else if (day === 0) {
+      openHour = 10;
+      closeHour = 22;
+    }
+
+    const isOpenNow = hours >= openHour && hours < closeHour;
+    return {
+      isOpen: isOpenNow,
+      text: isOpenNow
+        ? `Sedang Buka • Sampai ${closeHour === 24 ? '00.00' : '22.00'} WIB`
+        : `Sedang Tutup • Buka Pukul ${openHour}.00 WIB`,
+      detail: isOpenNow ? 'Pesanan langsung diproses kasir' : 'Buka sesuai jadwal operasional',
+      isHoliday: false,
+    };
+  }, []);
+
   return (
     <div className="boutique-page">
-      {/* ─── 1. Minimalist Floating Glass Navbar ───────────────────────── */}
+      {/* ─── 1. Floating Vintage Navbar ─────────────────────────────────── */}
       <header className="boutique-nav-wrapper">
         <nav className="boutique-navbar" aria-label="Navigasi Utama">
           <button
@@ -80,20 +132,23 @@ export const HomePage = ({
             className="boutique-brand"
             onClick={() => scrollToSection('hero')}
           >
-            <span className="brand-wordmark">BlueSukan</span>
+            <span className="brand-wordmark">Blue'sukan</span>
             <span className="brand-dot">•</span>
-            <span className="brand-sub">COFFEE</span>
+            <span className="brand-sub">KOPI &amp; ANGKRINGAN</span>
           </button>
 
           <div className="boutique-nav-links">
             <button type="button" className="boutique-link" onClick={() => scrollToSection('menu-bento')}>
-              Menu Signature
+              Menu Andalan
+            </button>
+            <button type="button" className="boutique-link" onClick={() => scrollToSection('program-sosial')}>
+              Program Sosial
             </button>
             <button type="button" className="boutique-link" onClick={() => scrollToSection('story')}>
-              Filosofi
+              Suasana Serayu
             </button>
             <button type="button" className="boutique-link" onClick={() => scrollToSection('location')}>
-              Lokasi &amp; Jam
+              Jadwal &amp; Lokasi
             </button>
           </div>
 
@@ -123,7 +178,7 @@ export const HomePage = ({
         </nav>
       </header>
 
-      {/* ─── 2. Asymmetric Editorial Hero Canvas (Modern Editorial) ────── */}
+      {/* ─── 2. Hero Section: Spot Bengong Tepi Serayu ─────────────────── */}
       <section id="hero" className="boutique-hero">
         <div className="hero-editorial-canvas">
           {activeOrder && (
@@ -146,23 +201,24 @@ export const HomePage = ({
 
           <div className="hero-text-block">
             <div className="hero-meta-overline">
-              <span>KEMANG, JAKARTA</span>
+              <Waves size={13} strokeWidth={2.4} />
+              <span>RAWALO, BANYUMAS</span>
               <span className="meta-sep">•</span>
-              <span>SPECIALTY ROASTERS &amp; COFFEE BAR</span>
+              <span>SPOT BENGONG TEPI SERAYU</span>
             </div>
 
             <h1 className="hero-editorial-heading">
               <span className="hero-heading-line">
-                <span className="hero-heading-mask">Sensasi Kopi Artisan</span>
+                <span className="hero-heading-mask">Ngopi Santai di Tepi Serayu,</span>
               </span>
               <span className="hero-heading-line">
-                <em className="hero-serif-accent hero-heading-mask">dalam Setiap Seduhan.</em>
+                <em className="hero-serif-accent hero-heading-mask">Pesan Langsung dari Meja.</em>
               </span>
             </h1>
 
             <p className="hero-editorial-sub">
-              Ruang eksplorasi rasa, ketenangan, dan racikan biji kopi Nusantara pilihan.
-              Pesan langsung dari kenyamanan meja Anda secara mandiri tanpa hambatan antrean.
+              Warung kayu vintage, semilir angin Bendung Gerak Serayu, dan cangkir kopi panas khas angkringan.
+              Duduk nyaman, pilih menu favoritmu, dan tunjukkan tiket pesanan digital langsung ke kasir.
             </p>
 
             <div className="hero-actions-row">
@@ -172,18 +228,50 @@ export const HomePage = ({
                 onClick={onGoToMenu}
                 id="hero-main-cta"
               >
-                <span>Jelajahi Menu &amp; Pesan</span>
+                <span>Buka Menu &amp; Pesan Sekarang</span>
                 <ArrowRight size={17} className="btn-cta-arrow" aria-hidden="true" />
               </button>
 
               <button
                 type="button"
                 className="btn-editorial-secondary"
-                onClick={() => scrollToSection('story')}
+                onClick={() => scrollToSection('location')}
               >
-                <span>Cerita Kami</span>
+                <span>Cek Jadwal Operasional</span>
                 <ArrowRight size={15} className="btn-secondary-arrow" aria-hidden="true" />
               </button>
+            </div>
+
+            {/* Official Tagline Badge */}
+            <div className="hero-poster-tagline-badge">
+              <span>Nongkrong Asyik • Kopi Enak • Teman Asyik • Hati Bahagia</span>
+            </div>
+
+            {/* 3 Seating Location Cards (Model A Seating) */}
+            <div className="hero-seating-cards-grid">
+              <div className="hero-seating-card" onClick={onGoToMenu}>
+                <div className="seating-card-icon">☕</div>
+                <div className="seating-card-info">
+                  <h4>Indoor Vintage</h4>
+                  <p>Teras kayu jati teduh beratap</p>
+                </div>
+              </div>
+
+              <div className="hero-seating-card highlight" onClick={onGoToMenu}>
+                <div className="seating-card-icon">🌊</div>
+                <div className="seating-card-info">
+                  <h4>Outdoor Tepi Serayu</h4>
+                  <p>Semilir angin aliran sungai lepas</p>
+                </div>
+              </div>
+
+              <div className="hero-seating-card" onClick={onGoToMenu}>
+                <div className="seating-card-icon">🌿</div>
+                <div className="seating-card-info">
+                  <h4>Area Lt 2</h4>
+                  <p>Balkon panorama Bendung Gerak</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -191,27 +279,54 @@ export const HomePage = ({
             <div className="hero-media-frame">
               <img
                 src={getOptimizedImageUrl(
-                  'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=85',
+                  'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?auto=format&fit=crop&w=1000&q=85',
                   800
                 )}
-                alt="BlueSukan Cafe Interior & Atmosphere"
+                alt="Angkringan Blue'sukan Kopi Serayu"
                 className="hero-asymmetric-img"
                 loading="eager"
                 decoding="async"
               />
+              <div className="hero-media-badge-tag">
+                <span>📍 Tepi Bendung Gerak Serayu</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ─── 3. Signature Menu (Bento Grid Architecture) ───────────────── */}
+      {/* ─── 3. Special Social Program Banner (Dari Poster Resmi) ─────── */}
+      <section id="program-sosial" className="boutique-section program-section">
+        <div className="boutique-container">
+          <div className="social-honor-banner">
+            <div className="social-honor-badge">
+              <Award size={20} color="#FFFFFF" strokeWidth={2.4} />
+              <span>PROGRAM SOSIAL RESMI</span>
+            </div>
+            <div className="social-honor-content">
+              <h2 className="social-honor-title">
+                ⭐ KHUSUS GURU HONORER: Makan Siang di Blue'sukan Kopi GRATIS!
+              </h2>
+              <p className="social-honor-desc">
+                Wujud penghormatan tulus kami bagi para pahlawan tanpa tanda jasa yang mengabdi tanpa kenal lelah.
+                Cukup tunjukkan kartu identitas guru atau bukti mengajar aktif Anda kepada kasir saat berkunjung.
+              </p>
+              <div className="social-honor-quote">
+                <span>"Muliakan para pendidik, berkahkan rezeki bersama."</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── 4. Signature Menu Bento Grid ──────────────────────────────── */}
       <section id="menu-bento" className="boutique-section bento-section">
         <div className="boutique-container">
           <div className="section-header-editorial">
-            <span className="section-label-overline">CURATED SELECTION</span>
-            <h2 className="section-editorial-title">Signature House Picks</h2>
+            <span className="section-label-overline">PILIHAN FAVORIT PENGUNJUNG</span>
+            <h2 className="section-editorial-title">Menu Andalan Angkringan</h2>
             <p className="section-editorial-lead">
-              Racikan kopi artisan dan hidangan kurasi barista dengan standar kualitas tanpa kompromi.
+              Gorengan mendoan hangat khas Banyumas, nasi bakar pulen, dan racikan kopi seduh tradisional.
             </p>
           </div>
 
@@ -220,24 +335,24 @@ export const HomePage = ({
             <div className="bento-card bento-hero-card" onClick={onGoToMenu}>
               <div className="bento-hero-image-wrap">
                 <img
-                  src={getOptimizedImageUrl(BENTO_HERO.image_url, 800)}
-                  alt={BENTO_HERO.name}
+                  src={getOptimizedImageUrl(SIGNATURE_HERO.image_url, 800)}
+                  alt={SIGNATURE_HERO.name}
                   className="bento-hero-img"
                   loading="lazy"
                   decoding="async"
                 />
                 <div className="bento-card-scrim"></div>
-                <div className="bento-badge-tag">{BENTO_HERO.tagline}</div>
+                <div className="bento-badge-tag">{SIGNATURE_HERO.tagline}</div>
               </div>
 
               <div className="bento-hero-body">
-                <div className="bento-category-tag">{BENTO_HERO.category}</div>
-                <h3 className="bento-hero-title">{BENTO_HERO.name}</h3>
-                <p className="bento-hero-notes">{BENTO_HERO.notes}</p>
-                <p className="bento-hero-desc">{BENTO_HERO.description}</p>
+                <div className="bento-category-tag">{SIGNATURE_HERO.category}</div>
+                <h3 className="bento-hero-title">{SIGNATURE_HERO.name}</h3>
+                <p className="bento-hero-notes">{SIGNATURE_HERO.notes}</p>
+                <p className="bento-hero-desc">{SIGNATURE_HERO.description}</p>
 
                 <div className="bento-card-footer">
-                  <span className="bento-price-tag">{formatRupiah(BENTO_HERO.price)}</span>
+                  <span className="bento-price-tag">{formatRupiah(SIGNATURE_HERO.price)}</span>
                   <button
                     type="button"
                     className="bento-quick-add"
@@ -255,7 +370,7 @@ export const HomePage = ({
 
             {/* Bento Stacked Secondary Cards */}
             <div className="bento-stacked-col">
-              {BENTO_SECONDARY.map((item) => (
+              {SIGNATURE_SECONDARY.map((item) => (
                 <div
                   key={item.id}
                   className="bento-card bento-item-card"
@@ -304,14 +419,14 @@ export const HomePage = ({
               className="btn-editorial-explore-menu"
               onClick={onGoToMenu}
             >
-              <span>Buka Menu Selengkapnya (12 Pilihan)</span>
+              <span>Buka Menu Selengkapnya (55 Pilihan)</span>
               <ArrowRight size={17} />
             </button>
           </div>
         </div>
       </section>
 
-      {/* ─── 4. Atmosphere & Story Section (Kinfolk Style) ─────────────── */}
+      {/* ─── 5. Suasana & Cerita Tepi Serayu ────────────────────────────── */}
       <section id="story" className="boutique-section story-section">
         <div className="boutique-container">
           <div className="story-split-grid">
@@ -319,10 +434,10 @@ export const HomePage = ({
               <div className="story-image-frame">
                 <img
                   src={getOptimizedImageUrl(
-                    'https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=800&q=80',
+                    'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80',
                     800
                   )}
-                  alt="Barista brewing coffee at BlueSukan Cafe"
+                  alt="Suasana Ngopi di Blue'sukan Kopi"
                   className="story-main-img"
                   loading="lazy"
                   decoding="async"
@@ -330,30 +445,31 @@ export const HomePage = ({
               </div>
               <div className="story-quote-card">
                 <p className="story-quote-text">
-                  “Setiap cangkir adalah jembatan antara dedikasi petani lokal dan ketenangan momen Anda.”
+                  “Duduk tenang di tepi Serayu, melepas penat bersama secangkir kopi dan sepiring mendoan hangat.”
                 </p>
-                <span className="story-quote-author">— BlueSukan Artisan Roastery</span>
+                <span className="story-quote-author">— Angkringan Blue'sukan Kopi</span>
               </div>
             </div>
 
             <div className="story-text-column">
-              <span className="section-label-overline">OUR PHILOSOPHY</span>
+              <span className="section-label-overline">SUASANA WARUNG</span>
               <h2 className="story-heading">
-                Dedikasi pada Kualitas, <br />
-                <em className="story-serif-accent">Kenyamanan &amp; Kesederhanaan.</em>
+                Teduh di Tepi Sungai, <br />
+                <em className="story-serif-accent">Hangat Bersama Kawan.</em>
               </h2>
 
               <p className="story-paragraph">
-                BlueSukan Cafe didirikan dengan satu komitmen sederhana: menyajikan kopi berkualitas specialty tanpa pretensi, di dalam ruang yang memberikan ketenangan bagi pikiran dan inspirasi bagi setiap karya Anda.
+                Angkringan Blue'sukan Kopi hadir sebagai oase sederhana di tepi Bendung Gerak Serayu, Rawalo.
+                Di sini Anda bebas menikmati gemericik air sungai, hembusan angin segar, serta obrolan santai tanpa batasan waktu.
               </p>
 
               <div className="story-pillars">
                 <div className="story-pillar-item">
                   <span className="pillar-num">01</span>
                   <div className="pillar-content">
-                    <h4 className="pillar-title">Kurasi Biji Kopi Nusantara</h4>
+                    <h4 className="pillar-title">Panorama Tepi Serayu</h4>
                     <p className="pillar-desc">
-                      Biji kopi specialty grade dari Gayo, Toraja, dan Flores yang dipanggang dengan profil rasa presisi.
+                      Pemandangan langsung ke arah sungai dan Bendung Gerak, sempurna untuk spot bengong sore hingga malam.
                     </p>
                   </div>
                 </div>
@@ -361,9 +477,9 @@ export const HomePage = ({
                 <div className="story-pillar-item">
                   <span className="pillar-num">02</span>
                   <div className="pillar-content">
-                    <h4 className="pillar-title">Pengalaman Meja Nir-Antre</h4>
+                    <h4 className="pillar-title">Cita Rasa Otentik &amp; Murah Meriah</h4>
                     <p className="pillar-desc">
-                      Pemesanan mandiri langsung dari meja melalui ponsel cerdas Anda, sehingga percakapan tidak terputus.
+                      Dari mendoan hangat, nasi bakar, hingga aneka kopi sachet dan jahe susu dengan harga ramah kantong.
                     </p>
                   </div>
                 </div>
@@ -371,9 +487,9 @@ export const HomePage = ({
                 <div className="story-pillar-item">
                   <span className="pillar-num">03</span>
                   <div className="pillar-content">
-                    <h4 className="pillar-title">Ruang Hangat &amp; Inspiratif</h4>
+                    <h4 className="pillar-title">Pesan Mandiri Cepat Tanpa Antre</h4>
                     <p className="pillar-desc">
-                      Suasana tenang, pencahayaan alami, dan fasilitas stopkontak di setiap sudut meja.
+                      Pilih tempat duduk favorit Anda, buka web di HP, dan pesan langsung tanpa perlu repot berdiri di kasir.
                     </p>
                   </div>
                 </div>
@@ -383,62 +499,101 @@ export const HomePage = ({
         </div>
       </section>
 
-      {/* ─── 5. Location, Hours & Contact ──────────────────────────────── */}
+      {/* ─── 6. Jadwal Operasional & Lokasi Resmi ───────────────────────── */}
       <section id="location" className="boutique-section location-section">
         <div className="boutique-container">
           <div className="section-header-editorial">
-            <span className="section-label-overline">VISIT THE BAR</span>
-            <h2 className="section-editorial-title">Lokasi &amp; Jam Operasional</h2>
+            <span className="section-label-overline">JADWAL &amp; LOKASI</span>
+            <h2 className="section-editorial-title">Jadwal Operasional Resmi</h2>
             <p className="section-editorial-lead">
-              Temukan kami di kawasan Kemang yang tenang dan asri.
+              Kunjungi kami di tepi Bendung Gerak Serayu, Rawalo, Banyumas.
             </p>
           </div>
 
           <div className="location-editorial-grid">
-            <div className="location-editorial-card">
-              <div className="loc-card-header">
-                <MapPin size={20} className="loc-card-icon" />
-                <span className="loc-card-label">ALAMAT</span>
-              </div>
-              <h3 className="loc-card-value">BlueSukan Cafe Kemang</h3>
-              <p className="loc-card-address">
-                Jl. Kemang Raya No. 42, RT.02/RW.02, Bangka, Mampang Prapatan, Jakarta Selatan 12730
-              </p>
-              <div className="loc-landmark-pill">
-                <span>📍 Seberang Plaza Kemang 88</span>
-              </div>
-            </div>
-
+            {/* Card 1: Jadwal Jam Buka Resmi */}
             <div className="location-editorial-card">
               <div className="loc-card-header">
                 <Clock size={20} className="loc-card-icon" />
-                <span className="loc-card-label">JAM BUKA</span>
+                <span className="loc-card-label">JADWAL ASLI POSTER</span>
               </div>
+
+              {/* Status Pill Dinamis */}
+              <div className={`loc-live-status-pill ${shopStatus.isOpen ? 'open' : 'closed'}`}>
+                <span className="indicator-dot" />
+                <strong>{shopStatus.text}</strong>
+              </div>
+
               <div className="loc-hours-table">
-                <div className="loc-hours-row">
-                  <span>Senin – Jumat</span>
-                  <strong>08.00 – 23.00 WIB</strong>
+                <div className="loc-hours-row holiday">
+                  <span>Senin</span>
+                  <strong>LIBUR (Alias Prei)</strong>
                 </div>
                 <div className="loc-hours-row">
-                  <span>Sabtu – Minggu</span>
-                  <strong>07.30 – 23.30 WIB</strong>
+                  <span>Selasa – Kamis</span>
+                  <strong>11.00 – 00.00 WIB</strong>
                 </div>
-              </div>
-              <div className="loc-open-indicator">
-                <span className="indicator-dot"></span>
-                <span>Buka Hari Ini &amp; Siap Melayani</span>
+                <div className="loc-hours-row">
+                  <span>Jumat</span>
+                  <strong>15.00 – 00.00 WIB</strong>
+                </div>
+                <div className="loc-hours-row">
+                  <span>Sabtu</span>
+                  <strong>10.00 – 00.00 WIB</strong>
+                </div>
+                <div className="loc-hours-row">
+                  <span>Minggu</span>
+                  <strong>10.00 – 22.00 WIB</strong>
+                </div>
               </div>
             </div>
 
+            {/* Card 2: Alamat Lengkap */}
             <div className="location-editorial-card">
               <div className="loc-card-header">
-                <MessageCircle size={20} className="loc-card-icon" />
-                <span className="loc-card-label">KONTAK &amp; MEDIA</span>
+                <MapPin size={20} className="loc-card-icon" />
+                <span className="loc-card-label">ALAMAT LOKASI</span>
+              </div>
+              <h3 className="loc-card-value">Angkringan Blue'sukan Kopi</h3>
+              <p className="loc-card-address">
+                Kawasan Tepi Bendung Gerak Serayu, Kecamatan Rawalo, Kabupaten Banyumas, Jawa Tengah 53173
+              </p>
+              <div className="loc-landmark-pill">
+                <span>📍 Tepat di pinggir aliran Sungai Serayu</span>
+              </div>
+              <div style={{ marginTop: '14px' }}>
+                <a
+                  href="https://maps.google.com/?q=Bendung+Gerak+Serayu+Rawalo+Banyumas"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="loc-social-btn"
+                  style={{ width: '100%', justifyContent: 'center' }}
+                >
+                  <MapPin size={15} />
+                  <span>Buka di Google Maps</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Card 3: Kontak & Media Sosial */}
+            <div className="location-editorial-card">
+              <div className="loc-card-header">
+                <Globe size={20} className="loc-card-icon" />
+                <span className="loc-card-label">KONTAK RESMI</span>
               </div>
               <p className="loc-contact-desc">
-                Punya pertanyaan mengenai reservasi atau katering kopi untuk acara?
+                Ikuti media sosial kami untuk kabar terbaru, promo, dan suasana senja tepi Serayu:
               </p>
               <div className="loc-social-links">
+                <a
+                  href="https://instagram.com/bluesukankopi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="loc-social-btn"
+                >
+                  <Globe size={15} />
+                  <span>Instagram: @bluesukankopi</span>
+                </a>
                 <a
                   href="https://wa.me/6281234567890"
                   target="_blank"
@@ -446,16 +601,7 @@ export const HomePage = ({
                   className="loc-social-btn"
                 >
                   <MessageCircle size={15} />
-                  <span>WhatsApp: +62 812-3456-7890</span>
-                </a>
-                <a
-                  href="https://instagram.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="loc-social-btn"
-                >
-                  <Globe size={15} />
-                  <span>Instagram: @bluesukancafe</span>
+                  <span>WhatsApp Layanan &amp; Tanya Meja</span>
                 </a>
               </div>
             </div>
@@ -463,19 +609,19 @@ export const HomePage = ({
         </div>
       </section>
 
-      {/* ─── 6. Deep Ink Navy Footer ───────────────────────────────────── */}
+      {/* ─── 7. Vintage Navy Footer ────────────────────────────────────── */}
       <footer className="boutique-footer">
         <div className="boutique-container">
           <div className="footer-main-grid">
             <div className="footer-brand-block">
               <div className="footer-brand-title">
-                <span>BlueSukan</span>
+                <span>Blue'sukan</span>
                 <span className="brand-dot">•</span>
-                <span>CAFE</span>
+                <span>KOPI</span>
               </div>
               <p className="footer-brand-desc">
-                Specialty Coffee Roasters &amp; Guest Self-Order System.
-                Diracik dengan presisi, disajikan dengan kehangatan.
+                Angkringan &amp; Spot Bengong Tepi Serayu, Rawalo, Banyumas.
+                Nongkrong Asyik • Kopi Enak • Teman Asyik • Hati Bahagia.
               </p>
             </div>
 
@@ -483,9 +629,9 @@ export const HomePage = ({
               <span className="footer-nav-heading">NAVIGASI</span>
               <ul className="footer-nav-list">
                 <li><button type="button" onClick={() => scrollToSection('hero')}>Beranda</button></li>
-                <li><button type="button" onClick={onGoToMenu}>Katalog Menu</button></li>
-                <li><button type="button" onClick={() => scrollToSection('story')}>Filosofi</button></li>
-                <li><button type="button" onClick={() => scrollToSection('location')}>Lokasi</button></li>
+                <li><button type="button" onClick={onGoToMenu}>Katalog Menu (55)</button></li>
+                <li><button type="button" onClick={() => scrollToSection('program-sosial')}>Program Guru Honorer</button></li>
+                <li><button type="button" onClick={() => scrollToSection('location')}>Jadwal &amp; Lokasi</button></li>
               </ul>
             </div>
 
@@ -500,20 +646,18 @@ export const HomePage = ({
 
           <div className="footer-bottom-bar">
             <span className="footer-copyright">
-              © {new Date().getFullYear()} BlueSukan Cafe. All rights reserved.
+              © {new Date().getFullYear()} Angkringan Blue'sukan Kopi. Rawalo, Banyumas.
             </span>
             <div className="footer-payment-chips">
               <span>QRIS</span>
-              <span>GOPAY</span>
-              <span>OVO</span>
-              <span>SHOPEEPAY</span>
-              <span>CASH</span>
+              <span>TUNAI / CASH</span>
+              <span>DEBIT</span>
             </div>
           </div>
         </div>
       </footer>
 
-      {/* ─── 7. Floating Active Order Live Tracker Bar ─────────────────── */}
+      {/* ─── 8. Floating Active Order Tracker ─────────────────────────── */}
       {activeOrder && (
         <ActiveOrderTracker
           order={activeOrder}

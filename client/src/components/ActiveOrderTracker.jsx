@@ -22,7 +22,7 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
     }
   }, [order?.status]);
 
-  // Realtime Polling of Order Status (every 3 seconds per PRD Task 4)
+  // Fallback Polling of Order Status (every 30 seconds as fallback to SSE)
   useEffect(() => {
     if (!order?.order_code || currentStatus === 'completed' || currentStatus === 'cancelled') {
       return;
@@ -42,7 +42,7 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
       } catch {
         // Network hiccup — continue next poll
       }
-    }, 3000);
+    }, 30000);
 
     return () => clearInterval(intervalId);
   }, [order?.order_code, currentStatus, onStatusChange]);

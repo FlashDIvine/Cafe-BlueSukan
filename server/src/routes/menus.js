@@ -76,6 +76,17 @@ router.get('/', async (req, res) => {
       prisma.menu.findMany({
         where,
         orderBy: { id: 'asc' },
+        select: {
+          id: true,
+          category_id: true,
+          name: true,
+          price: true,
+          stock: true,
+          image_url: true,
+          description: true,
+          is_available: true,
+          is_popular: true,
+        },
       }),
       getCategoriesMap(),
     ]);

@@ -21,7 +21,14 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
   const [countdown, setCountdown] = useState(null); // null when inactive
   const [isCountdownCancelled, setIsCountdownCancelled] = useState(false);
 
-  // Polling status interval (every 3 seconds per PRD Task 4)
+  // Sync internal state when order prop changes (via SSE in parent)
+  useEffect(() => {
+    if (order?.status && order.status !== currentStatus) {
+      setCurrentStatus(order.status);
+    }
+  }, [order?.status]);
+
+  // Fallback polling interval (every 30 seconds as fallback to SSE)
   useEffect(() => {
     if (!order?.order_code || currentStatus === 'paid_processing' || currentStatus === 'completed') {
       return;
@@ -36,7 +43,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
       } catch {
         // Network hiccup — keep polling
       }
-    }, 3000);
+    }, 30000);
 
     return () => clearInterval(intervalId);
   }, [order?.order_code, currentStatus]);
@@ -129,7 +136,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
           <div className="ticket-cafe-logo">
             <Coffee size={24} color="#FFFFFF" />
           </div>
-          <span className="ticket-cafe-name">BlueSukan Cafe</span>
+          <span className="ticket-cafe-name">Angkringan Blue'sukan Kopi</span>
           <div className="ticket-order-code-badge" title="Kode Pesanan Anda">
             <span>{order?.order_code || '#BC-100'}</span>
           </div>
@@ -143,12 +150,12 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
               size={170}
               level="H"
               includeMargin={false}
-              fgColor="#0F3E7D"
+              fgColor="#1B3B64"
               bgColor="#FFFFFF"
             />
           </div>
           <p className="qr-scan-hint">
-            <Sparkles size={14} color="var(--color-royal-blue)" />
+            <Sparkles size={14} color="var(--accent-amber)" />
             Tunjukkan QR ini ke kasir saat memesan
           </p>
         </div>
@@ -165,7 +172,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
                 <span>Pembayaran Sukses • Sedang Diproses</span>
               </div>
               <p className="status-desc-row">
-                Pesanan Anda telah dikonfirmasi dan sedang diracik oleh barista BlueSukan Cafe.
+                Pesanan Anda telah dikonfirmasi dan sedang disiapkan oleh tim Angkringan Blue'sukan Kopi.
               </p>
             </div>
           </div>

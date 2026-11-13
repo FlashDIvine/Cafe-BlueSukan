@@ -69,7 +69,7 @@ export const RecommendedCard = memo(({ item }) => {
           {item.name}
         </h3>
         <p className="stitch-rec-desc">
-          {item.description || 'Pilihan menu istimewa BlueSukan Cafe'}
+          {item.description || "Pilihan menu favorit Angkringan Blue'sukan Kopi"}
         </p>
 
         <div className="stitch-rec-footer">

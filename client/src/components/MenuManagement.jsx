@@ -316,6 +316,8 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                   <img
                     src={newCategoryImage}
                     alt="Preview"
+                    loading="lazy"
+                    decoding="async"
                     style={{
                       width: '36px',
                       height: '36px',
@@ -408,6 +410,8 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                   <img
                     src={cat.image || DEFAULT_CATEGORY_FALLBACK}
                     alt={cat.name}
+                    loading="lazy"
+                    decoding="async"
                     style={{
                       width: '24px',
                       height: '24px',
@@ -529,6 +533,8 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                 <img
                   src={menu.image_url}
                   alt={menu.name}
+                  loading="lazy"
+                  decoding="async"
                   style={{
                     width: '56px',
                     height: '56px',

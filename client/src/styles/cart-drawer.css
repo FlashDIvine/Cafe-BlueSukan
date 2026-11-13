@@ -634,8 +634,8 @@
 
 .btn-checkout-submit {
   width: 100%;
-  background-color: var(--accent);
-  color: var(--bone);
+  background-color: var(--accent-amber, #C96A2B);
+  color: #FFFFFF;
   border: none;
   font-family: var(--f-body);
   font-size: 0.9375rem;
@@ -647,12 +647,14 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 24%, transparent);
+  box-shadow: 0 4px 14px rgba(201, 106, 43, 0.35);
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 .btn-checkout-submit:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-amber-hover, #AF581F);
+  transform: translateY(-1px);
 }
 
 .btn-checkout-submit:disabled {

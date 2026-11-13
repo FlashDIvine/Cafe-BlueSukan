@@ -14,11 +14,11 @@ export const Navbar = memo(({ onOpenTableModal, onGoHome, activeOrder, onOpenTic
       </div>
       <div className="brand-text">
         <span className="brand-title">
-          BlueSukan <span className="brand-title-accent">Cafe</span>
+          Blue'sukan <span className="brand-title-accent">Kopi</span>
         </span>
         <div className="brand-subtitle">
           <span className="status-dot" aria-hidden="true" />
-          <span className="brand-badge-text">Guest Self-Order</span>
+          <span className="brand-badge-text">Tepi Serayu • Rawalo</span>
         </div>
       </div>
     </>
@@ -32,7 +32,7 @@ export const Navbar = memo(({ onOpenTableModal, onGoHome, activeOrder, onOpenTic
           className="brand-container brand-interactive"
           onClick={onGoHome}
           title="Kembali ke Halaman Utama"
-          aria-label="BlueSukan Cafe - Kembali ke Halaman Utama"
+          aria-label="Angkringan Blue'sukan Kopi - Kembali ke Halaman Utama"
         >
           {brandContent}
         </button>

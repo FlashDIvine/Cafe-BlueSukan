@@ -33,7 +33,7 @@ export const TableModal = ({ isOpen, onClose }) => {
         <form onSubmit={handleSave}>
           <div className="modal-body">
             <p className="modal-desc">
-              Pilih area tempat Anda duduk di BlueSukan Cafe untuk mempermudah barista mengantarkan pesanan.
+              Pilih area tempat Anda duduk di Angkringan Blue'sukan Kopi untuk mempermudah pesanan diantarkan ke meja Anda.
             </p>
             <div className="seating-selector-grid">
               {SEATING_AREAS.map((area) => {

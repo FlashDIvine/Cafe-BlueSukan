@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { getTableFromUrl } from '../utils/formatters';
 import { MOCK_MENUS, CATEGORIES } from '../data/mockMenus';
 import { fetchMenusApi } from '../services/api';
@@ -57,7 +57,8 @@ export const OrderProvider = ({ children }) => {
     };
 
     fetchLatestMenus();
-    const interval = setInterval(fetchLatestMenus, 3000);
+    // Relaxed 30s polling fallback (combined with immediate visibility change fetch)
+    const interval = setInterval(fetchLatestMenus, 30000);
 
     const handleVisibilityChange = () => {
       if (typeof document !== 'undefined' && !document.hidden) {
@@ -86,12 +87,26 @@ export const OrderProvider = ({ children }) => {
 
   // Toast / notification feedback state (for stock warnings, add confirmations)
   const [toastMessage, setToastMessage] = useState(null);
+  const toastTimerRef = useRef(null);
 
   const showToast = useCallback((msg, type = 'info') => {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
     setToastMessage({ msg, type, id: Date.now() });
-    setTimeout(() => {
+    toastTimerRef.current = setTimeout(() => {
       setToastMessage((prev) => (prev && prev.msg === msg ? null : prev));
+      toastTimerRef.current = null;
     }, 3000);
+  }, []);
+
+  // Cleanup pending toast timer on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) {
+        clearTimeout(toastTimerRef.current);
+      }
+    };
   }, []);
 
   // Listen to URL search param changes on initial load or popstate

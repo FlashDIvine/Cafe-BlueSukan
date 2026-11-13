@@ -315,3 +315,16 @@ export async function deleteCategoryApi(categoryId) {
   if (!res.ok) throw new Error(json.message || 'Gagal menghapus kategori');
   return json.data;
 }
+
+/**
+ * Fetch Daily Sales Summary for Cashier (GET /api/orders/summary/daily)
+ * @param {string} [date] - Optional date in YYYY-MM-DD
+ * @returns {Promise<Object>}
+ */
+export async function fetchDailySalesSummaryApi(date) {
+  const query = date ? `?date=${encodeURIComponent(date)}` : '';
+  const res = await fetch(`${API_BASE}/orders/summary/daily${query}`);
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.message || 'Gagal memuat ringkasan penjualan harian');
+  return json;
+}

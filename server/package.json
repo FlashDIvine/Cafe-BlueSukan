@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
+    "start:lowmem": "node --max-old-space-size=192 --optimize-for-size src/index.js",
+    "prisma:generate": "prisma generate",
     "build": "prisma generate"
   },
   "prisma": {

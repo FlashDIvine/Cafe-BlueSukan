@@ -302,6 +302,8 @@ export const MenuFormModal = ({ isOpen, onClose, onSubmit, initialMenu, categori
                   <img
                     src={imageUrl}
                     alt="Preview Menu"
+                    loading="lazy"
+                    decoding="async"
                     style={{
                       width: '64px',
                       height: '64px',

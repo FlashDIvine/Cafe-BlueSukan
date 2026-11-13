@@ -65,6 +65,43 @@ function AppContent() {
     }
   }, [activeOrder]);
 
+  // Realtime SSE stream for active order status updates
+  useEffect(() => {
+    if (!activeOrder?.order_code || activeOrder.status === 'completed' || activeOrder.status === 'cancelled') {
+      return;
+    }
+
+    let eventSource = null;
+    try {
+      eventSource = new EventSource('/api/orders/stream');
+
+      eventSource.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (
+            payload?.order_code === activeOrder.order_code &&
+            payload?.status &&
+            payload.status !== activeOrder.status
+          ) {
+            setActiveOrder((prev) => (prev ? { ...prev, status: payload.status } : prev));
+          }
+        } catch {
+          // Heartbeat or malformed comment
+        }
+      };
+
+      eventSource.onerror = () => {
+        // Auto-reconnect silently
+      };
+    } catch (err) {
+      console.warn('Failed to initialize SSE EventSource in App:', err);
+    }
+
+    return () => {
+      if (eventSource) eventSource.close();
+    };
+  }, [activeOrder?.order_code, activeOrder?.status]);
+
   // Listen to browser hash changes (e.g. #cashier, #menu, #home)
   useEffect(() => {
     const handleHashChange = () => {

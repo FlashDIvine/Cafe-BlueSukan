@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { Router } from 'express';
 import prisma from '../prisma.js';
 import {
@@ -6,7 +7,12 @@ import {
   findOrderByCode,
   findOrderById,
   findMenuById,
+  pruneOrders,
 } from '../db.js';
+
+// Global Event Emitter for Realtime SSE Broadcasts
+export const orderEvents = new EventEmitter();
+orderEvents.setMaxListeners(100);
 
 const router = Router();
 
@@ -72,6 +78,15 @@ router.post('/', async (req, res) => {
 
       memoryOrders.unshift(newOrder);
 
+      // Auto-prune old completed/cancelled orders to prevent unbounded memory growth
+      pruneOrders();
+
+      orderEvents.emit('order_changed', {
+        type: 'NEW_ORDER',
+        order_code: newOrder.order_code,
+        status: newOrder.status,
+      });
+
       return res.status(201).json({
         success: true,
         message: 'Pesanan berhasil dibuat',
@@ -127,6 +142,12 @@ router.post('/', async (req, res) => {
       });
     });
 
+    orderEvents.emit('order_changed', {
+      type: 'NEW_ORDER',
+      order_code: createdOrder.order_code,
+      status: createdOrder.status,
+    });
+
     res.status(201).json({
       success: true,
       message: 'Pesanan berhasil dibuat',
@@ -168,6 +189,158 @@ router.get('/', async (req, res) => {
       list = memoryOrders.filter((o) => o.status === status);
     }
     res.json({ success: true, data: list });
+  }
+});
+
+/**
+ * GET /api/orders/stream
+ * Server-Sent Events (SSE) Stream for Cashier & Customer realtime sync
+ */
+router.get('/stream', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  if (typeof res.flushHeaders === 'function') {
+    res.flushHeaders();
+  }
+
+  // Initial connection handshake
+  res.write(`data: ${JSON.stringify({ type: 'CONNECTED', timestamp: new Date().toISOString() })}\n\n`);
+
+  const onOrderUpdate = (payload) => {
+    try {
+      res.write(`data: ${JSON.stringify(payload)}\n\n`);
+    } catch (err) {
+      console.error('Error writing to SSE stream:', err);
+    }
+  };
+
+  orderEvents.on('order_changed', onOrderUpdate);
+
+  // Heartbeat comment every 15s to keep long-lived connections alive through proxies / Vercel
+  const heartbeat = setInterval(() => {
+    try {
+      res.write(': heartbeat\n\n');
+    } catch {
+      clearInterval(heartbeat);
+    }
+  }, 15000);
+
+  // Robust multi-event listener cleanup to guarantee zero memory leaks
+  let isCleanedUp = false;
+  const cleanup = () => {
+    if (isCleanedUp) return;
+    isCleanedUp = true;
+    clearInterval(heartbeat);
+    orderEvents.off('order_changed', onOrderUpdate);
+  };
+
+  req.on('close', cleanup);
+  req.on('error', cleanup);
+  res.on('finish', cleanup);
+  res.on('close', cleanup);
+});
+
+/**
+ * GET /api/orders/summary/daily
+ * Daily Sales Summary for Cashier
+ */
+router.get('/summary/daily', async (req, res) => {
+  try {
+    let startOfDay;
+    let endOfDay;
+
+    if (req.query.date) {
+      const dateParts = req.query.date.split('-');
+      if (dateParts.length === 3) {
+        const year = parseInt(dateParts[0], 10);
+        const month = parseInt(dateParts[1], 10) - 1;
+        const day = parseInt(dateParts[2], 10);
+        startOfDay = new Date(year, month, day, 0, 0, 0, 0);
+        endOfDay = new Date(year, month, day, 23, 59, 59, 999);
+      }
+    }
+
+    if (!startOfDay) {
+      const now = new Date();
+      startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    }
+
+    let validOrders = [];
+
+    if (process.env.DATABASE_URL) {
+      validOrders = await prisma.order.findMany({
+        where: {
+          created_at: { gte: startOfDay, lte: endOfDay },
+          status: { in: ['paid_processing', 'completed'] },
+        },
+        include: { items: true },
+      });
+    } else {
+      validOrders = memoryOrders.filter((o) => {
+        const orderDate = new Date(o.created_at);
+        return (
+          orderDate >= startOfDay &&
+          orderDate <= endOfDay &&
+          ['paid_processing', 'completed'].includes(o.status)
+        );
+      });
+    }
+
+    let totalRevenue = 0;
+    const paymentBreakdown = { Cash: 0, QRIS: 0, Debit: 0 };
+    const itemSalesMap = {};
+
+    for (const order of validOrders) {
+      const price = Number(order.total_price) || 0;
+      totalRevenue += price;
+
+      const rawMethod = (order.payment_method || 'Cash').toLowerCase();
+      let normalizedMethod = 'Cash';
+      if (rawMethod === 'qris') normalizedMethod = 'QRIS';
+      else if (rawMethod === 'debit') normalizedMethod = 'Debit';
+
+      paymentBreakdown[normalizedMethod] = (paymentBreakdown[normalizedMethod] || 0) + price;
+
+      for (const item of order.items || []) {
+        const name = item.menu_name || item.name || 'Menu';
+        const qty = Number(item.quantity) || 1;
+        const itemPrice = Number(item.price) || 0;
+        const subtotal = Number(item.subtotal) || itemPrice * qty;
+
+        if (!itemSalesMap[name]) {
+          itemSalesMap[name] = { name, qty: 0, revenue: 0 };
+        }
+        itemSalesMap[name].qty += qty;
+        itemSalesMap[name].revenue += subtotal;
+      }
+    }
+
+    const topItems = Object.values(itemSalesMap)
+      .sort((a, b) => b.qty - a.qty || b.revenue - a.revenue)
+      .slice(0, 5);
+
+    const averageOrderValue = validOrders.length > 0
+      ? Math.round(totalRevenue / validOrders.length)
+      : 0;
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const dateStr = `${startOfDay.getFullYear()}-${pad(startOfDay.getMonth() + 1)}-${pad(startOfDay.getDate())}`;
+
+    res.json({
+      success: true,
+      date: dateStr,
+      total_orders: validOrders.length,
+      total_revenue: totalRevenue,
+      average_order_value: averageOrderValue,
+      payment_breakdown: paymentBreakdown,
+      top_items: topItems,
+    });
+  } catch (error) {
+    console.error('Error fetching daily summary:', error);
+    res.status(500).json({ success: false, message: 'Gagal memuat ringkasan penjualan harian' });
   }
 });
 
@@ -328,6 +501,12 @@ router.put('/:id/items', async (req, res) => {
     order.items = newItemsData;
     order.total_price = totalPrice;
 
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: order.order_code,
+      status: order.status,
+    });
+
     return res.json({
       success: true,
       message: `Menu pesanan ${order.order_code} berhasil diperbarui`,
@@ -377,6 +556,12 @@ router.put('/:id/items', async (req, res) => {
       });
     });
 
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: updatedOrder.order_code,
+      status: updatedOrder.status,
+    });
+
     res.json({
       success: true,
       message: `Menu pesanan ${updatedOrder.order_code} berhasil diperbarui`,
@@ -424,6 +609,12 @@ router.patch('/:id/approve', async (req, res) => {
     order.payment_method = paymentMethod;
     order.paid_at = new Date().toISOString();
 
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: order.order_code,
+      status: order.status,
+    });
+
     return res.json({
       success: true,
       message: `Pesanan ${order.order_code} telah dikonfirmasi & stok dipotong`,
@@ -467,6 +658,12 @@ router.patch('/:id/approve', async (req, res) => {
       });
     });
 
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: approvedOrder.order_code,
+      status: approvedOrder.status,
+    });
+
     res.json({
       success: true,
       message: `Pesanan ${approvedOrder.order_code} telah dikonfirmasi & stok dipotong`,
@@ -489,6 +686,13 @@ router.patch('/:id/complete', async (req, res) => {
     const order = findOrderById(id);
     if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
     order.status = 'completed';
+
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: order.order_code,
+      status: order.status,
+    });
+
     return res.json({
       success: true,
       message: `Pesanan ${order.order_code} telah diselesaikan`,
@@ -514,6 +718,12 @@ router.patch('/:id/complete', async (req, res) => {
       where: { id },
       data: { status: 'completed' },
       include: { items: true },
+    });
+
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: completed.order_code,
+      status: completed.status,
     });
 
     res.json({
@@ -544,6 +754,13 @@ router.patch('/:id/cancel', async (req, res) => {
       });
     }
     order.status = 'cancelled';
+
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: order.order_code,
+      status: order.status,
+    });
+
     return res.json({
       success: true,
       message: `Pesanan ${order.order_code} telah dibatalkan`,
@@ -568,6 +785,12 @@ router.patch('/:id/cancel', async (req, res) => {
       where: { id },
       data: { status: 'cancelled' },
       include: { items: true },
+    });
+
+    orderEvents.emit('order_changed', {
+      type: 'STATUS_UPDATED',
+      order_code: cancelled.order_code,
+      status: cancelled.status,
     });
 
     res.json({

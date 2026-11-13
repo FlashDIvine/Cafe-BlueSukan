@@ -1,13 +1,14 @@
-# 📋 BlueSukan Cafe — Project Handover & Context Guide untuk AI Gemini
+# 📋 Angkringan Blue'sukan Kopi — Project Handover & Context Guide untuk AI Gemini
 
-Dokumen ini disusun sebagai panduan menyeluruh untuk **AI Gemini** (dan pengembang) agar dapat langsung memahami arsitektur, kode, status pengerjaan, dan alur sistem dari repositori **BlueSukan Cafe**, serta mengetahui bagian mana yang perlu dilanjutkan.
+Dokumen ini disusun sebagai panduan menyeluruh untuk **AI Gemini** (dan pengembang) agar dapat langsung memahami arsitektur, kode, status pengerjaan, dan alur sistem dari repositori **Angkringan Blue'sukan Kopi** (Rawalo, Banyumas), serta mengetahui bagian mana yang perlu dilanjutkan.
 
 ---
 
 ## 1. Ringkasan & Identitas Projek
 
-- **Nama Resmi Brand:** **BlueSukan Cafe** (atau *BlueSukan Specialty Coffee & Roastery*).
-- **Konsep Inti:** Aplikasi web **Guest Self-Order** (*mobile-first*) untuk pelanggan kafe yang memesan langsung dari meja tanpa login/registrasi, terintegrasi dengan **POS Kasir (Cashier Dashboard)** untuk verifikasi pesanan, pembayaran (Cash/QRIS/Debit), dan **Manajemen Stok Menu (Inventory CRUD)** secara realtime.
+- **Nama Resmi Brand:** **Angkringan Blue'sukan Kopi** (Spot Bengong Tepi Serayu • Rawalo, Banyumas).
+- **Tagline Resmi:** *"Nongkrong Asyik • Kopi Enak • Teman Asyik • Hati Bahagia"* (`@bluesukankopi`).
+- **Konsep Inti:** Aplikasi web **Guest Self-Order** (*mobile-first*) untuk pelanggan angkringan tepi Sungai Serayu yang memesan langsung dari meja tanpa login/registrasi, terintegrasi dengan **POS Kasir (Cashier Dashboard)** untuk verifikasi pesanan, pembayaran (Cash/QRIS/Debit), dan **Manajemen Stok Menu (Inventory CRUD)** secara realtime.
 - **Arsitektur Repositori:** Monorepo sederhana yang menggabungkan frontend React Vite dan backend Express.js dalam satu repo, siap untuk *local dev* maupun *production deployment* di Vercel.
 
 ---
@@ -18,7 +19,14 @@ Dokumen ini disusun sebagai panduan menyeluruh untuk **AI Gemini** (dan pengemba
 - **Framework & Runtime:** React 19 (`react`, `react-dom`), Vite 8.
 - **Iconography:** `lucide-react`.
 - **QR Code Generator:** `qrcode.react` (merender QR kode pesanan untuk di-scan kasir).
-- **Styling:** Vanilla CSS murni dengan Design System berbasis CSS Variables (`client/src/styles/index.css`), tanpa Tailwind. Desain mengusung tema **High-End Modern Boutique & Editorial Cafe** dengan palet warna Deep Cobalt (`#1E40AF`), Midnight Navy (`#0A0F1D`), dan Glassmorphism.
+- **Styling & Tema:** Vanilla CSS murni dengan Design System berbasis CSS Variables (`client/src/styles/index.css`), tanpa Tailwind. Desain mengusung tema **Vintage Riverside Angkringan & Retro Poster** terinspirasi dari papan poster clipboard resmi Blue'sukan Kopi dan suasana senja Bendung Gerak Serayu:
+  - Background Utama (`--bg-primary`): `#F4ECDC` (Aged Kraft Paper / Kertas Menu Vintage)
+  - Background Card (`--bg-surface`): `#FBF7EF` dengan border `#D5C7B2`
+  - Warna Utama Brand (`--brand-navy`): `#1B3B64` (Vintage Poster Navy Blue)
+  - Warna Aksen Hangat (`--accent-amber`): `#C96A2B` (Lantern Amber / Genteng Terakota)
+  - Teks Utama (`--text-primary`): `#1E1915` (Dark Roasted Espresso)
+  - Teks Sekunder (`--text-secondary`): `#5A4D41` (Weathered Wood)
+- **Tipografi:** Google Fonts `Fraunces` (Display/Poster), `Plus Jakarta Sans` (Body & UI), `JetBrains Mono` (Harga & Kode Order).
 
 ### Backend (`/server`)
 - **Runtime:** Node.js (ES Module: `"type": "module"`).
@@ -149,22 +157,106 @@ Fitur pengalihan pasca-checkout ke Beranda telah selesai diimplementasikan:
 - [x] **Modul 3: Antarmuka Kasir POS Dashboard & Edit Menu Pesanan** (Selesai)
 - [x] **Modul 4: Manajemen Menu & Stok Kafe (CRUD & Quick Stock Stepper)** (Selesai)
 - [x] **Modul 5: Integrasi Database Permanen (Prisma ORM & PostgreSQL)** (Selesai)
-- [x] **Visual Overhaul: Modern Boutique & Bento Grid UI** (Selesai)
+- [x] **Visual Overhaul: Vintage Riverside Angkringan & Retro Poster UI** (Selesai)
+- [x] **Migrasi Katalog Menu Asli (55 Menu & 5 Kategori Asli Angkringan)** (Selesai)
 - [x] **Post-Checkout Flow: Redirect ke Beranda + Floating Active Order Tracker & Modal QR** (Selesai)
 - [x] **Seating Location: 3 Pilihan Area Murni (Indoor, Outdoor, Lt 2)** (Selesai)
-
-### Backlog & Peningkatan Selanjutnya (Siap Dilanjutkan):
-1. **WebSockets / Server-Sent Events (SSE):** Menggantikan interval polling 3 detik dengan koneksi realtime dua arah antara kasir dan pelanggan.
-2. **Fitur Riwayat Pesanan Pelanggan (Local Storage):** Menyimpan daftar riwayat pesanan sebelumnya di perangkat pelanggan agar dapat dilihat kembali kapan saja.
-3. **Fitur Notifikasi Audio / Ring Bell di Kasir:** Suara bel notifikasi saat pesanan baru dari meja masuk ke dashboard kasir POS.
-4. **Laporan Penjualan Harian Kasir (Sales Summary):** Ringkasan omzet harian, menu terlaris, dan rincian metode pembayaran (Cash/QRIS/Debit) di akhir shift kasir.
-5. **Kustomisasi Varian Menu (Options/Add-ons):** Pilihan level gula (Normal, Less Sugar), varian susu (Oat Milk, Fresh Milk), dan extra espresso shot.
+- [x] **Realtime Server-Sent Events (SSE) & Fallback (`/api/orders/stream`)** (Selesai)
+- [x] **Notifikasi Audio Bel Kasir (Web Audio API Synthesizer Ding-Dong)** (Selesai)
+- [x] **Laporan Penjualan Harian Kasir (Daily Sales Summary Modal & `/api/orders/summary/daily`)** (Selesai)
+- [x] **Optimasi Penggunaan RAM & Anti-Memory Leak (Node.js Heap & Browser Kasir)** (Selesai)
+- [x] **Konfigurasi Production Deployment EthioDeploy / Node.js PaaS Container** (Selesai)
 
 ---
 
-## 8. Catatan Penting untuk AI Gemini Selanjutnya
+## 8. Optimasi Penggunaan Memori (RAM / Memory Footprint)
+
+Untuk menjamin kestabilan aplikasi saat di-deploy pada VPS dengan kapasitas RAM terbatas (512MB – 1GB) maupun lingkungan serverless Vercel, serta mencegah *browser crash* di perangkat kasir yang menyala seharian, serangkaian optimasi berikut telah diimplementasikan:
+
+### A. Backend & Node.js V8 Heap
+1. **Script Eksekusi Rendah Memori (`start:lowmem`):**
+   - Ditambahkan pada root `package.json` dan `server/package.json`:
+     ```bash
+     npm run start:lowmem
+     # Menjalankan: node --max-old-space-size=192 --optimize-for-size server/src/index.js
+     ```
+   - Membatasi batas heap V8 maksimal 192MB dan mengaktifkan strategi Garbage Collection agresif untuk menghemat konsumsi RAM server.
+2. **In-Memory Store Auto-Pruning (`server/src/db.js`):**
+   - Fungsi `pruneOrders()` otomatis menghapus pesanan berstatus `completed` atau `cancelled` yang berumur lebih dari 24 jam.
+   - Menetapkan batas maksimum (hard-cap) riwayat pesanan dalam memori sebanyak **200 pesanan terbaru**.
+   - Dijalankan otomatis setiap ada `POST /api/orders` baru serta secara periodik tiap 1 jam via background timer dengan `.unref()` agar tidak menahan proses shutdown Node.js.
+3. **Database Payload & Connection Pooling (`server/src/routes/menus.js` & `prisma.js`):**
+   - Query `GET /api/menus` menggunakan Prisma `select` eksplisit hanya pada atribut yang dibutuhkan (`id`, `category_id`, `name`, `price`, `stock`, `image_url`, `description`, `is_available`, `is_popular`), menghindari alokasi memori untuk metadata timestamp yang tidak digunakan client.
+   - `server/src/prisma.js` otomatis membatasi pool koneksi (`?connection_limit=5`) jika parameter belum ditentukan di `DATABASE_URL`, mencegah *connection exhaustion* pada PostgreSQL/Supabase.
+4. **SSE Event Listener Cleanup & Endpoint Diagnostik RAM (`/api/health`):**
+   - `server/src/routes/orders.js` membersihkan listener `orderEvents` secara menyeluruh melalui handler multi-event (`req.on('close')`, `req.on('error')`, `res.on('finish')`, `res.on('close')`) serta mereset heartbeat interval.
+   - Endpoint `GET /api/health` mengembalikan telemetri memori real-time:
+     ```json
+     {
+       "status": "ok",
+       "service": "Angkringan Blue'sukan Kopi API",
+       "uptimeSeconds": 142,
+       "engine": "In-Memory Store",
+       "memory": {
+         "rssMB": 85.55,
+         "heapUsedMB": 11.19,
+         "heapTotalMB": 18.94,
+         "externalMB": 2.57
+       }
+     }
+     ```
+
+### B. Frontend & Browser Kasir
+1. **Singleton `AudioContext` & Audio Node Disconnect (`client/src/utils/bellSound.js`):**
+   - Menggunakan satu instance global `AudioContext` (singleton) yang digunakan kembali setiap kali bel notifikasi berbunyi.
+   - Transient nodes (`OscillatorNode`, `GainNode`) langsung di-disconnect via callback `onended` untuk melepaskan buffer audio driver hardware di browser.
+2. **Pembatasan Render DOM Riwayat Kasir (`client/src/pages/CashierPage.jsx`):**
+   - Pada tab riwayat selesai/batal, rendering DOM dibatasi maksimal **25 pesanan selesai terbaru hari ini** secara default.
+   - Tombol toggle *"Tampilkan Semua ({N} Riwayat Selesai / Batal)"* tersedia jika kasir ingin melihat riwayat lengkap tanpa membebani browser sejak awal.
+3. **Lazy Image Decoding & Asynchronous Decoding:**
+   - Seluruh tag `<img>` pada katalog (55 menu), bento grid, kartu rekomendasi, keranjang, dan manajemen menu menggunakan `loading="lazy"` dan `decoding="async"`.
+4. **Eliminasi Blind Polling & Pembersihan Interval Dangling:**
+   - Interval polling menu 3 detik di `OrderContext.jsx` direlaksasi menjadi 30 detik (ditambah sinkronisasi instan saat tab dibuka via `visibilitychange`).
+   - Seluruh `setTimeout` notifikasi toast dibersihkan via `useRef` saat unmount untuk mencegah *memory leak* di React.
+
+---
+
+## 9. Konfigurasi Deployment Production (EthioDeploy / Node.js Container / VPS)
+
+Repositori ini telah dikonfigurasi penuh agar dapat di-deploy ke **EthioDeploy** (atau PaaS container Node.js serupa seperti Railway, Render, Fly.io) sebagai satu kesatuan (*monorepo single-service*):
+
+### A. Lifecycle Scripts (`package.json`)
+- **Instalasi Dependensi:**
+  ```bash
+  npm run install:all
+  # Menginstal root dependencies, client node_modules, dan server node_modules
+  ```
+- **Build Tahap CI/CD:**
+  ```bash
+  npm run build
+  # 1. Menjalankan 'prisma generate' (aman walau DATABASE_URL belum diisi)
+  # 2. Mem-build bundle client Vite ke 'client/dist'
+  ```
+- **Menjalankan Server:**
+  ```bash
+  npm start
+  # atau: npm run start:lowmem
+  # Menjalankan: NODE_ENV=production node --max-old-space-size=192 --optimize-for-size server/src/index.js
+  ```
+
+### B. Arsitektur Serving Statis & Binding Jaringan (`server/src/index.js`)
+1. **Binding Host:** Server Express melakukan binding ke `HOST = '0.0.0.0'` dan `PORT = process.env.PORT || 3001` sehingga dapat dijangkau oleh reverse proxy container EthioDeploy.
+2. **Serving Bundel Frontend:** Di mode `production`, backend langsung melayani aset statis dari `client/dist`:
+   - Header aset `/assets/*.js` dan `/assets/*.css` diberi cache jangka panjang (`max-age=31536000, immutable`).
+   - File `index.html` diberi header `Cache-Control: no-cache, no-store, must-revalidate` agar browser pelanggan selalu memuat versi rilis teranyar.
+3. **Single Page Application (SPA) Fallback:** Rute GET non-API (`app.get(/(.*)/, ...)`) otomatis mengembalikan `index.html`, menjaga navigasi client-side hash (`/#menu`, `/#cashier`) tetap mulus.
+4. **Dual-Engine Fleksibel:** Jika `DATABASE_URL` belum diisi di dashboard EthioDeploy, server tetap berjalan normal dengan *In-Memory Store*. Jika `DATABASE_URL` diisi, server otomatis beralih ke PostgreSQL Prisma tanpa perlu rebuild.
+
+---
+
+## 10. Catatan Penting untuk AI Gemini Selanjutnya
 
 1. **Selalu gunakan file ini (`GEMINI_PROJECT_SUMMARY.md`) sebagai rujukan utama** sebelum mengubah struktur data atau komponen.
 2. **Styling menggunakan CSS murni (Vanilla CSS):** Jangan memasukkan kelas utility TailwindCSS tanpa instruksi khusus dari user.
-3. **Branding resmi:** Selalu gunakan nama **"BlueSukan Cafe"** atau **"BlueSukan"** (bukan nama lama).
+3. **Branding resmi:** Selalu gunakan nama **"Angkringan Blue'sukan Kopi"** atau **"Blue'sukan Kopi"** (Rawalo, Banyumas).
 4. **Keamanan State:** Jangan menghapus `activeOrder` dari memori jika pelanggan masih membutuhkan kode pesanan atau QR untuk ditunjukkan ke kasir fisik.

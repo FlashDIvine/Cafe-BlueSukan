@@ -305,11 +305,11 @@
 .btn-editorial-primary {
   min-height: 48px;
   min-width: 160px;
-  padding: 0 22px;
-  background-color: var(--accent);
-  color: var(--bone);
-  border: 1px solid var(--accent);
-  border-radius: 9999px 4px 9999px 9999px;
+  padding: 0 24px;
+  background-color: var(--accent-amber, #C96A2B);
+  color: #FFFFFF;
+  border: 1px solid var(--accent-amber, #C96A2B);
+  border-radius: var(--radius-pill);
   font-family: var(--f-body);
   font-size: 0.9375rem;
   font-weight: 700;
@@ -318,12 +318,177 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(30, 86, 160, 0.24);
+  box-shadow: 0 4px 16px rgba(201, 106, 43, 0.35);
   user-select: none;
+  transition: all 0.2s ease;
+}
+
+.btn-editorial-primary:hover {
+  background-color: var(--accent-amber-hover, #AF581F);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(201, 106, 43, 0.45);
 }
 
 .btn-cta-arrow {
   flex-shrink: 0;
+}
+
+/* Retro Poster Tagline Badge */
+.hero-poster-tagline-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(27, 59, 100, 0.08);
+  border: 1px dashed var(--brand-navy, #1B3B64);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-family: var(--f-display);
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 600;
+  color: var(--brand-navy, #1B3B64);
+  margin-top: 4px;
+  width: fit-content;
+}
+
+/* 3 Seating Location Cards (Model A Seating) */
+.hero-seating-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.hero-seating-card {
+  background: var(--bg-surface, #FBF7EF);
+  border: 1.5px solid var(--border-color, #D5C7B2);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-seating-card:hover {
+  border-color: var(--brand-navy, #1B3B64);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 25, 21, 0.08);
+}
+
+.hero-seating-card.highlight {
+  border-color: var(--accent-amber, #C96A2B);
+  background: #FFF9F2;
+}
+
+.seating-card-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.seating-card-info h4 {
+  font-family: var(--f-body);
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: var(--text-primary, #1E1915);
+  margin: 0;
+}
+
+.seating-card-info p {
+  font-family: var(--f-body);
+  font-size: 0.72rem;
+  color: var(--text-secondary, #5A4D41);
+  margin: 2px 0 0;
+}
+
+/* Special Social Program Banner */
+.social-honor-banner {
+  background: linear-gradient(135deg, #1B3B64 0%, #102540 100%);
+  color: #FFFFFF;
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--accent-amber, #C96A2B);
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(27, 59, 100, 0.25);
+}
+
+.social-honor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-amber, #C96A2B);
+  color: #FFFFFF;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.social-honor-title {
+  font-family: var(--f-display);
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  font-weight: 700;
+  color: #FCEBDC;
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.social-honor-desc {
+  font-family: var(--f-body);
+  font-size: 0.92rem;
+  color: #E2E8F0;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.social-honor-quote {
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: #FBBF24;
+}
+
+/* Realtime Schedule Status Pill */
+.loc-live-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  margin-bottom: 16px;
+  width: fit-content;
+}
+
+.loc-live-status-pill.open {
+  background: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #86EFAC;
+}
+
+.loc-live-status-pill.open .indicator-dot {
+  background-color: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.25);
+}
+
+.loc-live-status-pill.closed {
+  background: #FEE2E2;
+  color: #B91C1C;
+  border: 1px solid #FCA5A5;
+}
+
+.loc-live-status-pill.closed .indicator-dot {
+  background-color: #DC2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25);
+}
+
+.loc-hours-row.holiday {
+  color: #B91C1C;
+  font-weight: 800;
 }
 
 /* Secondary Action: Restrained Minimalist Editorial Outline */
