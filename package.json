@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "concurrently -n client,server -c cyan,green \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
     "install:all": "npm install && npm --prefix client install && npm --prefix server install",
-    "build": "npm --prefix server run prisma:generate --if-present && npm --prefix client run build",
-    "start": "NODE_ENV=production node --max-old-space-size=192 --optimize-for-size server/src/index.js",
-    "start:lowmem": "NODE_ENV=production node --max-old-space-size=192 --optimize-for-size server/src/index.js",
+    "build": "npm --prefix server install --include=dev && npm --prefix client install --include=dev && npm --prefix server run prisma:generate --if-present && npm --prefix client run build",
+    "start": "node --max-old-space-size=192 --optimize-for-size server.js",
+    "start:lowmem": "node --max-old-space-size=192 --optimize-for-size server.js",
     "vercel-build": "prisma generate --schema=./server/prisma/schema.prisma && npm install --prefix client && npm run build --prefix client",
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run dev --prefix server"

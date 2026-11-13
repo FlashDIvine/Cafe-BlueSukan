@@ -221,9 +221,9 @@ Untuk menjamin kestabilan aplikasi saat di-deploy pada VPS dengan kapasitas RAM 
 
 ---
 
-## 9. Konfigurasi Deployment Production (EthioDeploy / Node.js Container / VPS)
+## 9. Konfigurasi Deployment Production (SnapDeploy / EthioDeploy / Node.js PaaS Container)
 
-Repositori ini telah dikonfigurasi penuh agar dapat di-deploy ke **EthioDeploy** (atau PaaS container Node.js serupa seperti Railway, Render, Fly.io) sebagai satu kesatuan (*monorepo single-service*):
+Repositori ini telah dikonfigurasi penuh agar dapat di-deploy ke **SnapDeploy** dan **EthioDeploy** (atau PaaS container Node.js serupa seperti Railway, Render, Coolify, Dokku) sebagai satu kesatuan (*monorepo single-service*):
 
 ### A. Lifecycle Scripts (`package.json`)
 - **Instalasi Dependensi:**
@@ -231,20 +231,24 @@ Repositori ini telah dikonfigurasi penuh agar dapat di-deploy ke **EthioDeploy**
   npm run install:all
   # Menginstal root dependencies, client node_modules, dan server node_modules
   ```
-- **Build Tahap CI/CD:**
+- **Build Tahap CI/CD (Anti-Error `sh: vite: not found`):**
   ```bash
   npm run build
-  # 1. Menjalankan 'prisma generate' (aman walau DATABASE_URL belum diisi)
-  # 2. Mem-build bundle client Vite ke 'client/dist'
+  # 1. Menjalankan 'npm install --include=dev' di client & server agar devDependencies (termasuk Vite) selalu tersedia saat build container meskipun NODE_ENV=production aktif.
+  # 2. Menjalankan 'prisma generate' (aman walau DATABASE_URL belum diisi)
+  # 3. Mem-build bundle client Vite ke 'client/dist'
   ```
-- **Menjalankan Server:**
+- **Menjalankan Server (Root Entry Point `server.js`):**
   ```bash
   npm start
   # atau: npm run start:lowmem
-  # Menjalankan: NODE_ENV=production node --max-old-space-size=192 --optimize-for-size server/src/index.js
+  # Menjalankan: node --max-old-space-size=192 --optimize-for-size server.js
   ```
 
-### B. Arsitektur Serving Statis & Binding Jaringan (`server/src/index.js`)
+### B. Root Server Entry Point (`server.js`)
+File [server.js](file:///home/najib/Projek/Bluesukan/server.js) di root proyek bertindak sebagai entri standar yang mendelegasikan ke `server/src/index.js`, sehingga platform buildpack otomatis mendeteksi dan menjalankan aplikasi tanpa konfigurasi path tambahan.
+
+### C. Arsitektur Serving Statis & Binding Jaringan (`server/src/index.js`)
 1. **Binding Host:** Server Express melakukan binding ke `HOST = '0.0.0.0'` dan `PORT = process.env.PORT || 3001` sehingga dapat dijangkau oleh reverse proxy container EthioDeploy.
 2. **Serving Bundel Frontend:** Di mode `production`, backend langsung melayani aset statis dari `client/dist`:
    - Header aset `/assets/*.js` dan `/assets/*.css` diberi cache jangka panjang (`max-age=31536000, immutable`).
