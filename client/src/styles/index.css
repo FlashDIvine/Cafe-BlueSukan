@@ -354,10 +354,22 @@ button:active, .btn-interactive:active {
 .bottom-dock .active-order-floating-bar,
 .bottom-dock .floating-cart-wrapper {
   position: static;
-  transform: none;
+  transform: none !important;
   width: 100%;
   max-width: 100%;
   left: auto;
   bottom: auto;
   box-sizing: border-box;
+  animation: slideUpDockItem 0.28s ease-out both;
+}
+
+@keyframes slideUpDockItem {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
