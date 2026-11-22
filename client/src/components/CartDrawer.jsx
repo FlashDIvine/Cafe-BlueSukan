@@ -169,18 +169,6 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
                 <div className="cart-items-list">
                   {cartItems.map((item) => (
                     <div key={item.menuId} className="cart-item-card">
-                      <img
-                        src={item.imageUrl}
-                        alt={item.name}
-                        className="cart-item-thumbnail"
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src =
-                            'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=200&q=80';
-                        }}
-                      />
                       <div className="cart-item-details">
                         <span className="cart-item-name">{item.name}</span>
                         <span className="cart-item-unit-price">{formatRupiah(item.price)}</span>

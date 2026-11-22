@@ -23,7 +23,7 @@ export async function fetchMenusApi(category) {
 
 /**
  * Create a new menu item (POST /api/menus)
- * @param {Object} menuData - { name, category_id, price, stock, image_url, description, is_available, is_popular }
+ * @param {Object} menuData - { name, category_id, price, stock, description, is_available, is_popular }
  * @returns {Promise<Object>}
  */
 export async function createMenuApi(menuData) {
