@@ -6,6 +6,8 @@ import { HomePage } from './pages/HomePage';
 import { MenuPage } from './pages/MenuPage';
 import { CartDrawer } from './components/CartDrawer';
 import { ActiveOrderModal } from './components/ActiveOrderModal';
+import { ActiveOrderTracker } from './components/ActiveOrderTracker';
+import { FloatingCartBar } from './components/FloatingCartBar';
 import { submitOrderApi } from './services/api';
 import { playCustomerChime } from './utils/bellSound';
 import { formatLocationDisplay } from './utils/formatters';
@@ -225,6 +227,21 @@ function AppContent() {
           onStatusChange={handleOrderStatusChange}
           onOpenCart={() => setIsCartOpen(true)}
         />
+      )}
+
+      {/* Customer Mode: Bottom Dock (Active Order Tracker + Floating Cart Bar) */}
+      {appMode !== 'cashier' && (
+        <div className="bottom-dock">
+          {activeOrder && (
+            <ActiveOrderTracker
+              order={activeOrder}
+              onOpenTicket={() => setIsTicketModalOpen(true)}
+              onDismiss={handleDismissActiveOrder}
+              onStatusChange={handleOrderStatusChange}
+            />
+          )}
+          <FloatingCartBar onOpenCart={() => setIsCartOpen(true)} />
+        </div>
       )}
 
       {/* Customer Cart Drawer (available in both Home & Menu modes) */}

@@ -5,8 +5,6 @@ import { Navbar } from '../components/Navbar';
 import { MenuCard } from '../components/MenuCard';
 import { Footer } from '../components/Footer';
 import { TableModal } from '../components/TableModal';
-import { ActiveOrderTracker } from '../components/ActiveOrderTracker';
-import { FloatingCartBar } from '../components/FloatingCartBar';
 import '../styles/home-page.css';
 
 const SCHEDULE_DAYS = [
@@ -205,24 +203,11 @@ export const HomePage = ({
         onScrollToSection={scrollToSection}
       />
 
-      {/* ─── 7. Floating Active Order Tracker ──────────────────────────── */}
-      {activeOrder && (
-        <ActiveOrderTracker
-          order={activeOrder}
-          onOpenTicket={onOpenTicketModal}
-          onDismiss={onDismissActiveOrder}
-          onStatusChange={onStatusChange}
-        />
-      )}
-
-      {/* ─── 8. Table Selection Modal ──────────────────────────────────── */}
+      {/* ─── 7. Table Selection Modal ──────────────────────────────────── */}
       <TableModal
         isOpen={isTableModalOpen}
         onClose={() => setIsTableModalOpen(false)}
       />
-
-      {/* ─── 9. Floating Cart Bar ───────────────────────────────────────── */}
-      <FloatingCartBar onOpenCart={onOpenCart} />
     </div>
   );
 };

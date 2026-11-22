@@ -4,7 +4,6 @@ import { useOrder } from '../hooks/useOrder';
 import { Navbar } from '../components/Navbar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { MenuCard } from '../components/MenuCard';
-import { FloatingCartBar } from '../components/FloatingCartBar';
 import { TableModal } from '../components/TableModal';
 import { Toast } from '../components/Toast';
 import '../styles/menu-page.css';
@@ -102,9 +101,6 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
           )}
         </section>
       </main>
-
-      {/* Floating Bottom Cart Bar */}
-      <FloatingCartBar onOpenCart={onOpenCart} />
 
       {/* Table Selection Modal */}
       <TableModal

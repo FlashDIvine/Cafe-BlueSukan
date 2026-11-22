@@ -326,3 +326,38 @@ button:active, .btn-interactive:active {
   background-color: var(--ok);
   color: #FFFFFF;
 }
+
+/* ─── Bottom Dock Wrapper (Anti-Slop) ─────────────────────────────────────── */
+.bottom-dock {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--content-max-width, 32rem);
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.bottom-dock > * {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bottom-dock .active-order-floating-bar,
+.bottom-dock .floating-cart-wrapper {
+  position: static;
+  transform: none;
+  width: 100%;
+  max-width: 100%;
+  left: auto;
+  bottom: auto;
+  box-sizing: border-box;
+}
