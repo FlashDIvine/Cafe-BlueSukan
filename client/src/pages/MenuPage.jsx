@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Search, X, SlidersHorizontal, ArrowRight, UtensilsCrossed } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Search, X } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { Navbar } from '../components/Navbar';
 import { CategoryFilter } from '../components/CategoryFilter';
-import { RecommendedCard } from '../components/RecommendedCard';
 import { MenuCard } from '../components/MenuCard';
 import { FloatingCartBar } from '../components/FloatingCartBar';
 import { TableModal } from '../components/TableModal';
@@ -15,14 +14,6 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
-  const [isFirstLoad, setIsFirstLoad] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsFirstLoad(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, []);
 
   // Dynamic count of menus per category
   const menusCountByCategory = useMemo(() => {
@@ -32,20 +23,6 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
     });
     return counts;
   }, [menus]);
-
-  // Recommended / Featured items (e.g. popular items or top available picks)
-  const recommendedMenus = useMemo(() => {
-    const popular = menus.filter((item) => item.is_popular);
-    if (popular.length >= 2) return popular;
-    return menus.slice(0, 4);
-  }, [menus]);
-
-  // Dynamic active category title
-  const activeCategoryTitle = useMemo(() => {
-    if (activeCategory === 'all') return 'Popular Menu';
-    const found = categories.find((c) => c.id === activeCategory);
-    return found ? found.name : 'Popular Menu';
-  }, [categories, activeCategory]);
 
   // Filtered menu items by Category and Search Query
   const filteredMenus = useMemo(() => {
@@ -61,18 +38,8 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
     });
   }, [menus, activeCategory, searchQuery]);
 
-  const handleSeeAll = () => {
-    setActiveCategory('all');
-    setSearchQuery('');
-  };
-
-  const handleFilterBtnClick = () => {
-    // Open table modal or toggle all categories
-    setIsTableModalOpen(true);
-  };
-
   return (
-    <main className={`stitch-home-container ${isFirstLoad ? 'is-first-load' : ''}`}>
+    <div className="antislop-menu-page">
       <Navbar
         onOpenTableModal={() => setIsTableModalOpen(true)}
         onGoHome={onGoHome}
@@ -81,15 +48,17 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
       />
       <Toast />
 
-      {/* Top Search Bar */}
-      <section className="stitch-search-section" aria-label="Pencarian Menu">
-        <div className="stitch-search-row">
-          <div className="stitch-search-input-box">
-            <Search size={18} className="stitch-search-icon" />
+      <main className="menu-main-container">
+        {/* Top Header & Search */}
+        <section className="menu-header-section" aria-label="Judul & Pencarian Menu">
+          <h1 className="menu-page-title">Menu</h1>
+
+          <div className="menu-search-box">
+            <Search size={18} className="search-icon" aria-hidden="true" />
             <input
               type="text"
-              className="stitch-search-input"
-              placeholder="What are you craving today?"
+              className="search-input"
+              placeholder="Cari kopi, mendoan, nasi bakar..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               aria-label="Cari menu"
@@ -97,73 +66,42 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
             {searchQuery && (
               <button
                 type="button"
-                className="stitch-search-clear-btn"
+                className="search-clear-btn"
                 onClick={() => setSearchQuery('')}
-                aria-label="Hapus pencarian"
+                aria-label="Hapus kata kunci pencarian"
               >
-                <X size={12} />
+                <X size={14} />
               </button>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Categories Horizontal Cards */}
-      <CategoryFilter
-        categories={categories}
-        activeCategory={activeCategory}
-        onSelectCategory={setActiveCategory}
-        menusCountByCategory={menusCountByCategory}
-      />
-
-      {/* Recommended for You Section (Visible when not actively searching) */}
-      {!searchQuery && activeCategory === 'all' && recommendedMenus.length > 0 && (
-        <section className="stitch-recommended-section" aria-label="Rekomendasi Menu">
-          <div className="stitch-section-header-row">
-            <h2 className="stitch-section-title">Recommended for You</h2>
-            <button
-              type="button"
-              className="stitch-see-all-btn"
-              onClick={handleSeeAll}
-            >
-              <span>See all</span>
-              <ArrowRight size={14} aria-hidden="true" />
-            </button>
-          </div>
-
-          <div className="stitch-recommended-scroll no-scrollbar">
-            {recommendedMenus.map((item) => (
-              <RecommendedCard key={`rec-${item.id}`} item={item} />
-            ))}
-          </div>
         </section>
-      )}
 
-      {/* Popular Menu / 2-Column Catalog Grid */}
-      <section className="stitch-catalog-section" aria-label="Katalog Menu">
-        <div className="stitch-section-header-row">
-          <h2 className="stitch-section-title">{activeCategoryTitle}</h2>
-          <span className="stitch-section-count">{filteredMenus.length} items</span>
-        </div>
+        {/* Categories Horizontal Scroll Chips */}
+        <CategoryFilter
+          categories={categories}
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          menusCountByCategory={menusCountByCategory}
+        />
 
-        {filteredMenus.length > 0 ? (
-          <div className="stitch-popular-grid">
-            {filteredMenus.map((item) => (
-              <MenuCard key={`menu-${item.id}`} item={item} />
-            ))}
-          </div>
-        ) : (
-          <div className="stitch-empty-state">
-            <div className="stitch-empty-icon">
-              <UtensilsCrossed size={28} />
+        {/* Catalog List: One row per item, dotted separator, no cards */}
+        <section className="menu-catalog-section" aria-label="Daftar Menu">
+          {filteredMenus.length > 0 ? (
+            <div className="menu-items-list">
+              {filteredMenus.map((item) => (
+                <MenuCard key={`menu-${item.id}`} item={item} />
+              ))}
             </div>
-            <h3 className="stitch-empty-title">Menu tidak ditemukan</h3>
-            <p className="stitch-empty-desc">
-              Coba kata kunci lain atau pilih kategori menu yang berbeda.
-            </p>
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="menu-empty-state">
+              <h3 className="empty-title">Menu tidak ditemukan</h3>
+              <p className="empty-desc">
+                Coba gunakan kata kunci lain atau pilih kategori berbeda.
+              </p>
+            </div>
+          )}
+        </section>
+      </main>
 
       {/* Floating Bottom Cart Bar */}
       <FloatingCartBar onOpenCart={onOpenCart} />
@@ -173,6 +111,6 @@ export const MenuPage = ({ onOpenCart, onGoHome, activeOrder, onOpenTicketModal 
         isOpen={isTableModalOpen}
         onClose={() => setIsTableModalOpen(false)}
       />
-    </main>
+    </div>
   );
 };

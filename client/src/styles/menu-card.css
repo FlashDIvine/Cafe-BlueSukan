@@ -1,649 +1,181 @@
 /* ==========================================================================
-   BlueSukan Cafe - Menu Cards Modern Editorial Styles
-   (Recommended Horizontal Carousel Cards & 2-Column Catalog Grid Cards)
-   Palette: Ink, Bone, Accent, Accent Light, Muted, Border, Surface
-   Typography: Instrument Serif (Display), DM Sans (Body)
-   Tokens: --ink, --bone, --accent, --accent-light, --muted, --border, --surface, --e-out
+   Blue'sukan Kopi - Menu Item Row (Anti-Slop)
+   Single text row per menu, dotted separator, rotated price tag
    ========================================================================== */
 
-/* ─── 1. Recommended Horizontal Carousel Card ────────────────────────────── */
-.stitch-recommended-card {
-  width: 220px;
-  flex-shrink: 0;
-  background-color: var(--surface);
-  border-radius: 12px 3px 12px 12px;
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--ink) 4%, transparent);
-  overflow: hidden;
+.menu-item-row {
   display: flex;
-  flex-direction: column;
-  scroll-snap-align: start;
-  user-select: none;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 2px dotted rgba(58, 36, 24, 0.25);
   box-sizing: border-box;
-}
-
-.stitch-recommended-card.is-out-of-stock {
-  opacity: 0.6;
-  filter: grayscale(0.25);
-}
-
-.stitch-rec-image-wrap {
   width: 100%;
-  height: 128px;
-  position: relative;
-  overflow: hidden;
-  background-color: var(--bone);
+  transition: background-color 0.15s ease;
 }
 
-.stitch-rec-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+.menu-item-row:first-child {
+  border-top: 2px dotted rgba(58, 36, 24, 0.25);
 }
 
-/* Badges on Recommended Card */
-.stitch-badge-bestseller {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background-color: var(--accent);
-  color: var(--bone);
-  font-family: var(--f-body);
-  font-size: 0.625rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+/* Baris genap padding-left 1.4rem agar ritme tidak seragam */
+.menu-item-row:nth-child(even) {
+  padding-left: 1.4rem;
 }
 
-.stitch-rating-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background-color: color-mix(in srgb, var(--surface) 94%, transparent);
-  backdrop-filter: blur(4px);
-  padding: 2px 7px;
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  font-family: var(--f-body);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: var(--ink);
+.menu-item-row.is-out-of-stock {
+  opacity: 0.55;
 }
 
-.stitch-star-icon {
-  color: var(--color-warning);
-  fill: var(--color-warning);
-  flex-shrink: 0;
-}
-
-.stitch-rating-badge .tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-.stitch-badge-out {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background-color: color-mix(in srgb, var(--ink) 88%, transparent);
-  backdrop-filter: blur(4px);
-  color: var(--bone);
-  font-family: var(--f-body);
-  font-size: 0.625rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 9999px;
-  letter-spacing: 0.04em;
-}
-
-/* Content Area */
-.stitch-rec-content {
-  padding: 12px 14px 14px;
+.menu-item-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
   flex: 1;
-}
-
-.stitch-rec-title {
-  font-family: var(--f-body);
-  font-size: 0.90625rem;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stitch-rec-desc {
-  font-family: var(--f-body);
-  font-size: 0.71875rem;
-  color: var(--muted);
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stitch-rec-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 8px;
-  gap: 8px;
-}
-
-.stitch-rec-price-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.stitch-rec-price {
-  font-family: var(--f-body);
-  font-size: 0.9375rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-
-.stitch-low-stock-tag {
-  font-family: var(--f-body);
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: var(--color-warning-dark);
-  background-color: var(--color-warning-light);
-  padding: 1px 6px;
-  border-radius: 4px;
-  width: fit-content;
-}
-
-.stitch-rec-action {
-  display: flex;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-/* Recommended Primary Add Button */
-.stitch-btn-add-primary {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: var(--accent);
-  color: var(--bone);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  padding: 0;
-}
-
-.stitch-btn-add-primary::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.stitch-btn-add-primary:hover {
-  background-color: var(--accent-hover);
-}
-
-.stitch-btn-add-primary:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stitch-btn-disabled {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: color-mix(in srgb, var(--ink) 4%, transparent);
-  color: var(--muted);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: not-allowed;
-  position: relative;
-  padding: 0;
-}
-
-.stitch-btn-disabled::before {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-/* Compact Stepper in Recommended Card */
-.stitch-stepper-compact {
-  display: flex;
-  align-items: center;
-  background-color: var(--bone);
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  padding: 2px 4px;
-  gap: 4px;
-}
-
-.stitch-stepper-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--surface);
-  color: var(--accent);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  padding: 0;
-}
-
-.stitch-stepper-btn::before {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.stitch-stepper-btn:hover:not(:disabled) {
-  background-color: var(--accent);
-  color: var(--bone);
-  border-color: var(--accent);
-}
-
-.stitch-stepper-btn:disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.stitch-stepper-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stitch-stepper-val {
-  font-family: var(--f-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  min-width: 16px;
-  text-align: center;
-}
-
-/* ─── 2. 2-Column Catalog Grid Product Card ───────────────────────────────── */
-.stitch-grid-card {
-  background-color: var(--surface);
-  border-radius: 12px 3px 12px 12px;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 3%, transparent);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  user-select: none;
-  width: 100%;
-  max-width: 100%;
   min-width: 0;
-  box-sizing: border-box;
-  overflow: hidden;
-  content-visibility: auto;
-  contain-intrinsic-size: 180px 240px;
 }
 
-.stitch-grid-card.is-out-of-stock {
-  opacity: 0.6;
-  filter: grayscale(0.25);
-}
-
-.stitch-grid-image-wrap {
-  width: 100%;
-  height: 115px;
-  border-radius: 8px 2px 8px 8px;
-  position: relative;
-  overflow: hidden;
-  background-color: var(--bone);
-}
-
-.stitch-grid-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Heart Favorite Button */
-.stitch-grid-heart-btn {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: color-mix(in srgb, var(--surface) 92%, transparent);
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--border);
+.menu-item-title-row {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: absolute;
-  padding: 0;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
-.stitch-grid-heart-btn::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  min-width: 44px;
-  min-height: 44px;
+.menu-item-name {
+  font-family: var(--f-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+  margin: 0;
 }
 
-.stitch-grid-heart-btn:hover {
-  background-color: var(--surface);
-  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
-}
-
-.stitch-grid-heart-btn.liked {
-  background-color: var(--color-danger-light);
-  border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
-}
-
-.stitch-heart-icon {
+.menu-item-desc {
+  font-family: var(--f-body);
+  font-size: 0.9rem;
   color: var(--muted);
-  fill: none;
-  flex-shrink: 0;
+  line-height: 1.45;
+  margin: 0;
 }
 
-.stitch-grid-heart-btn.liked .stitch-heart-icon {
-  color: var(--color-danger);
-  fill: var(--color-danger);
-}
-
-.stitch-grid-heart-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Status Badges on Grid */
-.stitch-grid-badge-new {
-  position: absolute;
-  bottom: 6px;
-  left: 6px;
-  background-color: var(--accent);
-  color: var(--bone);
+.menu-item-badge-out {
   font-family: var(--f-body);
-  font-size: 0.625rem;
+  font-size: 0.72rem;
   font-weight: 700;
+  color: var(--red);
+  background-color: var(--soft);
   padding: 2px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.04em;
+  border-radius: var(--radius-pill);
 }
 
-.stitch-grid-badge-out {
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  background-color: color-mix(in srgb, var(--ink) 88%, transparent);
-  backdrop-filter: blur(4px);
-  color: var(--bone);
+.menu-item-stock-warning {
   font-family: var(--f-body);
-  font-size: 0.625rem;
-  font-weight: 700;
-  padding: 2px 7px;
-  border-radius: 9999px;
-  letter-spacing: 0.04em;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--red);
 }
 
-/* Grid Card Content */
-.stitch-grid-content {
-  padding: 2px 4px 4px;
+.menu-item-actions-wrap {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
-  justify-content: space-between;
-}
-
-.stitch-grid-title {
-  font-family: var(--f-body);
-  font-size: 0.84375rem;
-  font-weight: 700;
-  color: var(--ink);
-  line-height: 1.25;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.stitch-grid-stock-warning {
-  font-family: var(--f-body);
-  font-size: 0.625rem;
-  font-weight: 700;
-  color: var(--color-warning-dark);
-}
-
-.stitch-grid-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 6px;
-  gap: 6px;
-}
-
-.stitch-grid-price {
-  font-family: var(--f-body);
-  font-size: 0.875rem;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-}
-
-.stitch-grid-action {
-  display: flex;
-  align-items: center;
+  align-items: flex-end;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-/* Grid Add Button */
-.stitch-grid-btn-add {
+/* Label harga: latar --sun, huruf Caprasimo .95rem, padding .2rem .7rem, miring -3deg (baris genap +2.5deg) */
+.menu-item-price {
+  background-color: var(--sun);
+  color: var(--on-sun);
+  font-family: var(--f-display);
+  font-size: 0.95rem;
+  line-height: 1.2;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-price, 0.6rem);
+  transform: rotate(-3deg);
+  transform-origin: center;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.menu-item-row:nth-child(even) .menu-item-price {
+  transform: rotate(2.5deg);
+}
+
+.menu-item-add-btn {
+  background-color: var(--soft);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(58, 36, 24, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  user-select: none;
+}
+
+.menu-item-add-btn:hover {
+  background-color: var(--sun);
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+.menu-item-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--soft);
+  border-radius: var(--radius-pill);
+  padding: 3px 6px;
+  min-height: 40px;
+  border: 1px solid rgba(58, 36, 24, 0.15);
+}
+
+.stepper-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: var(--accent-light);
-  color: var(--accent);
-  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+  background-color: var(--paper);
+  color: var(--ink);
+  border: 1px solid rgba(58, 36, 24, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  position: relative;
   padding: 0;
+  transition: all 0.15s ease;
 }
 
-.stitch-grid-btn-add::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  min-width: 44px;
-  min-height: 44px;
+.stepper-btn:hover:not(:disabled) {
+  background-color: var(--sun);
+  transform: scale(1.05);
 }
 
-.stitch-grid-btn-add:hover {
-  background-color: var(--accent);
-  color: var(--bone);
-  border-color: var(--accent);
-}
-
-.stitch-grid-btn-add:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stitch-btn-disabled-circle {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: color-mix(in srgb, var(--ink) 4%, transparent);
-  color: var(--muted);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: not-allowed;
-  position: relative;
-  padding: 0;
-}
-
-.stitch-btn-disabled-circle::before {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-/* Stepper in 2-Column Grid Card */
-.stitch-grid-stepper {
-  display: flex;
-  align-items: center;
-  background-color: var(--bone);
-  border: 1px solid var(--border);
-  border-radius: 9999px;
-  padding: 2px 3px;
-  gap: 3px;
-}
-
-.stitch-grid-stepper-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background-color: var(--surface);
-  color: var(--accent);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  padding: 0;
-}
-
-.stitch-grid-stepper-btn::before {
-  content: '';
-  position: absolute;
-  inset: -9px;
-  min-width: 44px;
-  min-height: 44px;
-}
-
-.stitch-grid-stepper-btn:hover:not(:disabled) {
-  background-color: var(--accent);
-  color: var(--bone);
-  border-color: var(--accent);
-}
-
-.stitch-grid-stepper-btn:disabled {
+.stepper-btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.stitch-grid-stepper-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stitch-grid-stepper-val {
-  font-family: var(--f-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
+.stepper-val {
+  font-family: var(--f-display);
+  font-size: 0.95rem;
   color: var(--ink);
-  min-width: 14px;
+  min-width: 18px;
   text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
-/* ─── 3. Motion & Stagger Animation ───────────────────────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  /* Subtle image zoom on card hover */
-  .stitch-rec-image,
-  .stitch-grid-image {
-    transition: transform var(--t-fast) var(--e-out);
-  }
-
-  .stitch-recommended-card:hover .stitch-rec-image,
-  .stitch-grid-card:hover .stitch-grid-image {
-    transform: scale(1.03);
-  }
-
-  .stitch-btn-add-primary,
-  .stitch-grid-btn-add,
-  .stitch-grid-heart-btn,
-  .stitch-stepper-btn,
-  .stitch-grid-stepper-btn {
-    transition: background-color var(--t-fast) var(--e-out),
-                border-color var(--t-fast) var(--e-out),
-                color var(--t-fast) var(--e-out),
-                transform var(--t-fast) var(--e-out);
-  }
-
-  .stitch-btn-add-primary:active,
-  .stitch-grid-btn-add:active,
-  .stitch-grid-heart-btn:active,
-  .stitch-stepper-btn:active,
-  .stitch-grid-stepper-btn:active {
-    transform: scale(0.94);
-  }
-
-  /* Stagger initial load ONLY during first mount (.is-first-load)
-     - Carousel recommendation limited to first 2 cards only
-     - 2-Column grid limited to first 4 cards
-     - Total duration < 400ms (220ms + 120ms = 340ms) with fill-mode: both */
-  .is-first-load .stitch-recommended-card:nth-child(1) {
-    animation: menuCardFadeUp 220ms var(--e-out) 0ms both;
-  }
-
-  .is-first-load .stitch-recommended-card:nth-child(2) {
-    animation: menuCardFadeUp 220ms var(--e-out) 50ms both;
-  }
-
-  .is-first-load .stitch-grid-card:nth-child(1) {
-    animation: menuCardFadeUp 220ms var(--e-out) 0ms both;
-  }
-
-  .is-first-load .stitch-grid-card:nth-child(2) {
-    animation: menuCardFadeUp 220ms var(--e-out) 40ms both;
-  }
-
-  .is-first-load .stitch-grid-card:nth-child(3) {
-    animation: menuCardFadeUp 220ms var(--e-out) 80ms both;
-  }
-
-  .is-first-load .stitch-grid-card:nth-child(4) {
-    animation: menuCardFadeUp 220ms var(--e-out) 120ms both;
-  }
-
-  @keyframes menuCardFadeUp {
-    from {
-      opacity: 0;
-      transform: translateY(8px);
-    }
-  }
+.menu-item-disabled-tag {
+  font-family: var(--f-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 6px 8px;
 }
