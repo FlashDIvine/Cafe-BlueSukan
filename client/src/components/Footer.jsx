@@ -64,13 +64,6 @@ export const Footer = memo(({ onGoToMenu, onGoToCashier, onScrollToSection }) =>
                   </button>
                 </li>
               )}
-              {onGoToCashier && (
-                <li>
-                  <button type="button" onClick={onGoToCashier}>
-                    Dashboard Kasir
-                  </button>
-                </li>
-              )}
             </ul>
           </div>
         </nav>
