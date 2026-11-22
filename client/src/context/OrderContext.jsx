@@ -29,8 +29,7 @@ export const OrderProvider = ({ children }) => {
                     pItem.price === nItem.price &&
                     pItem.name === nItem.name &&
                     pItem.category_id === nItem.category_id &&
-                    pItem.is_popular === nItem.is_popular &&
-                    pItem.image_url === nItem.image_url
+                    pItem.is_popular === nItem.is_popular
                   );
                 });
                 if (isIdentical) return prev;
@@ -43,7 +42,7 @@ export const OrderProvider = ({ children }) => {
               if (prev.length === res.categories.length) {
                 const isIdentical = prev.every((pCat, idx) => {
                   const nCat = res.categories[idx];
-                  return pCat.id === nCat.id && pCat.name === nCat.name && pCat.image === nCat.image;
+                  return pCat.id === nCat.id && pCat.name === nCat.name;
                 });
                 if (isIdentical) return prev;
               }
@@ -82,7 +81,7 @@ export const OrderProvider = ({ children }) => {
   const [customerName, setCustomerName] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Cart state: Array of { menuId, name, price, quantity, maxStock, imageUrl, subtotal }
+  // Cart state: Array of { menuId, name, price, quantity, maxStock, subtotal }
   const [cartItems, setCartItems] = useState([]);
 
   // Toast / notification feedback state (for stock warnings, add confirmations)
@@ -165,7 +164,6 @@ export const OrderProvider = ({ children }) => {
             price: menuItem.price,
             quantity: qtyToAdd,
             maxStock: menuItem.stock,
-            imageUrl: menuItem.image_url,
             subtotal: qtyToAdd * menuItem.price,
           },
         ];

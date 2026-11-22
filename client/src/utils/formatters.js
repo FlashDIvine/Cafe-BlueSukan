@@ -6,7 +6,7 @@
  * Standard 3 Seating Areas for BlueSukan Cafe (Model A)
  */
 export const SEATING_AREAS = [
-  { id: 'indoor', name: 'Indoor', label: 'Indoor', desc: 'Teras Beratap' },
+  { id: 'indoor', name: 'Indoor', label: 'Teras Beratap', desc: 'Teras Beratap' },
   { id: 'outdoor', name: 'Outdoor', label: 'Outdoor', desc: 'Area Terbuka' },
   { id: 'lt2', name: 'Lt 2', label: 'Lt 2', desc: 'Lantai Atas' },
 ];
@@ -54,7 +54,8 @@ export function getTableFromUrl(fallback = 'Indoor') {
  * @returns {string}
  */
 export function formatLocationDisplay(val) {
-  if (!val) return 'Indoor';
+  if (!val) return 'Teras Beratap';
+  if (typeof val === 'string' && val.toLowerCase() === 'indoor') return 'Teras Beratap';
   if (/^\d+$/.test(val)) return `Meja ${val}`;
   return val;
 }

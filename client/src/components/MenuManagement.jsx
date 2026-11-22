@@ -12,14 +12,10 @@ import {
   Coffee,
   Tag,
   FolderPlus,
-  Upload,
-  Image as ImageIcon,
   X,
   AlertCircle,
-  Loader2,
 } from 'lucide-react';
 import { formatRupiah } from '../utils/formatters';
-import { convertImageToWebP } from '../utils/imageConverter';
 import { MenuFormModal } from './MenuFormModal';
 import {
   createMenuApi,
@@ -32,9 +28,6 @@ import {
   deleteCategoryApi,
 } from '../services/api';
 
-const DEFAULT_CATEGORY_FALLBACK =
-  'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=150&q=80&fm=webp';
-
 export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -45,12 +38,8 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
 
   // Category management state
   const [newCategoryName, setNewCategoryName] = useState('');
-  const [newCategoryImage, setNewCategoryImage] = useState('');
-  const [categoryImageError, setCategoryImageError] = useState('');
-  const [isConvertingCategory, setIsConvertingCategory] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [isAddingCategory, setIsAddingCategory] = useState(false);
-  const fileInputRef = useRef(null);
 
   const showToast = (msg, type = 'info') => {
     setToastMsg({ msg, type });
@@ -135,70 +124,30 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
     }
   };
 
-  // Client-side Image Conversion & Optimization to WebP for Category
-  const handleCategoryImageChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setCategoryImageError('');
-    setIsConvertingCategory(true);
-
-    try {
-      const result = await convertImageToWebP(file);
-      setNewCategoryImage(result.dataUrl);
-      setCategoryImageError('');
-    } catch (err) {
-      setCategoryImageError(err.message || 'Gagal memproses gambar');
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    } finally {
-      setIsConvertingCategory(false);
-    }
-  };
-
-  const handleClearCategoryImage = () => {
-    setNewCategoryImage('');
-    setCategoryImageError('');
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
   const handleCancelCategoryEdit = () => {
     setEditingCategory(null);
     setNewCategoryName('');
-    setNewCategoryImage('');
-    setCategoryImageError('');
-    setIsConvertingCategory(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleStartEditCategory = (cat) => {
     setEditingCategory(cat);
     setNewCategoryName(cat.name);
-    setNewCategoryImage(cat.image || '');
-    setCategoryImageError('');
-    setIsConvertingCategory(false);
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const handleCategorySubmit = async (e) => {
     e.preventDefault();
     if (!newCategoryName.trim()) return;
-    if (isConvertingCategory) {
-      showToast('Sedang mengonversi gambar, mohon tunggu sebentar', 'warning');
-      return;
-    }
 
     setIsAddingCategory(true);
     try {
       if (editingCategory) {
         await updateCategoryApi(editingCategory.id, {
           name: newCategoryName.trim(),
-          image: newCategoryImage.trim() || null,
         });
         showToast(`Kategori "${newCategoryName.trim()}" berhasil diperbarui`, 'success');
       } else {
         await createCategoryApi({
           name: newCategoryName.trim(),
-          image: newCategoryImage.trim() || null,
         });
         showToast(`Kategori "${newCategoryName.trim()}" berhasil ditambahkan`, 'success');
       }
@@ -273,84 +222,10 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                 placeholder="Nama kategori (contoh: Pastry, Dessert)..."
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
-                disabled={isAddingCategory || isConvertingCategory}
+                disabled={isAddingCategory}
                 style={{ flex: 1 }}
                 required
               />
-            </div>
-
-            {/* Image Upload input (JPG, PNG, WebP -> Auto Convert to WebP <= 2MB) */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                id="category-file-input"
-                style={{ display: 'none' }}
-                onChange={handleCategoryImageChange}
-                disabled={isConvertingCategory}
-              />
-              <button
-                type="button"
-                className="btn-secondary"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '7px 12px',
-                  fontSize: '12px',
-                  cursor: 'pointer',
-                  borderRadius: 'var(--radius-sm)',
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isConvertingCategory}
-                title="Pilih gambar (JPG, PNG, WebP) - otomatis dikonversi ke WebP maks. 2MB"
-              >
-                {isConvertingCategory ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                <span>{isConvertingCategory ? 'Mengonversi...' : 'Upload Foto'}</span>
-              </button>
-
-              {/* Circle Image Preview */}
-              {newCategoryImage ? (
-                <div style={{ position: 'relative', width: '36px', height: '36px' }}>
-                  <img
-                    src={newCategoryImage}
-                    alt="Preview"
-                    loading="lazy"
-                    decoding="async"
-                    style={{
-                      width: '36px',
-                      height: '36px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid var(--color-primary)',
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleClearCategoryImage}
-                    style={{
-                      position: 'absolute',
-                      top: '-4px',
-                      right: '-4px',
-                      width: '16px',
-                      height: '16px',
-                      borderRadius: '50%',
-                      backgroundColor: 'var(--color-danger)',
-                      color: 'white',
-                      border: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      fontSize: '10px',
-                    }}
-                    title="Hapus gambar"
-                  >
-                    <X size={10} />
-                  </button>
-                </div>
-              ) : null}
             </div>
 
             <div style={{ display: 'flex', gap: '6px' }}>
@@ -378,28 +253,7 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
           </form>
         </div>
 
-        {/* Error Validation Alert Banner */}
-        {categoryImageError && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: 'var(--color-danger-dark)',
-              backgroundColor: 'var(--color-danger-light)',
-              padding: '6px 12px',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '12px',
-              fontWeight: '600',
-              marginTop: '4px',
-            }}
-          >
-            <AlertCircle size={14} />
-            <span>{categoryImageError}</span>
-          </div>
-        )}
-
-        {/* Category List with Circle Thumbnails */}
+        {/* Category List */}
         <div className="category-chips-list" style={{ marginTop: '10px' }}>
           {categories
             .filter((c) => c.id !== 'all')
@@ -407,24 +261,6 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
               const count = menus.filter((m) => m.category_id === cat.id).length;
               return (
                 <div key={cat.id} className="category-chip-item" style={{ gap: '8px' }}>
-                  <img
-                    src={cat.image || DEFAULT_CATEGORY_FALLBACK}
-                    alt={cat.name}
-                    loading="lazy"
-                    decoding="async"
-                    style={{
-                      width: '24px',
-                      height: '24px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '1px solid var(--color-border)',
-                      backgroundColor: 'var(--color-sky)',
-                    }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = DEFAULT_CATEGORY_FALLBACK;
-                    }}
-                  />
                   <span>{cat.name}</span>
                   <span className="category-chip-count">{count} menu</span>
 
@@ -528,27 +364,8 @@ export const MenuManagement = ({ menus, categories = [], onRefreshMenus }) => {
                 boxShadow: 'var(--shadow-xs)',
               }}
             >
-              {/* Left Thumbnail & Info */}
+              {/* Left Info */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: '1 1 240px', minWidth: '200px' }}>
-                <img
-                  src={menu.image_url}
-                  alt={menu.name}
-                  loading="lazy"
-                  decoding="async"
-                  style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: 'var(--radius-md)',
-                    objectFit: 'cover',
-                    backgroundColor: 'var(--color-sky)',
-                    flexShrink: 0,
-                  }}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src =
-                      'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=200&q=80';
-                  }}
-                />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <strong style={{ fontSize: '14px', color: 'var(--color-text-main)' }}>{menu.name}</strong>

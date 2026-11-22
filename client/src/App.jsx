@@ -6,7 +6,9 @@ import { HomePage } from './pages/HomePage';
 import { MenuPage } from './pages/MenuPage';
 import { CartDrawer } from './components/CartDrawer';
 import { ActiveOrderModal } from './components/ActiveOrderModal';
-import { submitOrderApi } from './services/api';
+import { ActiveOrderTracker } from './components/ActiveOrderTracker';
+import { FloatingCartBar } from './components/FloatingCartBar';
+import { submitOrderApi, fetchOrderByCodeApi } from './services/api';
 import { playCustomerChime } from './utils/bellSound';
 import { formatLocationDisplay } from './utils/formatters';
 
@@ -54,6 +56,19 @@ function AppContent() {
 
   const { showToast, clearCart } = useOrder();
 
+  // Refresh active order data completely from backend
+  const refreshActiveOrder = async (orderCode) => {
+    try {
+      const freshOrder = await fetchOrderByCodeApi(orderCode);
+      if (freshOrder) {
+        setActiveOrder(freshOrder);
+      }
+    } catch (err) {
+      console.error('Failed to refresh active order:', err);
+      showToast('Gagal memperbarui pesanan', 'warning');
+    }
+  };
+
   // Sync activeOrder changes to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -99,13 +114,15 @@ function AppContent() {
             });
           }
 
-          // 2. Order status update / QRIS confirmation
-          if (
-            payload?.order_code === activeOrder.order_code &&
-            payload?.status &&
-            payload.status !== activeOrder.status
-          ) {
-            setActiveOrder((prev) => (prev ? { ...prev, status: payload.status } : prev));
+          // 2. Order status / items update: ambil ulang pesanan secara menyeluruh tanpa syarat status berubah
+          if (payload?.order_code === activeOrder.order_code) {
+            if (
+              payload?.type === 'ORDER_UPDATED' ||
+              payload?.type === 'STATUS_UPDATED' ||
+              payload?.type === 'QRIS_CONFIRMED'
+            ) {
+              refreshActiveOrder(payload.order_code);
+            }
           }
         } catch {
           // Heartbeat or malformed comment
@@ -213,11 +230,6 @@ function AppContent() {
             activeOrder={activeOrder}
             onOpenTicketModal={() => setIsTicketModalOpen(true)}
           />
-          <CartDrawer
-            isOpen={isCartOpen}
-            onClose={() => setIsCartOpen(false)}
-            onProceedToCheckout={handleProceedToCheckout}
-          />
         </div>
       ) : (
         /* 3. Default Cafe Landing Page (Homepage) with Active Order Integration */
@@ -228,6 +240,31 @@ function AppContent() {
           onOpenTicketModal={() => setIsTicketModalOpen(true)}
           onDismissActiveOrder={handleDismissActiveOrder}
           onStatusChange={handleOrderStatusChange}
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+      )}
+
+      {/* Customer Mode: Bottom Dock (Active Order Tracker + Floating Cart Bar) */}
+      {appMode !== 'cashier' && (
+        <div className="bottom-dock">
+          {activeOrder && (
+            <ActiveOrderTracker
+              order={activeOrder}
+              onOpenTicket={() => setIsTicketModalOpen(true)}
+              onDismiss={handleDismissActiveOrder}
+              onStatusChange={handleOrderStatusChange}
+            />
+          )}
+          <FloatingCartBar onOpenCart={() => setIsCartOpen(true)} />
+        </div>
+      )}
+
+      {/* Customer Cart Drawer (available in both Home & Menu modes) */}
+      {appMode !== 'cashier' && (
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onProceedToCheckout={handleProceedToCheckout}
         />
       )}
 
@@ -237,6 +274,10 @@ function AppContent() {
         onClose={() => setIsTicketModalOpen(false)}
         order={activeOrder}
         onGoToMenu={handleGoToMenu}
+        onOrderUpdate={setActiveOrder}
+        onCancelOrder={(cancelledOrder) => {
+          setActiveOrder((prev) => (prev ? { ...prev, status: 'cancelled' } : cancelledOrder));
+        }}
       />
 
       {/* Prominent Ring Customer Notification Dialog (Bell Chime & Vibrate alert from Cashier/Barista) */}

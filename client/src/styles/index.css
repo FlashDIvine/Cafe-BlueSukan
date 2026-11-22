@@ -1,113 +1,76 @@
+/* ==========================================================================
+   Blue'sukan Kopi - Design Tokens & Core Styles
+   Arah Desain: Tactile Riverside Warung (Anti-Slop)
+   ========================================================================== */
+
 :root {
-  /* 1. Palette: Vintage Riverside Angkringan & Retro Poster */
-  --bg-primary: #F4ECDC;           /* Aged Kraft Paper / Kertas Menu Vintage */
-  --bg-surface: #FBF7EF;           /* Vintage Card Background */
-  --brand-navy: #1B3B64;           /* Vintage Poster Navy Blue */
-  --brand-navy-dark: #102540;
-  --brand-navy-light: #2C5282;
-  --accent-amber: #C96A2B;         /* Lantern Amber / Genteng Terakota */
-  --accent-amber-hover: #AF581F;
-  --accent-amber-light: #FCEBDC;
-  --text-primary: #1E1915;         /* Dark Roasted Espresso */
-  --text-secondary: #5A4D41;       /* Weathered Wood */
-  --border-color: #D5C7B2;         /* Aged Kraft Border */
-  --border-subtle: rgba(90, 77, 65, 0.16);
+  /* ─── 1. Design Tokens ─────────────────────────────────────────────────── */
+  --paper: #FBF4E2;
+  --ink: #3A2418;
+  --muted: #7A6354;
+  --blue: #3560AD;
+  --on-blue: #F7EFDD;
+  --sun: #E6AC3C;
+  --on-sun: #3A2418;
+  --soft: #F2E6C8;
+  --red: #C4472F;
+  --ok: #2E7048;
 
-  /* Modern Editorial / Legacy mappings */
-  --ink: var(--text-primary);
-  --bone: var(--bg-primary);
-  --surface: var(--bg-surface);
-  --accent: var(--brand-navy);
-  --accent-hover: var(--brand-navy-dark);
-  --accent-light: rgba(27, 59, 100, 0.12);
-  --muted: var(--text-secondary);
-  --muted-on-ink: #C5BAAD;
-  --border: var(--border-color);
-  --glass: rgba(251, 247, 239, 0.92);
+  /* ─── 2. Typography ────────────────────────────────────────────────────── */
+  --f-display: 'Caprasimo', cursive, serif;
+  --f-body: 'Karla', sans-serif;
 
-  /* 2. Typography */
-  --f-display: 'Fraunces', serif;
-  --f-body: 'Plus Jakarta Sans', sans-serif;
-  --f-mono: 'JetBrains Mono', monospace;
-  
-  --text-h1: clamp(2.4rem, 7.5vw, 3.8rem);
-  --text-h2: clamp(1.65rem, 5vw, 2.25rem);
-  --text-h3: clamp(1.2rem, 3.5vw, 1.45rem);
-  --text-base: 1rem;
-  --text-sm: 0.875rem;
-  --text-xs: 0.75rem;
+  /* ─── 3. Radius & Metrics ──────────────────────────────────────────────── */
+  --radius-pill: 99px;
+  --radius-card: 1.2rem;
+  --radius-price: 0.6rem;
+  --radius-sm: 0.5rem;
+  --content-max-width: 32rem;
 
-  /* 3. Spacing & Radius */
-  --space-unit: 1rem;
-  --radius-sharp: 3px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 24px;
-  --radius-pill: 9999px;
-
-  /* 4. Motion */
-  --e-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --e-in-out: cubic-bezier(0.76, 0, 0.24, 1);
-  --t-fast: 200ms;
-  --t-normal: 400ms;
-
-  /* Aliases for compatibility across components */
-  --color-primary: var(--brand-navy);
-  --color-primary-dark: var(--brand-navy-dark);
-  --color-primary-light: var(--brand-navy-light);
-  --color-accent: var(--accent-amber);
-  --color-accent-hover: var(--accent-amber-hover);
-  --color-accent-light: var(--accent-amber-light);
-  --color-bg: var(--bg-primary);
-  --color-surface: var(--bg-surface);
+  /* ─── 4. Aliases for Compatibility with Existing Modals/Cashier ────────── */
+  --bg-primary: var(--paper);
+  --bg-surface: var(--paper);
+  --surface: var(--paper);
+  --bone: var(--paper);
+  --brand-navy: var(--blue);
+  --brand-navy-dark: #274987;
+  --brand-navy-light: #4A76C9;
+  --accent-amber: var(--sun);
+  --accent-amber-hover: #D59B2E;
+  --accent-amber-light: var(--soft);
+  --text-primary: var(--ink);
+  --text-secondary: var(--muted);
+  --border-color: rgba(58, 36, 24, 0.15);
+  --border-subtle: rgba(58, 36, 24, 0.1);
+  --border: rgba(58, 36, 24, 0.15);
+  --accent: var(--blue);
+  --accent-hover: #274987;
+  --accent-light: var(--soft);
+  --color-primary: var(--blue);
+  --color-primary-dark: #274987;
+  --color-accent: var(--sun);
+  --color-accent-hover: #D59B2E;
+  --color-accent-light: var(--soft);
+  --color-bg: var(--paper);
+  --color-surface: var(--paper);
   --color-white: #FFFFFF;
-  --color-text-main: var(--text-primary);
-  --color-text-muted: var(--text-secondary);
-  --color-border: var(--border-color);
-  --color-ink: var(--text-primary);
-  --color-royal-blue: var(--brand-navy);
-  --color-royal-blue-light: rgba(27, 59, 100, 0.12);
-  --color-cobalt: var(--brand-navy);
-  --color-cobalt-hover: var(--brand-navy-dark);
-  --color-cobalt-glow: rgba(27, 59, 100, 0.22);
-  --color-navy: var(--brand-navy);
-  --color-sky: var(--accent-amber-light);
-  --color-sky-dark: #F6D6BA;
-  --color-slate: var(--text-secondary);
-  --color-slate-light: #A39688;
-  --color-text-subtle: var(--text-secondary);
-
-  /* Functional Status Colors */
-  --color-danger: #B91C1C;
-  --color-danger-light: #FEE2E2;
-  --color-danger-dark: #7F1D1D;
-  --color-warning: #D97706;
-  --color-warning-light: #FEF3C7;
-  --color-warning-dark: #92400E;
-  --color-success: #15803D;
-  --color-success-light: #DCFCE7;
-  --color-success-dark: #14532D;
-
-  /* Font Aliases */
+  --color-text-main: var(--ink);
+  --color-text-muted: var(--muted);
+  --color-border: rgba(58, 36, 24, 0.15);
+  --color-ink: var(--ink);
+  --color-royal-blue: var(--blue);
+  --color-sky: var(--soft);
+  --color-slate: var(--muted);
+  --color-danger: var(--red);
+  --color-success: var(--ok);
+  --color-warning: var(--sun);
   --font-display: var(--f-display);
   --font-sans: var(--f-body);
   --font-serif: var(--f-display);
-  --font-mono: var(--f-mono);
-
-  /* Shadow Aliases: Warm Kraft Paper Shadow */
-  --shadow-xs: 0 1px 3px rgba(30, 25, 21, 0.05);
-  --shadow-sm: 0 2px 8px rgba(30, 25, 21, 0.07);
-  --shadow-md: 0 6px 18px rgba(30, 25, 21, 0.09);
-  --shadow-lg: 0 14px 32px rgba(30, 25, 21, 0.12);
-  --shadow-float: 0 20px 42px rgba(30, 25, 21, 0.18);
-
-  /* Transition Aliases */
-  --transition-fast: var(--t-fast) var(--e-out);
-  --transition-normal: var(--t-normal) var(--e-out);
+  --font-mono: var(--f-body);
 }
 
-/* Base Reset & Core Styles */
+/* ─── Base Reset & Light-Mode Always ─────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -117,62 +80,194 @@
 
 html {
   font-family: var(--f-body);
-  background-color: var(--bone);
+  font-size: 16px;
+  background-color: var(--paper);
   color: var(--ink);
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   max-width: 100vw;
   overflow-x: hidden;
+  color-scheme: light; /* Force light mode */
 }
 
 body {
   min-height: 100vh;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-size: 1.02rem;
+  line-height: 1.6;
   display: flex;
   justify-content: center;
-  background-color: var(--bone);
 }
 
 #root {
   width: 100%;
-  max-width: 480px; /* Mobile-first constraint */
+  max-width: var(--content-max-width);
   min-height: 100vh;
-  background-color: var(--bone);
+  background-color: var(--paper);
   position: relative;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
+  text-align: left;
 }
 
-/* Numerical Consistency */
-.tabular {
-  font-variant-numeric: tabular-nums;
+/* Keyboard Focus Ring */
+:focus-visible {
+  outline: 3px solid var(--sun) !important;
+  outline-offset: 2px !important;
 }
 
-/* Global Typography Helpers */
-h1, .h1 { font-family: var(--f-display); font-weight: 400; line-height: 0.9; }
-h2, .h2 { font-family: var(--f-display); font-weight: 400; line-height: 1.1; }
-h3, .h3 { font-family: var(--f-body); font-weight: 700; letter-spacing: -0.02em; }
+/* ─── Typography & Headings ─────────────────────────────────────────────── */
+h1, h2, h3, h4, .font-display {
+  font-family: var(--f-display);
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1.15;
+}
 
-/* Interactive Targets */
-button, a, .clickable {
-  min-width: 44px;
-  min-height: 44px;
+/* Big titles (h1 hero & menu page) tilted -2deg */
+h1, .page-title, .hero-editorial-heading {
+  font-family: var(--f-display);
+  font-weight: 400;
+  transform: rotate(-2deg);
+  transform-origin: left bottom;
+  display: inline-block;
+}
+
+p, span, div, li, input, textarea, select {
+  font-family: var(--f-body);
+}
+
+/* ─── Button Micro-motion & Interactivity ────────────────────────────────── */
+button, a {
+  font-family: var(--f-body);
   cursor: pointer;
-  transition: all var(--t-fast) var(--e-out);
+  min-height: 40px;
+  min-width: 40px;
+  text-decoration: none;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.18s ease,
+              box-shadow 0.18s ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
-    animation-delay: -1ms !important;
-    animation-duration: 1ms !important;
-    animation-iteration-count: 1 !important;
-    background-attachment: initial !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0s !important;
-    transition-delay: 0s !important;
+button:hover, .btn-interactive:hover {
+  transform: translateY(-2px) rotate(-1deg);
+}
+
+button:active, .btn-interactive:active {
+  transform: translateY(0) rotate(0deg);
+}
+
+/* ─── Price Label Utility ────────────────────────────────────────────────── */
+.price-label, .bento-price-tag, .menu-item-price {
+  background-color: var(--sun);
+  color: var(--on-sun);
+  font-family: var(--f-display);
+  font-size: 0.95rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: var(--radius-price);
+  transform: rotate(-3deg);
+  display: inline-flex;
+  align-items: center;
+  font-weight: 400;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.price-label-even, .menu-item-row:nth-child(even) .menu-item-price {
+  transform: rotate(2.5deg);
+}
+
+/* ─── Category Chip Utility ──────────────────────────────────────────────── */
+.category-chip {
+  background-color: var(--soft);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 0.95rem;
+  font-weight: 500;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.category-chip.active, .category-chip[aria-selected="true"] {
+  background-color: var(--blue);
+  color: var(--on-blue);
+  font-weight: 700;
+}
+
+/* ─── Wavy Blue Ribbon Utility ───────────────────────────────────────────── */
+.wavy-ribbon-container {
+  background-color: var(--blue);
+  color: var(--on-blue);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.wavy-ribbon-svg {
+  display: block;
+  width: 100%;
+  height: 18px;
+  color: var(--blue);
+}
+
+.wavy-ribbon-svg.bottom {
+  transform: scaleY(-1);
+}
+
+/* ─── Floating Order Bar Slide-In ────────────────────────────────────────── */
+@keyframes slideUpOrderBar {
+  from {
+    transform: translateY(120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-/* Hide scrollbar utility */
+.floating-order-enter {
+  animation: slideUpOrderBar 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+
+/* ─── Steam Float Animation for Tin Cup SVG ──────────────────────────────── */
+@keyframes steamFloatSlow {
+  0%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-5px);
+  }
+}
+
+.cup-steam-path {
+  animation: steamFloatSlow 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button:hover, .btn-interactive:hover {
+    transform: none !important;
+  }
+  .floating-order-enter {
+    animation: none !important;
+  }
+  .cup-steam-path {
+    animation: none !important;
+  }
+}
+
+/* ─── Utility Helpers ────────────────────────────────────────────────────── */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -181,30 +276,27 @@ button, a, .clickable {
   scrollbar-width: none;
 }
 
-/* Common Layout Components */
 .app-container {
   display: flex;
   flex-direction: column;
   flex: 1;
   width: 100%;
-  max-width: 480px;
-  min-width: 0;
+  max-width: var(--content-max-width);
   margin: 0 auto;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding-bottom: 90px; /* Space for FloatingCartBar */
-  background-color: var(--color-bg);
-  box-shadow: 0 0 40px rgba(15, 23, 42, 0.06);
+  padding-bottom: 96px;
+  background-color: var(--paper);
 }
 
-/* Toast Notification */
+/* Toast Notification (antislop tactile style) */
 .toast-container {
   position: fixed;
-  top: 75px;
+  top: 70px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 32px);
-  max-width: 448px;
+  max-width: 440px;
   z-index: 1000;
   pointer-events: none;
   display: flex;
@@ -212,40 +304,72 @@ button, a, .clickable {
 }
 
 .toast-box {
-  background: color-mix(in srgb, var(--ink) 92%, transparent);
-  color: var(--bone);
+  background-color: var(--ink);
+  color: var(--paper);
   font-family: var(--f-body);
-  padding: 10px 16px;
+  padding: 10px 18px;
   border-radius: var(--radius-pill);
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--ink) 14%, transparent);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(58, 36, 24, 0.2);
 }
 
 .toast-box.warning {
-  background: color-mix(in srgb, var(--color-warning-dark) 95%, transparent);
-  color: var(--bone);
+  background-color: var(--sun);
+  color: var(--on-sun);
 }
 
 .toast-box.success {
-  background: color-mix(in srgb, var(--accent) 95%, transparent);
-  color: var(--bone);
-  border: 1px solid color-mix(in srgb, var(--accent-light) 30%, transparent);
+  background-color: var(--ok);
+  color: #FFFFFF;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .toast-container {
-    animation: slideDownToast 240ms var(--e-out) both;
-  }
+/* ─── Bottom Dock Wrapper (Anti-Slop) ─────────────────────────────────────── */
+.bottom-dock {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--content-max-width, 32rem);
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  box-sizing: border-box;
+  pointer-events: none;
+}
 
-  @keyframes slideDownToast {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -15px) scale(0.95);
-    }
+.bottom-dock > * {
+  pointer-events: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bottom-dock .active-order-floating-bar,
+.bottom-dock .floating-cart-wrapper {
+  position: static;
+  transform: none !important;
+  width: 100%;
+  max-width: 100%;
+  left: auto;
+  bottom: auto;
+  box-sizing: border-box;
+  animation: slideUpDockItem 0.28s ease-out both;
+}
+
+@keyframes slideUpDockItem {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -82,7 +82,6 @@ router.get('/', async (req, res) => {
           name: true,
           price: true,
           stock: true,
-          image_url: true,
           description: true,
           is_available: true,
           is_popular: true,
@@ -122,38 +121,26 @@ async function getCategoryName(categoryId) {
 }
 
 /**
- * Validate WebP image (both URL and base64 data URL)
- * Max size: 2MB (2 * 1024 * 1024 bytes)
- */
-function validateWebpImage(image) {
-  if (!image || typeof image !== 'string') return { valid: true, sanitized: null };
-  const trimmed = image.trim();
-  if (!trimmed) return { valid: true, sanitized: null };
-
-  if (trimmed.startsWith('data:')) {
-    if (!trimmed.startsWith('data:image/webp;base64,')) {
-      return { valid: false, message: 'Format gambar harus WebP (.webp)' };
-    }
-    const base64Data = trimmed.replace(/^data:image\/webp;base64,/, '');
-    const byteLength = Buffer.from(base64Data, 'base64').length;
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-    if (byteLength > MAX_SIZE) {
-      return { valid: false, message: 'Ukuran gambar maksimal 2 MB' };
-    }
-    return { valid: true, sanitized: trimmed };
-  }
-
-  // If it's a regular URL
-  return { valid: true, sanitized: trimmed };
-}
-
-/**
  * GET /api/menus/:id
  * Returns a single menu item by ID
  */
 router.get('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+
+    if (!process.env.DATABASE_URL) {
+      const menu = memoryMenus.find((m) => m.id === id);
+      if (!menu) {
+        return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+      }
+      const catObj = memoryCategories.find((c) => c.id === menu.category_id);
+      const category_name = catObj ? catObj.name : menu.category_id;
+      return res.json({
+        success: true,
+        data: { ...menu, category_name },
+      });
+    }
+
     const menu = await prisma.menu.findUnique({ where: { id } });
 
     if (!menu) {
@@ -190,7 +177,7 @@ async function syncMenuSequence() {
  */
 router.post('/', async (req, res) => {
   try {
-    const { name, category_id, price, stock, image_url, description, is_available, is_popular } = req.body;
+    const { name, category_id, price, stock, description, is_available, is_popular } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Nama menu wajib diisi' });
@@ -200,19 +187,6 @@ router.post('/', async (req, res) => {
     }
     if (price === undefined || isNaN(Number(price)) || Number(price) < 0) {
       return res.status(400).json({ success: false, message: 'Harga menu harus berupa angka positif' });
-    }
-
-    const defaultImage = 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=600&q=80&fm=webp';
-    let finalImageUrl = defaultImage;
-
-    if (image_url) {
-      const imgValidation = validateWebpImage(image_url);
-      if (!imgValidation.valid) {
-        return res.status(400).json({ success: false, message: imgValidation.message });
-      }
-      if (imgValidation.sanitized) {
-        finalImageUrl = imgValidation.sanitized;
-      }
     }
 
     const initialStock = stock !== undefined ? Math.max(0, parseInt(stock, 10) || 0) : 10;
@@ -225,10 +199,22 @@ router.post('/', async (req, res) => {
       price: parseInt(price, 10),
       stock: initialStock,
       is_available: initialStock > 0 ? available : false,
-      image_url: finalImageUrl,
       description: description?.trim() || '',
       is_popular: Boolean(is_popular),
     };
+
+    if (!process.env.DATABASE_URL) {
+      const newId = memoryMenus.length > 0 ? Math.max(...memoryMenus.map((m) => m.id)) + 1 : 1;
+      newMenu = { id: newId, ...menuData };
+      memoryMenus.push(newMenu);
+      const catObj = memoryCategories.find((c) => c.id === newMenu.category_id);
+      const category_name = catObj ? catObj.name : newMenu.category_id;
+      return res.status(201).json({
+        success: true,
+        message: `Menu "${newMenu.name}" berhasil ditambahkan`,
+        data: { ...newMenu, category_name },
+      });
+    }
 
     try {
       newMenu = await prisma.menu.create({ data: menuData });
@@ -262,13 +248,44 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+
+    if (!process.env.DATABASE_URL) {
+      const index = memoryMenus.findIndex((m) => m.id === id);
+      if (index === -1) {
+        return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+      }
+      const { name, category_id, price, stock, description, is_available, is_popular } = req.body;
+      const dataToUpdate = {};
+      if (name !== undefined) dataToUpdate.name = name.trim();
+      if (category_id !== undefined) dataToUpdate.category_id = category_id.trim();
+      if (price !== undefined && !isNaN(Number(price))) dataToUpdate.price = Math.max(0, parseInt(price, 10));
+      if (description !== undefined) dataToUpdate.description = description.trim();
+      if (is_popular !== undefined) dataToUpdate.is_popular = Boolean(is_popular);
+      if (stock !== undefined && !isNaN(Number(stock))) {
+        const parsedStock = Math.max(0, parseInt(stock, 10));
+        dataToUpdate.stock = parsedStock;
+        if (parsedStock === 0) dataToUpdate.is_available = false;
+      }
+      if (is_available !== undefined) dataToUpdate.is_available = Boolean(is_available);
+
+      memoryMenus[index] = { ...memoryMenus[index], ...dataToUpdate };
+      const updated = memoryMenus[index];
+      const catObj = memoryCategories.find((c) => c.id === updated.category_id);
+      const category_name = catObj ? catObj.name : updated.category_id;
+      return res.json({
+        success: true,
+        message: `Menu "${updated.name}" berhasil diperbarui`,
+        data: { ...updated, category_name },
+      });
+    }
+
     const existing = await prisma.menu.findUnique({ where: { id } });
 
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
     }
 
-    const { name, category_id, price, stock, image_url, description, is_available, is_popular } = req.body;
+    const { name, category_id, price, stock, description, is_available, is_popular } = req.body;
 
     const dataToUpdate = {};
     if (name !== undefined) dataToUpdate.name = name.trim();
@@ -276,16 +293,6 @@ router.put('/:id', async (req, res) => {
     if (price !== undefined && !isNaN(Number(price))) dataToUpdate.price = Math.max(0, parseInt(price, 10));
     if (description !== undefined) dataToUpdate.description = description.trim();
     if (is_popular !== undefined) dataToUpdate.is_popular = Boolean(is_popular);
-
-    if (image_url !== undefined) {
-      if (image_url) {
-        const imgValidation = validateWebpImage(image_url);
-        if (!imgValidation.valid) {
-          return res.status(400).json({ success: false, message: imgValidation.message });
-        }
-        dataToUpdate.image_url = imgValidation.sanitized || existing.image_url;
-      }
-    }
 
     if (stock !== undefined && !isNaN(Number(stock))) {
       const parsedStock = Math.max(0, parseInt(stock, 10));
@@ -348,6 +355,18 @@ router.patch('/:id/stock', async (req, res) => {
       isAvailable = true;
     }
 
+    if (!process.env.DATABASE_URL) {
+      menu.stock = newStock;
+      menu.is_available = isAvailable;
+      const catObj = memoryCategories.find((c) => c.id === menu.category_id);
+      const category_name = catObj ? catObj.name : menu.category_id;
+      return res.json({
+        success: true,
+        message: `Stok "${menu.name}" sekarang ${menu.stock}`,
+        data: { ...menu, category_name },
+      });
+    }
+
     const updated = await prisma.menu.update({
       where: { id },
       data: {
@@ -376,6 +395,22 @@ router.patch('/:id/stock', async (req, res) => {
 router.patch('/:id/toggle', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+
+    if (!process.env.DATABASE_URL) {
+      const menu = memoryMenus.find((m) => m.id === id);
+      if (!menu) {
+        return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+      }
+      menu.is_available = !menu.is_available;
+      const catObj = memoryCategories.find((c) => c.id === menu.category_id);
+      const category_name = catObj ? catObj.name : menu.category_id;
+      return res.json({
+        success: true,
+        message: `Menu "${menu.name}" sekarang ${menu.is_available ? 'Tersedia' : 'Nonaktif/Habis'}`,
+        data: { ...menu, category_name },
+      });
+    }
+
     const menu = await prisma.menu.findUnique({ where: { id } });
 
     if (!menu) {
@@ -408,6 +443,20 @@ router.patch('/:id/toggle', async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
+
+    if (!process.env.DATABASE_URL) {
+      const index = memoryMenus.findIndex((m) => m.id === id);
+      if (index === -1) {
+        return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
+      }
+      const [deleted] = memoryMenus.splice(index, 1);
+      return res.json({
+        success: true,
+        message: `Menu "${deleted.name}" berhasil dihapus`,
+        data: deleted,
+      });
+    }
+
     const deleted = await prisma.menu.delete({
       where: { id },
     });

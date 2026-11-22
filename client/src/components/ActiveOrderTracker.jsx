@@ -1,14 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import {
-  Clock,
-  ChefHat,
-  CheckCircle2,
-  AlertCircle,
-  QrCode,
-  X,
-  Sparkles,
-  CreditCard,
-} from 'lucide-react';
+import { Clock, ChefHat, CheckCircle2, AlertCircle, CreditCard, X } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import { fetchOrderStatusApi } from '../services/api';
 import '../styles/active-order-tracker.css';
@@ -50,43 +41,43 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
 
   if (!order) return null;
 
-  // Status Presentation configuration
+  // Status Presentation configuration - Anti-Slop Vintage Riverside Warung
   const getStatusConfig = () => {
     switch (currentStatus) {
       case 'paid_processing':
         return {
-          icon: <ChefHat size={20} strokeWidth={2.2} />,
+          icon: <ChefHat size={16} strokeWidth={2.2} />,
           pillClass: 'processing',
-          label: 'Sedang Diracik Barista',
+          label: 'Sedang dibuat',
           badgeClass: 'processing',
         };
       case 'completed':
         return {
-          icon: <CheckCircle2 size={20} strokeWidth={2.4} />,
+          icon: <CheckCircle2 size={16} strokeWidth={2.4} />,
           pillClass: 'completed',
-          label: 'Pesanan Selesai / Siap',
+          label: 'Siap diambil',
           badgeClass: 'completed',
         };
       case 'cancelled':
         return {
-          icon: <AlertCircle size={20} strokeWidth={2.2} />,
+          icon: <AlertCircle size={16} strokeWidth={2.2} />,
           pillClass: 'cancelled',
-          label: 'Pesanan Dibatalkan',
+          label: 'Dibatalkan',
           badgeClass: 'cancelled',
         };
       case 'waiting_qris_verification':
         return {
-          icon: <CreditCard size={20} strokeWidth={2.2} />,
-          pillClass: 'waiting',
-          label: 'Verifikasi Pembayaran QRIS',
-          badgeClass: 'waiting',
+          icon: <CreditCard size={16} strokeWidth={2.2} />,
+          pillClass: 'waiting-qris',
+          label: 'Menunggu cek kasir',
+          badgeClass: 'waiting-qris',
         };
       case 'waiting_payment':
       default:
         return {
-          icon: <Clock size={20} strokeWidth={2.2} />,
+          icon: <Clock size={16} strokeWidth={2.2} />,
           pillClass: 'waiting',
-          label: 'Menunggu Pembayaran Kasir',
+          label: 'Menunggu pembayaran',
           badgeClass: 'waiting',
         };
     }
@@ -94,6 +85,7 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
 
   const statusConfig = getStatusConfig();
   const isTerminalState = currentStatus === 'completed' || currentStatus === 'cancelled';
+  const displayCode = order.order_code?.startsWith('#') ? order.order_code : '#' + (order.order_code || '');
 
   return (
     <aside
@@ -114,7 +106,7 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
             </div>
 
             <div className="tracker-meta-line">
-              <span className="tracker-order-code">{order.order_code}</span>
+              <span className="tracker-order-code">{displayCode}</span>
               <span className="tracker-sep">•</span>
               <span className="tracker-table-badge">{formatLocationDisplay(order.table_number)}</span>
               <span className="tracker-sep">•</span>
@@ -129,11 +121,9 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
             type="button"
             className="btn-tracker-view-ticket"
             onClick={onOpenTicket}
-            aria-label="Tampilkan Tiket QR Pesanan"
-            title="Buka QR Code untuk di-scan kasir"
+            aria-label="Lihat tiket pesanan"
           >
-            <QrCode size={16} />
-            <span>Tiket QR</span>
+            <span>Tiket</span>
           </button>
 
           {isTerminalState && onDismiss && (
@@ -142,7 +132,7 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
               className="btn-tracker-dismiss"
               onClick={onDismiss}
               aria-label="Tutup notifikasi pesanan"
-              title="Tutup notifikasi"
+              title="Tutup"
             >
               <X size={15} />
             </button>

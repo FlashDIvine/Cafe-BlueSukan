@@ -1,18 +1,15 @@
 /* ==========================================================================
-   BlueSukan Cafe - Menu Page Modern Editorial Styles
-   Palette: Ink, Bone, Accent, Accent Light, Muted, Border, Surface
-   Typography: Instrument Serif (Display), DM Sans (Body)
-   Tokens: --ink, --bone, --accent, --accent-light, --muted, --border, --surface, --e-out
+   Blue'sukan Kopi - MenuPage Styles (Anti-Slop)
    ========================================================================== */
 
-.stitch-home-container {
+.antislop-menu-page {
   display: flex;
   flex-direction: column;
   flex: 1;
-  background-color: var(--bone);
+  background-color: var(--paper);
   color: var(--ink);
   font-family: var(--f-body);
-  min-height: 100%;
+  min-height: 100vh;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -20,239 +17,139 @@
   box-sizing: border-box;
 }
 
-/* ─── 1. Top Search Bar ──────────────────────────────────────────────────── */
-.stitch-search-section {
-  padding: 14px 16px 6px;
+.menu-main-container {
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  max-width: 32rem;
+  margin-left: 0;
+  padding: 0 16px 140px;
   box-sizing: border-box;
-}
-
-.stitch-search-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.stitch-search-input-box {
-  flex: 1;
-  min-width: 0;
+/* ─── Top Header & Search ─────────────────────────────────────────────────── */
+.menu-header-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 14px;
+}
+
+.menu-page-title {
+  font-family: var(--f-display);
+  font-size: clamp(2rem, 8vw, 2.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--ink);
+  margin: 0;
+  transform: rotate(-2deg);
+  transform-origin: left bottom;
+}
+
+.menu-search-box {
   position: relative;
-  background-color: var(--surface);
-  border-radius: 9999px;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 4px color-mix(in srgb, var(--ink) 3%, transparent);
+  width: 100%;
+  background-color: var(--soft);
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(58, 36, 24, 0.15);
   display: flex;
   align-items: center;
   min-height: 44px;
   box-sizing: border-box;
+  transition: all 0.15s ease;
 }
 
-.stitch-search-input-box:focus-within {
-  border-color: var(--accent);
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.menu-search-box:focus-within {
+  background-color: var(--paper);
+  border-color: var(--sun);
+  outline: 3px solid var(--sun);
 }
 
-.stitch-search-icon {
+.search-icon {
   position: absolute;
   left: 14px;
   color: var(--muted);
   pointer-events: none;
 }
 
-.stitch-search-input {
+.search-input {
   width: 100%;
-  padding: 12px 42px 12px 42px;
-  border-radius: 9999px;
+  padding: 10px 40px 10px 42px;
+  border-radius: var(--radius-pill);
   border: none;
   background: transparent;
   font-family: var(--f-body);
-  font-size: 0.84375rem;
+  font-size: 0.95rem;
   color: var(--ink);
   outline: none;
   box-sizing: border-box;
 }
 
-.stitch-search-input::placeholder {
+.search-input::placeholder {
   color: var(--muted);
   font-weight: 400;
 }
 
-.stitch-search-clear-btn {
+.search-clear-btn {
   position: absolute;
-  right: 2px;
+  right: 4px;
   background: transparent;
   border: none;
-  min-width: 44px;
-  min-height: 44px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--muted);
   cursor: pointer;
   padding: 0;
-}
-
-.stitch-search-clear-btn:hover {
-  color: var(--ink);
-}
-
-.stitch-search-clear-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
   border-radius: 50%;
 }
 
-/* ─── 2. Section Header Common ────────────────────────────────────────────── */
-.stitch-section-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  gap: 8px;
-}
-
-.stitch-section-title {
-  font-family: var(--f-display);
-  font-size: clamp(1.35rem, 5vw, 1.6rem);
-  font-weight: 400;
+.search-clear-btn:hover {
   color: var(--ink);
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+  background-color: rgba(58, 36, 24, 0.08);
 }
 
-.stitch-see-all-btn {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-family: var(--f-body);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  min-height: 44px;
-  min-width: 44px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  padding: 0 4px;
+.search-clear-btn:focus-visible {
+  outline: 3px solid var(--sun);
 }
 
-.stitch-see-all-btn:hover {
-  color: var(--accent-hover);
+/* ─── Menu Catalog Section ───────────────────────────────────────────────── */
+.menu-catalog-section {
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 4px;
 }
 
-.stitch-see-all-btn:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.stitch-section-count {
-  font-family: var(--f-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-
-/* ─── 3. Recommended for You Section ──────────────────────────────────────── */
-.stitch-recommended-section {
-  padding: 8px 16px 14px;
+.menu-items-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
 }
 
-.stitch-recommended-scroll {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 2px 2px 8px;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* ─── 4. Popular Menu 2-Column Grid Section ───────────────────────────────── */
-.stitch-catalog-section {
-  padding: 6px 16px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.stitch-popular-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-/* ─── 5. Empty State ──────────────────────────────────────────────────────── */
-.stitch-empty-state {
-  padding: 36px 16px;
+/* ─── Empty State ────────────────────────────────────────────────────────── */
+.menu-empty-state {
+  padding: 40px 16px;
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  background-color: var(--surface);
-  border-radius: 16px 4px 16px 16px;
-  border: 1px dashed var(--border);
-  margin: 8px 0;
+  background-color: var(--soft);
+  border-radius: var(--radius-card, 1.2rem);
+  margin-top: 12px;
 }
 
-.stitch-empty-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background-color: color-mix(in srgb, var(--accent) 8%, transparent);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stitch-empty-title {
+.empty-title {
   font-family: var(--f-display);
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 400;
   color: var(--ink);
+  margin: 0 0 6px;
 }
 
-.stitch-empty-desc {
+.empty-desc {
   font-family: var(--f-body);
-  font-size: 0.8125rem;
+  font-size: 0.92rem;
   color: var(--muted);
-  max-width: 240px;
-  line-height: 1.45;
-}
-
-@media (min-width: 481px) {
-  .stitch-popular-grid {
-    gap: 14px;
-  }
+  line-height: 1.5;
+  margin: 0;
 }

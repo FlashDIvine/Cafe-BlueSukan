@@ -1,155 +1,56 @@
 /* ==========================================================================
-   AntiSlopUI Navbar Styles
-   Tokens: --f-display (Instrument Serif), --f-body (DM Sans), --ink, --bone, --accent
-   Principles: Asymmetric layout, restrained palette, tactile micro-interactions, touch >= 44px
+   Blue'sukan Kopi - Navbar Styles (Anti-Slop)
    ========================================================================== */
 
-/* ─── 1. Header Container (Asymmetric Architectural Glass) ─────────────── */
 .navbar-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(249, 247, 244, 0.88); /* Translucent --bone */
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border, rgba(15, 18, 25, 0.08));
-  /* Asymmetric padding: generous breathing room on brand, tight precision on actions */
-  padding: 10px 14px 10px 18px;
+  background-color: var(--paper);
+  border-bottom: 2px solid var(--soft);
+  padding: 10px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  position: relative;
-  transition: background-color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1));
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Asymmetric bottom accent anchor line (rejecting centered symmetry) */
-.navbar-header::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 18px;
-  width: 44px;
-  height: 2px;
-  background: var(--accent, #1E56A0);
-  border-radius: 1px;
-  pointer-events: none;
-}
-
-/* ─── 2. Brand Section (Oversized Serif + Asymmetric Geometry) ─────────── */
+/* ─── Brand Logo (Left) ─────────────────────────────────────────────────── */
 .brand-container {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   text-decoration: none;
-  color: inherit;
-  user-select: none;
-}
-
-/* Interactive brand button reset ensuring touch target >= 44px */
-.brand-interactive {
+  color: var(--ink);
   background: none;
   border: none;
-  padding: 2px 4px 2px 0;
-  margin: 0;
+  padding: 0;
   text-align: left;
+  min-height: 40px;
+  min-width: 40px;
+}
+
+.brand-interactive {
   cursor: pointer;
-  min-height: 44px;
-  min-width: 44px;
-  border-radius: var(--radius-sm, 8px);
-  transition: transform var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
-.brand-interactive:hover .brand-logo-icon {
-  background-color: var(--accent, #1E56A0);
-  border-color: var(--accent, #1E56A0);
-  transform: rotate(-3deg) scale(1.03);
+.brand-interactive:hover .brand-title {
+  color: var(--blue);
 }
 
-.brand-interactive:active {
-  transform: scale(0.98);
-}
-
-.brand-interactive:focus-visible {
-  outline: 2px solid var(--accent, #1E56A0);
-  outline-offset: 3px;
-}
-
-.brand-static {
-  cursor: default;
-}
-
-/* Asymmetric corner badge for brand mark (14px 4px 14px 14px) */
-.brand-logo-icon {
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  border-radius: 14px 4px 14px 14px;
-  background: var(--ink, #0F1219);
-  color: var(--bone, #F9F7F4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(15, 18, 25, 0.12);
-  border: 1px solid rgba(15, 18, 25, 0.12);
-  transition: transform var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              background-color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              border-color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* Type is hero: Instrument Serif display headline */
 .brand-title {
-  font-family: var(--f-display, 'Instrument Serif', serif);
-  font-size: clamp(1.25rem, 5vw, 1.45rem);
+  font-family: var(--f-display);
+  font-size: 1.25rem;
   font-weight: 400;
-  color: var(--ink, #0F1219);
-  letter-spacing: -0.015em;
-  line-height: 0.95;
+  color: var(--ink);
+  line-height: 1.1;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
-.brand-title-accent {
-  font-style: italic;
-  color: var(--accent, #1E56A0);
-  margin-left: 3px;
-}
-
-/* Body font: DM Sans uppercase micro-label */
-.brand-subtitle {
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-  font-size: 0.6875rem;
-  font-weight: 700;
-  color: var(--muted, #525E71);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 1.2;
-}
-
-.brand-badge-text {
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-}
-
-/* Subtle rhythmic status beacon */
-.status-dot {
-  width: 6px;
-  height: 6px;
-  min-width: 6px;
-  border-radius: 50%;
-  background-color: var(--accent, #1E56A0);
-  display: inline-block;
-  box-shadow: 0 0 0 2px rgba(30, 86, 160, 0.22);
-}
-
-/* ─── 3. Asymmetric Actions Cluster (Touch Target >= 44px) ─────────────── */
+/* ─── Navbar Actions & Yellow Pill (Right) ──────────────────────────────── */
 .navbar-actions {
   display: flex;
   align-items: center;
@@ -157,180 +58,40 @@
   flex-shrink: 0;
 }
 
-/* Base button styling with enforced >= 44px touch target */
-.table-badge-btn {
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 14px;
+.navbar-pill-btn {
+  background-color: var(--sun);
+  color: var(--on-sun);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-family: var(--f-body);
+  font-size: 0.92rem;
+  font-weight: 700;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 6px;
   cursor: pointer;
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-  font-size: 0.8125rem;
-  user-select: none;
-  border: 1px solid transparent;
-  transition: transform var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              background-color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              border-color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              box-shadow var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1));
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(58, 36, 24, 0.08);
 }
 
-.table-badge-btn:active {
-  transform: scale(0.97);
+.navbar-pill-btn:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  background-color: #DE9F28;
 }
 
-.table-badge-btn:focus-visible {
-  outline: 2px solid var(--accent, #1E56A0);
-  outline-offset: 2px;
+.navbar-pill-btn:active {
+  transform: translateY(0);
 }
 
-/* Active Order Ticket Badge: Inverted High-Contrast Ink Capsule */
-.navbar-ticket-btn {
-  background-color: var(--ink, #0F1219);
-  color: var(--bone, #F9F7F4);
-  border: 1px solid var(--ink, #0F1219);
-  /* Asymmetric corner radius */
-  border-radius: 9999px 4px 9999px 9999px;
-  box-shadow: 0 3px 10px rgba(15, 18, 25, 0.16);
-  font-weight: 600;
+.navbar-pill-btn.soft {
+  background-color: var(--soft);
+  color: var(--ink);
+  box-shadow: none;
 }
 
-.navbar-ticket-btn:hover {
-  background-color: var(--accent, #1E56A0);
-  border-color: var(--accent, #1E56A0);
-  color: var(--bone);
-  box-shadow: 0 4px 14px rgba(30, 86, 160, 0.24);
-  transform: translateY(-1px);
-}
-
-.ticket-icon-wrap {
-  display: inline-flex;
-  align-items: center;
-  opacity: 0.9;
-}
-
-.ticket-label {
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.ticket-code {
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
-  color: var(--bone);
-}
-
-.ticket-pulse-beacon {
-  width: 5px;
-  height: 5px;
-  min-width: 5px;
-  border-radius: 50%;
-  background: var(--accent-light);
-  box-shadow: 0 0 6px var(--accent-light);
-  display: inline-block;
-}
-
-/* Table / Location Selector Button: Architectural Asymmetric Pill */
-.navbar-table-btn {
-  background-color: rgba(249, 247, 244, 0.92);
-  color: var(--ink, #0F1219);
-  border: 1px solid rgba(15, 18, 25, 0.12);
-  /* Asymmetric cut: left anchor accent & off-axis corner */
-  border-left: 2.5px solid var(--accent, #1E56A0);
-  border-radius: 9999px 9999px 9999px 6px;
-  box-shadow: 0 1px 3px rgba(15, 18, 25, 0.05);
-  font-weight: 500;
-}
-
-.navbar-table-btn:hover {
-  background-color: var(--surface);
-  border-color: var(--accent, #1E56A0);
-  box-shadow: 0 4px 14px rgba(30, 86, 160, 0.1);
-  transform: translateY(-1px);
-}
-
-.table-pin-icon {
-  color: var(--accent, #1E56A0);
-  flex-shrink: 0;
-}
-
-.table-text-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.table-prefix {
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--muted, #525E71);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.table-number-val {
-  font-family: var(--f-body, 'DM Sans', sans-serif);
-  color: var(--ink, #0F1219);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.table-edit-icon {
-  color: var(--muted, #525E71);
-  opacity: 0.65;
-  flex-shrink: 0;
-  transition: transform var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              color var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1)),
-              opacity var(--t-fast, 200ms) var(--e-out, cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-.navbar-table-btn:hover .table-edit-icon {
-  transform: rotate(-12deg) scale(1.15);
-  opacity: 1;
-  color: var(--accent, #1E56A0);
-}
-
-/* ─── 4. Accessibility & Motion Orchestration ───────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes antislopPulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 1;
-    }
-    50% {
-      transform: scale(1.3);
-      opacity: 0.5;
-    }
-  }
-
-  .status-dot {
-    animation: antislopPulse 2.4s infinite cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ticket-pulse-beacon {
-    animation: antislopPulse 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .navbar-header,
-  .brand-interactive,
-  .brand-logo-icon,
-  .table-badge-btn,
-  .table-edit-icon {
-    transition: none !important;
-    transform: none !important;
-  }
-
-  .status-dot,
-  .ticket-pulse-beacon {
-    animation: none !important;
-  }
+.navbar-pill-btn.soft:hover {
+  background-color: #E8D9B5;
 }
