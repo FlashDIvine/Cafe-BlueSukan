@@ -6,6 +6,7 @@ import { MenuCard } from '../components/MenuCard';
 import { Footer } from '../components/Footer';
 import { TableModal } from '../components/TableModal';
 import { ActiveOrderTracker } from '../components/ActiveOrderTracker';
+import { FloatingCartBar } from '../components/FloatingCartBar';
 import '../styles/home-page.css';
 
 const SCHEDULE_DAYS = [
@@ -23,6 +24,7 @@ export const HomePage = ({
   onOpenTicketModal,
   onDismissActiveOrder,
   onStatusChange,
+  onOpenCart,
 }) => {
   const { tableNumber, menus } = useOrder();
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
@@ -218,6 +220,9 @@ export const HomePage = ({
         isOpen={isTableModalOpen}
         onClose={() => setIsTableModalOpen(false)}
       />
+
+      {/* ─── 9. Floating Cart Bar ───────────────────────────────────────── */}
+      <FloatingCartBar onOpenCart={onOpenCart} />
     </div>
   );
 };

@@ -213,11 +213,6 @@ function AppContent() {
             activeOrder={activeOrder}
             onOpenTicketModal={() => setIsTicketModalOpen(true)}
           />
-          <CartDrawer
-            isOpen={isCartOpen}
-            onClose={() => setIsCartOpen(false)}
-            onProceedToCheckout={handleProceedToCheckout}
-          />
         </div>
       ) : (
         /* 3. Default Cafe Landing Page (Homepage) with Active Order Integration */
@@ -228,6 +223,16 @@ function AppContent() {
           onOpenTicketModal={() => setIsTicketModalOpen(true)}
           onDismissActiveOrder={handleDismissActiveOrder}
           onStatusChange={handleOrderStatusChange}
+          onOpenCart={() => setIsCartOpen(true)}
+        />
+      )}
+
+      {/* Customer Cart Drawer (available in both Home & Menu modes) */}
+      {appMode !== 'cashier' && (
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          onProceedToCheckout={handleProceedToCheckout}
         />
       )}
 

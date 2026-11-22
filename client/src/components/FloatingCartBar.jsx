@@ -7,7 +7,7 @@ import '../styles/floating-cart.css';
 export const FloatingCartBar = memo(({ onOpenCart }) => {
   const { totalItemsCount, grandTotalPrice, cartItems } = useOrder();
 
-  if (cartItems.length === 0) {
+  if (!totalItemsCount || totalItemsCount <= 0 || cartItems.length === 0) {
     return null;
   }
 
