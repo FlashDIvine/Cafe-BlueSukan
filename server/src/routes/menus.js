@@ -82,7 +82,6 @@ router.get('/', async (req, res) => {
           name: true,
           price: true,
           stock: true,
-          image_url: true,
           description: true,
           is_available: true,
           is_popular: true,
@@ -119,32 +118,6 @@ router.get('/', async (req, res) => {
 async function getCategoryName(categoryId) {
   const { map } = await getCategoriesMap();
   return map[categoryId] || categoryId;
-}
-
-/**
- * Validate WebP image (both URL and base64 data URL)
- * Max size: 2MB (2 * 1024 * 1024 bytes)
- */
-function validateWebpImage(image) {
-  if (!image || typeof image !== 'string') return { valid: true, sanitized: null };
-  const trimmed = image.trim();
-  if (!trimmed) return { valid: true, sanitized: null };
-
-  if (trimmed.startsWith('data:')) {
-    if (!trimmed.startsWith('data:image/webp;base64,')) {
-      return { valid: false, message: 'Format gambar harus WebP (.webp)' };
-    }
-    const base64Data = trimmed.replace(/^data:image\/webp;base64,/, '');
-    const byteLength = Buffer.from(base64Data, 'base64').length;
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-    if (byteLength > MAX_SIZE) {
-      return { valid: false, message: 'Ukuran gambar maksimal 2 MB' };
-    }
-    return { valid: true, sanitized: trimmed };
-  }
-
-  // If it's a regular URL
-  return { valid: true, sanitized: trimmed };
 }
 
 /**
@@ -190,7 +163,7 @@ async function syncMenuSequence() {
  */
 router.post('/', async (req, res) => {
   try {
-    const { name, category_id, price, stock, image_url, description, is_available, is_popular } = req.body;
+    const { name, category_id, price, stock, description, is_available, is_popular } = req.body;
 
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Nama menu wajib diisi' });
@@ -200,19 +173,6 @@ router.post('/', async (req, res) => {
     }
     if (price === undefined || isNaN(Number(price)) || Number(price) < 0) {
       return res.status(400).json({ success: false, message: 'Harga menu harus berupa angka positif' });
-    }
-
-    const defaultImage = 'https://images.unsplash.com/photo-1509785307050-d4066910ec1e?auto=format&fit=crop&w=600&q=80&fm=webp';
-    let finalImageUrl = defaultImage;
-
-    if (image_url) {
-      const imgValidation = validateWebpImage(image_url);
-      if (!imgValidation.valid) {
-        return res.status(400).json({ success: false, message: imgValidation.message });
-      }
-      if (imgValidation.sanitized) {
-        finalImageUrl = imgValidation.sanitized;
-      }
     }
 
     const initialStock = stock !== undefined ? Math.max(0, parseInt(stock, 10) || 0) : 10;
@@ -225,7 +185,6 @@ router.post('/', async (req, res) => {
       price: parseInt(price, 10),
       stock: initialStock,
       is_available: initialStock > 0 ? available : false,
-      image_url: finalImageUrl,
       description: description?.trim() || '',
       is_popular: Boolean(is_popular),
     };
@@ -268,7 +227,7 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ success: false, message: 'Menu tidak ditemukan' });
     }
 
-    const { name, category_id, price, stock, image_url, description, is_available, is_popular } = req.body;
+    const { name, category_id, price, stock, description, is_available, is_popular } = req.body;
 
     const dataToUpdate = {};
     if (name !== undefined) dataToUpdate.name = name.trim();
@@ -276,16 +235,6 @@ router.put('/:id', async (req, res) => {
     if (price !== undefined && !isNaN(Number(price))) dataToUpdate.price = Math.max(0, parseInt(price, 10));
     if (description !== undefined) dataToUpdate.description = description.trim();
     if (is_popular !== undefined) dataToUpdate.is_popular = Boolean(is_popular);
-
-    if (image_url !== undefined) {
-      if (image_url) {
-        const imgValidation = validateWebpImage(image_url);
-        if (!imgValidation.valid) {
-          return res.status(400).json({ success: false, message: imgValidation.message });
-        }
-        dataToUpdate.image_url = imgValidation.sanitized || existing.image_url;
-      }
-    }
 
     if (stock !== undefined && !isNaN(Number(stock))) {
       const parsedStock = Math.max(0, parseInt(stock, 10));
