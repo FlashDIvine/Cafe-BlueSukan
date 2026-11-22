@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { Coffee, MapPin, Edit3, QrCode } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatLocationDisplay } from '../utils/formatters';
 import '../styles/navbar.css';
@@ -7,21 +6,15 @@ import '../styles/navbar.css';
 export const Navbar = memo(({ onOpenTableModal, onGoHome, activeOrder, onOpenTicketModal }) => {
   const { tableNumber } = useOrder();
 
+  // Strip leading '#' to prevent double '#' like '##BC-101'
+  const cleanOrderCode = activeOrder?.order_code
+    ? activeOrder.order_code.replace(/^#+/, '')
+    : '';
+
   const brandContent = (
-    <>
-      <div className="brand-logo-icon" aria-hidden="true">
-        <Coffee size={19} strokeWidth={2.2} />
-      </div>
-      <div className="brand-text">
-        <span className="brand-title">
-          Blue'sukan <span className="brand-title-accent">Kopi</span>
-        </span>
-        <div className="brand-subtitle">
-          <span className="status-dot" aria-hidden="true" />
-          <span className="brand-badge-text">Tepi Serayu • Rawalo</span>
-        </div>
-      </div>
-    </>
+    <span className="brand-title">
+      Blue’sukan Kopi
+    </span>
   );
 
   return (
@@ -31,50 +24,39 @@ export const Navbar = memo(({ onOpenTableModal, onGoHome, activeOrder, onOpenTic
           type="button"
           className="brand-container brand-interactive"
           onClick={onGoHome}
-          title="Kembali ke Halaman Utama"
-          aria-label="Angkringan Blue'sukan Kopi - Kembali ke Halaman Utama"
+          title="Kembali ke Beranda"
+          aria-label="Blue’sukan Kopi - Kembali ke Beranda"
         >
           {brandContent}
         </button>
       ) : (
-        <div className="brand-container brand-static">
+        <div className="brand-container">
           {brandContent}
         </div>
       )}
 
       <div className="navbar-actions" role="toolbar" aria-label="Aksi Navigasi">
-        {activeOrder && onOpenTicketModal && (
+        {activeOrder && onOpenTicketModal ? (
           <button
             type="button"
-            className="navbar-ticket-btn table-badge-btn"
+            className="navbar-pill-btn"
             onClick={onOpenTicketModal}
-            title={`Lihat Tiket QR Pesanan Aktif (${activeOrder.order_code})`}
-            aria-label={`Lihat Tiket QR Pesanan Aktif nomor ${activeOrder.order_code}`}
+            title={`Lihat Tiket QR Pesanan (${cleanOrderCode})`}
+            aria-label={`Lihat Tiket QR Pesanan nomor ${cleanOrderCode}`}
           >
-            <span className="ticket-icon-wrap" aria-hidden="true">
-              <QrCode size={15} strokeWidth={2.2} />
-            </span>
-            <span className="ticket-label">
-              Tiket <span className="tabular ticket-code">{activeOrder.order_code}</span>
-            </span>
-            <span className="ticket-pulse-beacon" aria-hidden="true" />
+            <span>Meja {cleanOrderCode}</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="navbar-pill-btn"
+            onClick={onOpenTableModal}
+            title="Klik untuk mengubah lokasi duduk"
+            aria-label={`Lokasi meja saat ini: ${formatLocationDisplay(tableNumber)}`}
+          >
+            <span>Meja {formatLocationDisplay(tableNumber)}</span>
           </button>
         )}
-
-        <button
-          type="button"
-          className="navbar-table-btn table-badge-btn"
-          onClick={onOpenTableModal}
-          title="Klik untuk mengubah lokasi duduk"
-          aria-label={`Ubah lokasi meja saat ini: ${formatLocationDisplay(tableNumber)}`}
-        >
-          <MapPin size={15} strokeWidth={2.2} className="table-pin-icon" aria-hidden="true" />
-          <div className="table-text-group">
-            <span className="table-prefix">Area</span>
-            <span className="table-number-val tabular">{formatLocationDisplay(tableNumber)}</span>
-          </div>
-          <Edit3 size={13} strokeWidth={2} className="table-edit-icon" aria-hidden="true" />
-        </button>
       </div>
     </header>
   );
