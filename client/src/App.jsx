@@ -39,54 +39,121 @@ function AppContent() {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
+  const [selectedOrderCode, setSelectedOrderCode] = useState(null);
   const [ringNotification, setRingNotification] = useState(null);
 
-  // Initialize activeOrder from localStorage for persistent tracking
-  const [activeOrder, setActiveOrder] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('bluesukan_active_order');
-        if (saved) return JSON.parse(saved);
-      } catch (err) {
-        console.error('Failed to load active order from localStorage', err);
+  // 1 & 2. State activeOrders (array kode saja) & migrasi sekali jalan dari bluesukan_active_order
+  const [activeOrders, setActiveOrders] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const migratedCodes = [];
+      const legacy = localStorage.getItem('bluesukan_active_order');
+      if (legacy) {
+        try {
+          const parsed = JSON.parse(legacy);
+          if (parsed?.order_code) {
+            migratedCodes.push(parsed.order_code);
+          }
+        } catch (e) {
+          console.error('Failed to parse legacy active order', e);
+        }
+        localStorage.removeItem('bluesukan_active_order');
       }
+
+      const saved = localStorage.getItem('bluesukan_active_orders');
+      const existingCodes = saved ? JSON.parse(saved) : [];
+      const combined = Array.from(new Set([...migratedCodes, ...existingCodes]));
+      if (migratedCodes.length > 0) {
+        localStorage.setItem('bluesukan_active_orders', JSON.stringify(combined));
+      }
+      return combined;
+    } catch (err) {
+      console.error('Failed to load active orders from localStorage', err);
+      return [];
     }
-    return null;
   });
+
+  // Map data pesanan: { [kode]: order }
+  const [ordersMap, setOrdersMap] = useState({});
 
   const { showToast, clearCart } = useOrder();
 
-  // Refresh active order data completely from backend
-  const refreshActiveOrder = async (orderCode) => {
-    try {
-      const freshOrder = await fetchOrderByCodeApi(orderCode);
-      if (freshOrder) {
-        setActiveOrder(freshOrder);
-      }
-    } catch (err) {
-      console.error('Failed to refresh active order:', err);
-      showToast('Gagal memperbarui pesanan', 'warning');
-    }
-  };
-
-  // Sync activeOrder changes to localStorage
+  // Simpan activeOrders ke localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        if (activeOrder) {
-          localStorage.setItem('bluesukan_active_order', JSON.stringify(activeOrder));
-        } else {
-          localStorage.removeItem('bluesukan_active_order');
-        }
+        localStorage.setItem('bluesukan_active_orders', JSON.stringify(activeOrders));
       } catch (err) {
-        console.error('Failed to save active order to localStorage', err);
+        console.error('Failed to save active orders to localStorage', err);
       }
     }
-  }, [activeOrder]);
+  }, [activeOrders]);
+
+  // 4. Saat aplikasi dibuka, ambil setiap kode di daftar. Hapus status completed, cancelled, atau 404
+  useEffect(() => {
+    if (!activeOrders || activeOrders.length === 0) return;
+
+    let isMounted = true;
+    const loadOrders = async () => {
+      const validCodes = [];
+      const newMap = {};
+
+      for (const code of activeOrders) {
+        try {
+          const order = await fetchOrderByCodeApi(code);
+          if (order && order.status !== 'completed' && order.status !== 'cancelled') {
+            validCodes.push(code);
+            newMap[code] = order;
+          }
+        } catch (err) {
+          console.warn(`Pesanan ${code} tidak ditemukan atau sudah selesai:`, err);
+        }
+      }
+
+      if (isMounted) {
+        setOrdersMap((prev) => ({ ...prev, ...newMap }));
+        if (validCodes.length !== activeOrders.length) {
+          setActiveOrders(validCodes);
+        }
+      }
+    };
+
+    loadOrders();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Ambil ulang satu pesanan secara penuh
+  const refreshSingleOrder = async (orderCode) => {
+    try {
+      const freshOrder = await fetchOrderByCodeApi(orderCode);
+      if (freshOrder) {
+        if (freshOrder.status === 'completed' || freshOrder.status === 'cancelled') {
+          setActiveOrders((prev) => prev.filter((c) => c !== orderCode));
+          setOrdersMap((prev) => {
+            const next = { ...prev };
+            delete next[orderCode];
+            return next;
+          });
+        } else {
+          setOrdersMap((prev) => ({ ...prev, [orderCode]: freshOrder }));
+        }
+      }
+    } catch (err) {
+      console.error(`Failed to refresh order ${orderCode}:`, err);
+      setActiveOrders((prev) => prev.filter((c) => c !== orderCode));
+      setOrdersMap((prev) => {
+        const next = { ...prev };
+        delete next[orderCode];
+        return next;
+      });
+    }
+  };
 
   // Realtime SSE stream for active order status updates & ring customer alerts
   useEffect(() => {
-    if (!activeOrder?.order_code || activeOrder.status === 'cancelled') {
+    if (!activeOrders || activeOrders.length === 0) {
       return;
     }
 
@@ -97,32 +164,37 @@ function AppContent() {
       eventSource.onmessage = (event) => {
         try {
           const payload = JSON.parse(event.data);
+          const eventCode = payload?.order_code;
+
+          // Event SSE hanya memperbarui pesanan yang cocok dengan event.order_code
+          if (!eventCode || !activeOrders.includes(eventCode)) {
+            return;
+          }
 
           // 1. Ring customer signal from Cashier POS
-          if (payload?.type === 'RING_CUSTOMER' && payload.order_code === activeOrder.order_code) {
+          if (payload?.type === 'RING_CUSTOMER') {
             playCustomerChime();
             if (typeof navigator !== 'undefined' && navigator.vibrate) {
               try {
                 navigator.vibrate([300, 150, 300, 150, 400]);
               } catch (_) {}
             }
+            const targetOrder = ordersMap[eventCode];
             setRingNotification({
-              order_code: payload.order_code,
-              customer_name: payload.customer_name || activeOrder.customer_name,
-              table_number: payload.table_number || activeOrder.table_number,
+              order_code: eventCode,
+              customer_name: payload.customer_name || targetOrder?.customer_name || '',
+              table_number: payload.table_number || targetOrder?.table_number || '',
               timestamp: Date.now(),
             });
           }
 
-          // 2. Order status / items update: ambil ulang pesanan secara menyeluruh tanpa syarat status berubah
-          if (payload?.order_code === activeOrder.order_code) {
-            if (
-              payload?.type === 'ORDER_UPDATED' ||
-              payload?.type === 'STATUS_UPDATED' ||
-              payload?.type === 'QRIS_CONFIRMED'
-            ) {
-              refreshActiveOrder(payload.order_code);
-            }
+          // 2. Order status / items update: hanya mengambil ulang pesanan yang cocok
+          if (
+            payload?.type === 'ORDER_UPDATED' ||
+            payload?.type === 'STATUS_UPDATED' ||
+            payload?.type === 'QRIS_CONFIRMED'
+          ) {
+            refreshSingleOrder(eventCode);
           }
         } catch {
           // Heartbeat or malformed comment
@@ -139,7 +211,7 @@ function AppContent() {
     return () => {
       if (eventSource) eventSource.close();
     };
-  }, [activeOrder?.order_code, activeOrder?.status]);
+  }, [activeOrders, ordersMap]);
 
   // Listen to browser hash changes (e.g. #cashier, #menu, #home)
   useEffect(() => {
@@ -160,7 +232,6 @@ function AppContent() {
   }, []);
 
   const handleGoToMenu = () => {
-    // Preserve activeOrder so customer can track their order or add additional items
     setAppMode('menu');
     window.location.hash = '#menu';
   };
@@ -181,16 +252,20 @@ function AppContent() {
     window.location.hash = '#cashier';
   };
 
-  // Submit order & immediately transition back to Beranda (HomePage) with Ticket automatically opened
+  // 3. handleProceedToCheckout: tambahkan kode pesanan baru ke daftar tanpa menimpa daftar
   const handleProceedToCheckout = async (orderPayload) => {
     try {
       setIsCartOpen(false);
       const createdOrder = await submitOrderApi(orderPayload);
-      setActiveOrder(createdOrder);
-      clearCart();
-      showToast(`Pesanan ${createdOrder.order_code} berhasil dibuat!`, 'success');
+      const code = createdOrder.order_code;
 
-      // Direct transition to Beranda (HomePage) & automatically open Digital Ticket modal
+      setOrdersMap((prev) => ({ ...prev, [code]: createdOrder }));
+      setActiveOrders((prev) => (prev.includes(code) ? prev : [...prev, code]));
+      clearCart();
+      showToast(`Pesanan ${code} berhasil dibuat!`, 'success');
+
+      // Tampilkan tiket untuk pesanan baru ini
+      setSelectedOrderCode(code);
       setAppMode('home');
       setIsTicketModalOpen(true);
       if (window.location.hash) {
@@ -206,13 +281,24 @@ function AppContent() {
     }
   };
 
-  const handleDismissActiveOrder = () => {
-    setActiveOrder(null);
+  // 5. Dismiss satu pesanan hanya menghapus kode itu dari daftar
+  const handleDismissActiveOrder = (orderCode) => {
+    const codeToDismiss = orderCode || selectedOrderCode || activeOrders[0];
+    if (!codeToDismiss) return;
+    setActiveOrders((prev) => prev.filter((c) => c !== codeToDismiss));
+    setOrdersMap((prev) => {
+      const next = { ...prev };
+      delete next[codeToDismiss];
+      return next;
+    });
+    if (selectedOrderCode === codeToDismiss) {
+      setSelectedOrderCode(null);
+    }
   };
 
-  const handleOrderStatusChange = (newStatus) => {
-    setActiveOrder((prev) => (prev ? { ...prev, status: newStatus } : prev));
-  };
+  const activeOrderList = activeOrders.map((code) => ordersMap[code]).filter(Boolean);
+  const latestActiveOrder = activeOrderList[activeOrderList.length - 1] || null;
+  const currentSelectedOrder = (selectedOrderCode && ordersMap[selectedOrderCode]) || latestActiveOrder;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', width: '100%', minHeight: '100vh', minWidth: 0, overflowX: 'hidden' }}>
@@ -227,8 +313,11 @@ function AppContent() {
           <MenuPage
             onOpenCart={() => setIsCartOpen(true)}
             onGoHome={handleGoToHome}
-            activeOrder={activeOrder}
-            onOpenTicketModal={() => setIsTicketModalOpen(true)}
+            activeOrder={latestActiveOrder}
+            onOpenTicketModal={() => {
+              setSelectedOrderCode(null);
+              setIsTicketModalOpen(true);
+            }}
           />
         </div>
       ) : (
@@ -236,10 +325,20 @@ function AppContent() {
         <HomePage
           onGoToMenu={handleGoToMenu}
           onGoToCashier={handleGoToCashier}
-          activeOrder={activeOrder}
-          onOpenTicketModal={() => setIsTicketModalOpen(true)}
+          activeOrder={latestActiveOrder}
+          onOpenTicketModal={() => {
+            setSelectedOrderCode(null);
+            setIsTicketModalOpen(true);
+          }}
           onDismissActiveOrder={handleDismissActiveOrder}
-          onStatusChange={handleOrderStatusChange}
+          onStatusChange={(newStatus) => {
+            if (latestActiveOrder?.order_code) {
+              setOrdersMap((prev) => ({
+                ...prev,
+                [latestActiveOrder.order_code]: { ...latestActiveOrder, status: newStatus },
+              }));
+            }
+          }}
           onOpenCart={() => setIsCartOpen(true)}
         />
       )}
@@ -247,12 +346,32 @@ function AppContent() {
       {/* Customer Mode: Bottom Dock (Active Order Tracker + Floating Cart Bar) */}
       {appMode !== 'cashier' && (
         <div className="bottom-dock">
-          {activeOrder && (
+          {activeOrderList.length > 0 && (
             <ActiveOrderTracker
-              order={activeOrder}
-              onOpenTicket={() => setIsTicketModalOpen(true)}
+              orders={activeOrderList}
+              order={latestActiveOrder}
+              onOpenTicket={(targetOrder) => {
+                if (targetOrder?.order_code) {
+                  setSelectedOrderCode(targetOrder.order_code);
+                } else if (latestActiveOrder?.order_code) {
+                  setSelectedOrderCode(latestActiveOrder.order_code);
+                }
+                setIsTicketModalOpen(true);
+              }}
+              onOpenList={() => {
+                setSelectedOrderCode(null);
+                setIsTicketModalOpen(true);
+              }}
               onDismiss={handleDismissActiveOrder}
-              onStatusChange={handleOrderStatusChange}
+              onStatusChange={(code, newStatus) => {
+                if (newStatus === 'completed' || newStatus === 'cancelled') {
+                  handleDismissActiveOrder(code);
+                } else {
+                  setOrdersMap((prev) =>
+                    prev[code] ? { ...prev, [code]: { ...prev[code], status: newStatus } } : prev
+                  );
+                }
+              }}
             />
           )}
           <FloatingCartBar onOpenCart={() => setIsCartOpen(true)} />
@@ -268,15 +387,28 @@ function AppContent() {
         />
       )}
 
-      {/* Global Digital Ticket & QR Code Modal */}
+      {/* Global Digital Ticket & Active Orders Sheet Modal */}
       <ActiveOrderModal
         isOpen={isTicketModalOpen}
-        onClose={() => setIsTicketModalOpen(false)}
-        order={activeOrder}
+        onClose={() => {
+          setIsTicketModalOpen(false);
+          setSelectedOrderCode(null);
+        }}
+        orders={activeOrderList}
+        order={currentSelectedOrder}
+        selectedOrderCode={selectedOrderCode}
+        onSelectOrderCode={(code) => setSelectedOrderCode(code)}
         onGoToMenu={handleGoToMenu}
-        onOrderUpdate={setActiveOrder}
+        onOrderUpdate={(updated) => {
+          if (updated?.order_code) {
+            setOrdersMap((prev) => ({ ...prev, [updated.order_code]: updated }));
+          }
+        }}
         onCancelOrder={(cancelledOrder) => {
-          setActiveOrder((prev) => (prev ? { ...prev, status: 'cancelled' } : cancelledOrder));
+          const code = cancelledOrder?.order_code;
+          if (code) {
+            handleDismissActiveOrder(code);
+          }
         }}
       />
 
