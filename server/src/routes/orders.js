@@ -372,12 +372,9 @@ router.patch('/:order_code/confirm-qris', async (req, res) => {
     order.updated_at = new Date().toISOString();
 
     orderEvents.emit('order_changed', {
-      type: 'QRIS_CONFIRMED',
+      type: 'ORDER_UPDATED',
       order_code: order.order_code,
-      status: order.status,
-      customer_name: order.customer_name,
-      table_number: order.table_number,
-      total_price: order.total_price,
+      is_qris_claim: true,
     });
 
     return res.json({
@@ -413,12 +410,9 @@ router.patch('/:order_code/confirm-qris', async (req, res) => {
     });
 
     orderEvents.emit('order_changed', {
-      type: 'QRIS_CONFIRMED',
+      type: 'ORDER_UPDATED',
       order_code: updated.order_code,
-      status: updated.status,
-      customer_name: updated.customer_name,
-      table_number: updated.table_number,
-      total_price: updated.total_price,
+      is_qris_claim: true,
     });
 
     res.json({
@@ -626,9 +620,8 @@ router.put('/:id/items', async (req, res) => {
     order.total_price = totalPrice;
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: order.order_code,
-      status: order.status,
     });
 
     return res.json({
@@ -681,9 +674,8 @@ router.put('/:id/items', async (req, res) => {
     });
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: updatedOrder.order_code,
-      status: updatedOrder.status,
     });
 
     res.json({
@@ -734,9 +726,8 @@ router.patch('/:id/approve', async (req, res) => {
     order.paid_at = new Date().toISOString();
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: order.order_code,
-      status: order.status,
     });
 
     return res.json({
@@ -785,9 +776,8 @@ router.patch('/:id/approve', async (req, res) => {
     });
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: approvedOrder.order_code,
-      status: approvedOrder.status,
     });
 
     res.json({
@@ -814,9 +804,8 @@ router.patch('/:id/complete', async (req, res) => {
     order.status = 'completed';
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: order.order_code,
-      status: order.status,
     });
 
     return res.json({
@@ -847,9 +836,8 @@ router.patch('/:id/complete', async (req, res) => {
     });
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: completed.order_code,
-      status: completed.status,
     });
 
     res.json({
@@ -894,9 +882,8 @@ router.patch('/:id/cancel', async (req, res) => {
     order.status = 'cancelled';
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: order.order_code,
-      status: order.status,
     });
 
     return res.json({
@@ -934,9 +921,8 @@ router.patch('/:id/cancel', async (req, res) => {
     });
 
     orderEvents.emit('order_changed', {
-      type: 'STATUS_UPDATED',
+      type: 'ORDER_UPDATED',
       order_code: cancelled.order_code,
-      status: cancelled.status,
     });
 
     res.json({
