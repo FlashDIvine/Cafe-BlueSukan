@@ -15,6 +15,8 @@ import {
   Trees,
   Building2,
   Check,
+  Banknote,
+  QrCode,
 } from 'lucide-react';
 import { useOrder } from '../hooks/useOrder';
 import { formatRupiah, SEATING_AREAS } from '../utils/formatters';
@@ -38,6 +40,7 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
     showToast,
   } = useOrder();
 
+  const [paymentMethod, setPaymentMethod] = useState('qris');
   const [touched, setTouched] = useState({
     name: false,
     table: false,
@@ -76,6 +79,7 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
       customer_name: customerName.trim(),
       table_number: tableNumber.trim(),
       notes: notes.trim() || null,
+      payment_method: paymentMethod,
       total_price: grandTotalPrice,
       items: cartItems.map((item) => ({
         menu_id: item.menuId,
@@ -300,6 +304,58 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
                   )}
                 </div>
 
+                {/* Pilihan Metode Pembayaran: QRIS atau Tunai */}
+                <div className="form-group">
+                  <div className="form-label-row">
+                    <label className="form-label">
+                      Metode Pembayaran <span className="required-star">*</span>
+                    </label>
+                    <span className="table-badge-tip">Pilih cara bayar</span>
+                  </div>
+
+                  <div className="payment-selector-grid">
+                    <button
+                      type="button"
+                      className={`payment-choice-card ${paymentMethod === 'qris' ? 'selected' : ''}`}
+                      onClick={() => setPaymentMethod('qris')}
+                      aria-pressed={paymentMethod === 'qris'}
+                    >
+                      <div className="payment-choice-icon-wrap">
+                        <QrCode size={18} />
+                      </div>
+                      <div className="payment-choice-text">
+                        <strong className="payment-choice-title">QRIS</strong>
+                        <span className="payment-choice-desc">Scan barcode di HP</span>
+                      </div>
+                      {paymentMethod === 'qris' && (
+                        <div className="payment-choice-check">
+                          <Check size={12} strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`payment-choice-card ${paymentMethod === 'cash' ? 'selected' : ''}`}
+                      onClick={() => setPaymentMethod('cash')}
+                      aria-pressed={paymentMethod === 'cash'}
+                    >
+                      <div className="payment-choice-icon-wrap">
+                        <Banknote size={18} />
+                      </div>
+                      <div className="payment-choice-text">
+                        <strong className="payment-choice-title">Tunai (Cash)</strong>
+                        <span className="payment-choice-desc">Bayar di meja kasir</span>
+                      </div>
+                      {paymentMethod === 'cash' && (
+                        <div className="payment-choice-check">
+                          <Check size={12} strokeWidth={3} />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
                 {/* Textarea Catatan Tambahan */}
                 <div className="form-group">
                   <div className="form-label-row">
@@ -335,7 +391,11 @@ export const CartDrawer = ({ isOpen, onClose, onProceedToCheckout }) => {
                 </div>
                 <div className="bill-info-notice">
                   <Info size={14} flexShrink={0} />
-                  <span>Verifikasi & pembayaran dilakukan langsung di kasir (Cash/QRIS).</span>
+                  <span>
+                    {paymentMethod === 'qris'
+                      ? 'Barcode QRIS & petunjuk pencantuman kode pesanan akan muncul di tiket.'
+                      : 'Setelah memesan, silakan langsung menuju kasir untuk melakukan pembayaran tunai.'}
+                  </span>
                 </div>
               </section>
             </>

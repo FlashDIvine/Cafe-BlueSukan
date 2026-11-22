@@ -211,6 +211,32 @@ export const CashierOrderModal = ({
                 <strong style={{ color: 'var(--color-royal-blue)' }}>{formatLocationDisplay(order.table_number)}</strong>
               </div>
 
+              {/* Customer Chosen Payment Method (when waiting payment) */}
+              {isWaitingPayment && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: (order.payment_method === 'qris' || isQrisClaim) ? '#FEF3C7' : '#DCFCE7',
+                    border: `1px solid ${(order.payment_method === 'qris' || isQrisClaim) ? '#FCD34D' : '#86EFAC'}`,
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '7px 10px',
+                    fontSize: '12px',
+                    color: (order.payment_method === 'qris' || isQrisClaim) ? '#92400E' : '#166534',
+                    fontWeight: '700',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {(order.payment_method === 'qris' || isQrisClaim) ? <QrCode size={15} /> : <Banknote size={15} />}
+                    Pilihan Bayar Pelanggan:
+                  </span>
+                  <span style={{ textTransform: 'uppercase', fontWeight: '800' }}>
+                    {(order.payment_method === 'qris' || isQrisClaim) ? 'QRIS' : 'Tunai (Di Meja Kasir)'}
+                  </span>
+                </div>
+              )}
+
               {/* Payment Time & Method (if already paid) */}
               {(order.paid_at || (isProcessing && order.updated_at)) && (
                 <div
@@ -409,7 +435,7 @@ export const CashierOrderModal = ({
                 >
                   <CheckCircle2 size={18} />
                   <span>
-                    {isSubmitting ? 'Memproses...' : `Konfirmasi Bayar (${formatRupiah(currentTotalPrice)})`}
+                    {isSubmitting ? 'Memproses...' : `Konfirmasi Sudah Bayar (${formatRupiah(currentTotalPrice)})`}
                   </span>
                 </button>
               </>

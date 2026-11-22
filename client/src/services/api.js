@@ -122,6 +122,7 @@ export async function submitOrderApi(orderPayload) {
       customer_name: orderPayload.customer_name,
       table_number: orderPayload.table_number,
       notes: orderPayload.notes || null,
+      payment_method: orderPayload.payment_method || 'cash',
       items: orderPayload.items.map((item) => ({
         menu_id: item.menu_id,
         quantity: item.quantity,
@@ -202,18 +203,20 @@ export async function updateOrderItemsApi(orderId, items) {
 }
 
 /**
- * Cancel an order (PATCH /api/orders/:id/cancel)
- * @param {number} orderId
+ * Cancel an order (PATCH /api/orders/:idOrCode/cancel)
+ * @param {number|string} orderIdOrCode
+ * @param {boolean} [byCustomer=false]
  * @returns {Promise<Object>}
  */
-export async function cancelOrderApi(orderId) {
-  const res = await fetch(`${API_BASE}/orders/${orderId}/cancel`, {
+export async function cancelOrderApi(orderIdOrCode, byCustomer = false) {
+  const res = await fetch(`${API_BASE}/orders/${encodeURIComponent(orderIdOrCode)}/cancel`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ by_customer: byCustomer }),
   });
 
   const json = await res.json();
-  if (!res.ok) throw new Error(json.message || 'Failed to cancel order');
+  if (!res.ok) throw new Error(json.message || 'Gagal membatalkan pesanan');
   return json.data;
 }
 

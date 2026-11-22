@@ -265,18 +265,20 @@ File [server.js](file:///home/najib/Projek/Bluesukan/server.js) di root proyek b
 Untuk meningkatkan efisiensi transaksi mandiri tanpa antre di kasir fisik serta mempermudah pemanggilan pelanggan saat pesanan siap/diantar, dua fitur interaktif telah ditambahkan:
 
 ### A. Manajemen QRIS Dagang & Pembayaran Mandiri di Tiket Pelanggan
-1. **Manajemen QRIS Merchant di Kasir (`QrisManagementModal.jsx`):**
+1. **Pilihan Metode Bayar di Keranjang Checkout (`CartDrawer.jsx`):**
+   - Pelanggan dapat memilih metode pembayaran: **QRIS** (scan langsung di HP) atau **Tunai (Cash)** (bayar di meja kasir).
+   - Nilai dikirim via `POST /api/orders` dan disimpan di database/in-memory store.
+2. **Manajemen QRIS Merchant di Kasir (`QrisManagementModal.jsx`):**
    - Admin/Kasir dapat mengunggah barcode QRIS dagang (statis/dinamis) toko via tombol **"🖼️ Atur QRIS"** di dashboard kasir.
    - Dilengkapi kompresi gambar client-side otomatis menggunakan HTML5 `<canvas>` (maksimal resolusi lebar 500px, format WebP/JPEG, payload strict $\le$ 300KB) untuk mencegah pembengkakan memori server Node.js.
    - Endpoint: `GET /api/settings/qris` (publik), `POST /api/settings/qris` (simpan gambar & nama merchant), dan `DELETE /api/settings/qris` (hapus QRIS).
-2. **Pembayaran Langsung di Layar Tiket Pelanggan (`OrderTicket.jsx`):**
-   - Saat pesanan berstatus `waiting_payment`, tiket digital menampilkan gambar QRIS toko resmi beserta total tagihan dan tombol **"✅ Konfirmasi Sudah Bayar QRIS"**.
-   - Pelanggan cukup melakukan scan QRIS via e-wallet (BCA, GoPay, OVO, Dana, ShopeePay, dsb.), lalu menekan tombol konfirmasi.
-   - Memanggil endpoint `PATCH /api/orders/:order_code/confirm-qris` yang mengubah status pesanan menjadi `waiting_qris_verification` dan menyiarkan event SSE `QRIS_CONFIRMED`.
-3. **Verifikasi Kasir Realtime:**
-   - Kasir menerima notifikasi bunyi bel kasir instan via SSE saat pelanggan mengonfirmasi pembayaran QRIS.
-   - Kartu pesanan di kasir diberi badge sorotan khusus: `💳 Klaim Bayar QRIS (Cek Mutasi)` dan default metode bayar otomatis terpilih `QRIS`.
-   - Kasir mengecek mutasi rekening/e-wallet lalu menekan *"Verifikasi & Terima Pesanan"*.
+3. **Tampilan Tiket Pelanggan Sesuai Pilihan Bayar (`OrderTicket.jsx`):**
+   - **Jika Pembeli Memilih QRIS:** Tiket menampilkan barcode QRIS toko, total tagihan, banner peringatan **wajib mencantumkan Kode Pesanan pada catatan/berita transfer** (lengkap dengan tombol salin satu-klik), dan tombol **"✅ Konfirmasi Sudah Bayar QRIS"** (`PATCH /api/orders/:order_code/confirm-qris`).
+   - **Jika Pembeli Memilih Tunai:** Tiket mengarahkan pembeli langsung menuju meja kasir untuk membayar tunai sebesar total tagihan dengan menunjukkan Kode Pesanan atau QR tiket.
+4. **Dashboard Kasir & Konfirmasi Pembayaran (`CashierPage.jsx` & `CashierOrderModal.jsx`):**
+   - Kartu pesanan kasir menampilkan badge metode pembayaran yang dipilih (`QRIS` atau `Tunai`).
+   - Pada kartu pesanan yang belum dibayar, tersedia tombol aksi langsung **"✅ Konfirmasi Bayar"** yang memungkinkan kasir mengonfirmasi penerimaan uang dengan satu kali klik tanpa harus membuka modal (pesanan langsung beralih ke `paid_processing`).
+   - Pada modal kasir, pilihan metode bayar otomatis mengikuti pilihan pelanggan dan tersedia tombol **"Konfirmasi Sudah Bayar"**.
 
 ### B. Panggil / Bunyikan HP Pembeli Realtime (Ring Customer via SSE)
 1. **Tombol "📢 Panggil HP" di Kasir (`CashierPage.jsx` & `CashierOrderModal.jsx`):**

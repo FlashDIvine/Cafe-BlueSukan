@@ -13,17 +13,26 @@ import {
   X,
   QrCode,
   CreditCard,
+  Banknote,
+  AlertCircle,
+  Ban,
 } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
-import { fetchOrderStatusApi, fetchQrisSettingsApi, confirmQrisPaymentApi } from '../services/api';
+import {
+  fetchOrderStatusApi,
+  fetchQrisSettingsApi,
+  confirmQrisPaymentApi,
+  cancelOrderApi,
+} from '../services/api';
 import '../styles/order-ticket.css';
 
-export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
+export const OrderTicket = ({ order, onBackToMenu, onGoHome, onCancelOrder }) => {
   const [currentStatus, setCurrentStatus] = useState(order?.status || 'waiting_payment');
   const [countdown, setCountdown] = useState(null); // null when inactive
   const [isCountdownCancelled, setIsCountdownCancelled] = useState(false);
   const [qrisSettings, setQrisSettings] = useState(null);
   const [isConfirmingQris, setIsConfirmingQris] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Fetch Merchant QRIS settings
   useEffect(() => {
@@ -94,6 +103,8 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
 
   const isProcessing = currentStatus === 'paid_processing' || currentStatus === 'completed';
   const isQrisClaim = currentStatus === 'waiting_qris_verification';
+  const isCancelled = currentStatus === 'cancelled';
+  const isCanCancel = currentStatus === 'waiting_payment' || currentStatus === 'waiting_qris_verification';
 
   const handleConfirmQrisPayment = async () => {
     if (!order?.order_code) return;
@@ -105,6 +116,26 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
       alert(err.message || 'Gagal mengirim konfirmasi QRIS');
     } finally {
       setIsConfirmingQris(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!order) return;
+    const confirmMsg = `Yakin ingin membatalkan pesanan ${order.order_code}?\n\nPesanan belum dikonfirmasi kasir dan tindakan ini tidak dapat diurungkan.`;
+    if (!window.confirm(confirmMsg)) return;
+
+    try {
+      setIsCancelling(true);
+      const identifier = order.order_code || order.id;
+      const cancelled = await cancelOrderApi(identifier, true);
+      setCurrentStatus('cancelled');
+      if (onCancelOrder) {
+        onCancelOrder(cancelled || { ...order, status: 'cancelled' });
+      }
+    } catch (err) {
+      alert(err.message || 'Gagal membatalkan pesanan');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -132,18 +163,40 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
         <span className="ticket-header-title">Tiket Pesanan Digital</span>
       </header>
 
-      {/* Post-Order Success Confirmation Banner */}
-      <div className="ticket-success-alert">
-        <div className="ticket-success-icon">
-          <CheckCircle2 size={20} />
+      {/* Post-Order Confirmation or Cancelled Alert */}
+      {isCancelled ? (
+        <div
+          className="ticket-success-alert"
+          style={{ backgroundColor: '#FEE2E2', borderColor: '#FCA5A5' }}
+        >
+          <div
+            className="ticket-success-icon"
+            style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+          >
+            <Ban size={20} />
+          </div>
+          <div className="ticket-success-text">
+            <span className="ticket-success-title" style={{ color: '#991B1B' }}>
+              Pesanan Telah Dibatalkan
+            </span>
+            <span className="ticket-success-desc" style={{ color: '#7F1D1D' }}>
+              Pesanan <strong>{order?.order_code}</strong> telah dibatalkan sebelum dikonfirmasi penjual.
+            </span>
+          </div>
         </div>
-        <div className="ticket-success-text">
-          <span className="ticket-success-title">Pesanan Berhasil Dibuat!</span>
-          <span className="ticket-success-desc">
-            Kode pesanan Anda adalah <strong>{order?.order_code}</strong>. Simpan tiket ini untuk verifikasi kasir.
-          </span>
+      ) : (
+        <div className="ticket-success-alert">
+          <div className="ticket-success-icon">
+            <CheckCircle2 size={20} />
+          </div>
+          <div className="ticket-success-text">
+            <span className="ticket-success-title">Pesanan Berhasil Dibuat!</span>
+            <span className="ticket-success-desc">
+              Kode pesanan Anda adalah <strong>{order?.order_code}</strong>. Simpan tiket ini untuk verifikasi kasir.
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Auto-redirect countdown notification when completed */}
       {countdown !== null && !isCountdownCancelled && (
@@ -240,25 +293,53 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
               </p>
             </div>
           </div>
-        ) : (
+        ) : order?.payment_method === 'qris' ? (
           <div className="ticket-status-box waiting" role="status">
             <div className="status-icon-wrap" style={{ color: '#D97706' }}>
-              <Clock size={18} />
+              <QrCode size={18} />
             </div>
             <div className="status-text-content">
               <div className="status-title-row">
                 <span className="live-poll-indicator" title="Polling aktif"></span>
-                <span>Menunggu Pembayaran di Kasir</span>
+                <span>Menunggu Pembayaran QRIS</span>
               </div>
               <p className="status-desc-row">
-                Silakan bayar langsung lewat QRIS di bawah ini atau menuju kasir fisik (Tunai/Debit).
+                Silakan scan barcode QRIS di bawah ini, cantumkan Kode Pesanan pada catatan transfer, lalu konfirmasi.
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div
+            className="ticket-status-box waiting"
+            role="status"
+            style={{
+              backgroundColor: '#F0FDF4',
+              borderColor: '#86EFAC',
+            }}
+          >
+            <div className="status-icon-wrap" style={{ color: '#166534' }}>
+              <Banknote size={18} />
+            </div>
+            <div className="status-text-content">
+              <div className="status-title-row">
+                <span
+                  className="live-poll-indicator"
+                  style={{ backgroundColor: '#22C55E' }}
+                  title="Polling aktif"
+                ></span>
+                <span style={{ color: '#166534', fontWeight: '800' }}>
+                  Menunggu Pembayaran Tunai di Kasir
+                </span>
+              </div>
+              <p className="status-desc-row" style={{ color: '#15803D' }}>
+                Silakan menuju meja kasir dan lakukan pembayaran tunai sebesar {formatRupiah(order?.total_price || 0)}.
               </p>
             </div>
           </div>
         )}
 
-        {/* Direct Merchant QRIS Payment Box (when waiting_payment and QRIS image exists) */}
-        {currentStatus === 'waiting_payment' && qrisSettings?.qris_image && (
+        {/* Section Pembayaran QRIS Mandiri (Saat status waiting_payment & metode qris) */}
+        {currentStatus === 'waiting_payment' && order?.payment_method === 'qris' && (
           <div
             style={{
               margin: '14px 16px',
@@ -292,31 +373,121 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
                 marginBottom: '10px',
               }}
             >
-              {qrisSettings.qris_merchant_name || "Angkringan Blue'sukan Kopi"}
+              {qrisSettings?.qris_merchant_name || "Angkringan Blue'sukan Kopi"}
             </span>
 
+            {qrisSettings?.qris_image ? (
+              <div
+                style={{
+                  width: '180px',
+                  height: '180px',
+                  margin: '0 auto 10px',
+                  backgroundColor: '#FFFFFF',
+                  padding: '8px',
+                  borderRadius: '10px',
+                  border: '1.5px solid var(--color-border, #D5C7B2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)',
+                }}
+              >
+                <img
+                  src={qrisSettings.qris_image}
+                  alt="QRIS Dagang Blue'sukan Kopi"
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            ) : (
+              <div
+                style={{
+                  padding: '16px',
+                  backgroundColor: '#FFFBEB',
+                  border: '1px dashed #F59E0B',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#92400E',
+                  marginBottom: '10px',
+                }}
+              >
+                Gambar barcode QRIS toko sedang disiapkan kasir. Tunjukkan kode tiket ini ke kasir.
+              </div>
+            )}
+
+            {/* Banner Instruksi Wajib Catatan Transfer */}
             <div
               style={{
-                width: '180px',
-                height: '180px',
-                margin: '0 auto 10px',
-                backgroundColor: '#FFFFFF',
-                padding: '8px',
-                borderRadius: '10px',
-                border: '1.5px solid var(--color-border, #D5C7B2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.06)',
+                backgroundColor: '#FEF3C7',
+                border: '1.5px dashed #F59E0B',
+                borderRadius: '8px',
+                padding: '10px 12px',
+                margin: '10px 0 12px',
+                textAlign: 'left',
               }}
             >
-              <img
-                src={qrisSettings.qris_image}
-                alt="QRIS Dagang Blue'sukan Kopi"
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                loading="lazy"
-                decoding="async"
-              />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  color: '#92400E',
+                  fontWeight: '800',
+                  fontSize: '11.5px',
+                  marginBottom: '3px',
+                }}
+              >
+                <AlertCircle size={14} />
+                <span>PENTING SAAT TRANSFER:</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '11px', color: '#78350F', lineHeight: 1.35 }}>
+                Harap cantumkan <strong>Kode Pesanan</strong> berikut pada catatan/berita transfer Anda:
+              </p>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #FCD34D',
+                  borderRadius: '6px',
+                  padding: '6px 10px',
+                  marginTop: '6px',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'var(--font-mono, monospace)',
+                    fontWeight: '800',
+                    fontSize: '14px',
+                    color: '#1B3B64',
+                  }}
+                >
+                  {order?.order_code}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (navigator?.clipboard) {
+                      navigator.clipboard.writeText(order?.order_code || '');
+                      alert(`Kode ${order?.order_code} disalin ke clipboard!`);
+                    }
+                  }}
+                  style={{
+                    backgroundColor: '#1B3B64',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Salin Kode
+                </button>
+              </div>
             </div>
 
             <div style={{ marginBottom: '12px' }}>
@@ -361,6 +532,65 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome }) => {
                 {isConfirmingQris ? 'Mengirim Konfirmasi...' : '✅ Konfirmasi Sudah Bayar QRIS'}
               </span>
             </button>
+          </div>
+        )}
+
+        {/* Section Pembayaran Tunai (Saat status waiting_payment & metode cash/tunai) */}
+        {currentStatus === 'waiting_payment' && order?.payment_method !== 'qris' && (
+          <div
+            style={{
+              margin: '14px 16px',
+              padding: '16px',
+              backgroundColor: '#F0FDF4',
+              border: '1.5px solid #86EFAC',
+              borderRadius: '12px',
+              textAlign: 'center',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                color: '#166534',
+                fontWeight: '800',
+                fontSize: '13.5px',
+                marginBottom: '6px',
+              }}
+            >
+              <Banknote size={18} />
+              <span>Pembayaran Tunai di Kasir</span>
+            </div>
+            <p style={{ margin: '0 0 10px', fontSize: '12px', color: '#15803D', lineHeight: 1.45 }}>
+              Silakan langsung menuju ke meja kasir dan sebutkan Kode Pesanan <strong>{order?.order_code}</strong> atau tunjukkan QR Tiket di atas.
+            </p>
+            <div
+              style={{
+                backgroundColor: '#FFFFFF',
+                border: '1px dashed #86EFAC',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                marginBottom: '8px',
+              }}
+            >
+              <span style={{ fontSize: '11px', color: '#4B5563', display: 'block' }}>
+                Total Tagihan Tunai:
+              </span>
+              <span
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '800',
+                  color: '#166534',
+                  fontFamily: 'var(--font-mono, monospace)',
+                }}
+              >
+                {formatRupiah(order?.total_price || 0)}
+              </span>
+            </div>
+            <span style={{ fontSize: '11px', color: '#15803D' }}>
+              Kasir akan mengonfirmasi pesanan Anda setelah pembayaran tunai diterima.
+            </span>
           </div>
         )}
 

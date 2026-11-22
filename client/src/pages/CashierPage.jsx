@@ -17,6 +17,7 @@ import {
   QrCode,
   CreditCard,
   Bell,
+  Banknote,
 } from 'lucide-react';
 import { formatRupiah, formatPaidTime, formatLocationDisplay } from '../utils/formatters';
 import {
@@ -285,6 +286,25 @@ export const CashierPage = () => {
     return updated;
   };
 
+  const handleQuickConfirmPayment = async (order) => {
+    const method = order.payment_method || 'cash';
+    const methodLabel = method === 'qris' ? 'QRIS' : 'Tunai';
+    if (
+      window.confirm(
+        `Konfirmasi pembayaran ${order.order_code}?\n\nPemesan: ${order.customer_name}\nMetode: ${methodLabel}\nTotal: ${formatRupiah(order.total_price)}\nLokasi: ${formatLocationDisplay(order.table_number)}\n\nPesanan akan langsung diproses!`
+      )
+    ) {
+      try {
+        await approveOrderApi(order.id, method);
+        await loadData(true);
+        setRingToast(`✅ Pembayaran ${order.order_code} (${methodLabel}) berhasil dikonfirmasi!`);
+        setTimeout(() => setRingToast(null), 3500);
+      } catch (err) {
+        alert(err.message || 'Gagal mengonfirmasi pembayaran');
+      }
+    }
+  };
+
   const handleRingCustomer = async (order) => {
     try {
       await ringCustomerApi(order.id);
@@ -538,7 +558,28 @@ export const CashierPage = () => {
                     >
                       <div className="pos-card-header">
                         <div className="pos-card-code-table">
-                          <span className="pos-order-code">{order.order_code}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span className="pos-order-code">{order.order_code}</span>
+                            <span
+                              className={`pos-order-paymethod-chip ${order.payment_method === 'qris' ? 'qris' : 'cash'}`}
+                              style={{
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                padding: '2px 7px',
+                                borderRadius: '9999px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '3px',
+                                backgroundColor: order.payment_method === 'qris' ? '#FEF3C7' : '#DCFCE7',
+                                color: order.payment_method === 'qris' ? '#92400E' : '#166534',
+                                border: `1px solid ${order.payment_method === 'qris' ? '#FCD34D' : '#86EFAC'}`,
+                              }}
+                              title={`Metode Pembayaran: ${order.payment_method === 'qris' ? 'QRIS' : 'Tunai'}`}
+                            >
+                              {order.payment_method === 'qris' ? <QrCode size={11} /> : <Banknote size={11} />}
+                              <span>{order.payment_method === 'qris' ? 'QRIS' : 'Tunai'}</span>
+                            </span>
+                          </div>
                           <span className="pos-order-table-chip">{formatLocationDisplay(order.table_number)}</span>
                         </div>
 
@@ -617,6 +658,35 @@ export const CashierPage = () => {
                         </div>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                          {isWaiting && (
+                            <button
+                              type="button"
+                              className="btn-card-quick-confirm"
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '5px',
+                                padding: '6px 12px',
+                                borderRadius: '8px',
+                                backgroundColor: '#166534',
+                                border: 'none',
+                                color: '#FFFFFF',
+                                fontSize: '11.5px',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 4px rgba(22, 101, 52, 0.25)',
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleQuickConfirmPayment(order);
+                              }}
+                              title="Konfirmasi bahwa pelanggan sudah membayar"
+                            >
+                              <CheckCircle2 size={13} />
+                              <span>Konfirmasi Bayar</span>
+                            </button>
+                          )}
+
                           {(isProcessing || isCompleted) && (
                             <button
                               type="button"

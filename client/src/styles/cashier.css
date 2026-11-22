@@ -506,6 +506,20 @@
   color: var(--color-white);
 }
 
+.btn-card-quick-confirm {
+  transition: all var(--transition-fast);
+}
+
+.btn-card-quick-confirm:hover {
+  background-color: #15803D !important;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(22, 101, 52, 0.35) !important;
+}
+
+.btn-card-quick-confirm:active {
+  transform: translateY(0);
+}
+
 /* Empty Cashier State */
 .pos-empty-state {
   text-align: center;

@@ -21,7 +21,7 @@ const router = Router();
  * Create a new customer self-order using Prisma transaction (with memory fallback)
  */
 router.post('/', async (req, res) => {
-  const { customer_name, table_number, notes, items } = req.body;
+  const { customer_name, table_number, notes, items, payment_method } = req.body;
 
   if (!customer_name || !customer_name.trim()) {
     return res.status(400).json({ success: false, message: 'Nama pemesan wajib diisi' });
@@ -32,6 +32,8 @@ router.post('/', async (req, res) => {
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ success: false, message: 'Pesanan harus memiliki minimal 1 item' });
   }
+
+  const normalizedPaymentMethod = payment_method === 'qris' ? 'qris' : 'cash';
 
   // Memory store path
   if (!process.env.DATABASE_URL) {
@@ -70,7 +72,7 @@ router.post('/', async (req, res) => {
         table_number: String(table_number).trim(),
         notes: notes?.trim() || null,
         total_price: totalPrice,
-        payment_method: null,
+        payment_method: normalizedPaymentMethod,
         status: 'waiting_payment',
         created_at: new Date().toISOString(),
         items: orderItemsData,
@@ -133,6 +135,7 @@ router.post('/', async (req, res) => {
           table_number: String(table_number).trim(),
           notes: notes?.trim() || null,
           total_price: totalPrice,
+          payment_method: normalizedPaymentMethod,
           status: 'waiting_payment',
           items: {
             create: orderItemsData,
@@ -865,10 +868,14 @@ router.patch('/:id/complete', async (req, res) => {
  * Cancel an order
  */
 router.patch('/:id/cancel', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
+  const rawId = req.params.id;
+  const isNumeric = /^\d+$/.test(rawId);
+  const id = isNumeric ? parseInt(rawId, 10) : null;
+  const orderCode = !isNumeric ? rawId : null;
+  const isCustomer = req.body?.by_customer === true || req.query?.by === 'customer';
 
   if (!process.env.DATABASE_URL) {
-    const order = findOrderById(id);
+    const order = id ? findOrderById(id) : findOrderByCode(orderCode);
     if (!order) return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
     if (order.status === 'completed' || order.status === 'cancelled') {
       return res.status(400).json({
@@ -876,6 +883,14 @@ router.patch('/:id/cancel', async (req, res) => {
         message: `Pesanan berstatus "${order.status}" tidak dapat dibatalkan`,
       });
     }
+
+    if (isCustomer && order.status !== 'waiting_payment' && order.status !== 'waiting_qris_verification') {
+      return res.status(400).json({
+        success: false,
+        message: 'Pesanan sudah dikonfirmasi oleh penjual dan tidak dapat dibatalkan',
+      });
+    }
+
     order.status = 'cancelled';
 
     orderEvents.emit('order_changed', {
@@ -892,7 +907,8 @@ router.patch('/:id/cancel', async (req, res) => {
   }
 
   try {
-    const order = await prisma.order.findUnique({ where: { id } });
+    const where = id ? { id } : { order_code: orderCode };
+    const order = await prisma.order.findUnique({ where });
     if (!order) {
       return res.status(404).json({ success: false, message: 'Pesanan tidak ditemukan' });
     }
@@ -904,8 +920,15 @@ router.patch('/:id/cancel', async (req, res) => {
       });
     }
 
+    if (isCustomer && order.status !== 'waiting_payment' && order.status !== 'waiting_qris_verification') {
+      return res.status(400).json({
+        success: false,
+        message: 'Pesanan sudah dikonfirmasi oleh penjual dan tidak dapat dibatalkan',
+      });
+    }
+
     const cancelled = await prisma.order.update({
-      where: { id },
+      where,
       data: { status: 'cancelled' },
       include: { items: true },
     });
