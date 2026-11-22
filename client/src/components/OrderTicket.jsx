@@ -594,6 +594,44 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onCancelOrder }) =>
           </div>
         )}
 
+        {/* Tombol Batalkan Pesanan oleh Pembeli (Hanya jika belum dikonfirmasi penjual) */}
+        {isCanCancel && (
+          <div
+            style={{
+              margin: '12px 16px 6px',
+              textAlign: 'center',
+            }}
+          >
+            <button
+              type="button"
+              onClick={handleCancelOrder}
+              disabled={isCancelling}
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                backgroundColor: '#FEE2E2',
+                color: '#DC2626',
+                border: '1px solid #FCA5A5',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: isCancelling ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <Ban size={15} />
+              <span>{isCancelling ? 'Membatalkan...' : 'Batalkan Pesanan Ini'}</span>
+            </button>
+            <span style={{ fontSize: '11px', color: '#6B7280', display: 'block', marginTop: '4px' }}>
+              Pesanan hanya dapat dibatalkan selama belum dikonfirmasi penjual / kasir.
+            </span>
+          </div>
+        )}
+
         {/* Perforated separator */}
         <div className="ticket-perforated-line"></div>
 

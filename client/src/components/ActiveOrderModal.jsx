@@ -21,7 +21,7 @@ const ModalLoadingFallback = () => (
   </div>
 );
 
-export const ActiveOrderModal = ({ isOpen, onClose, order, onGoToMenu }) => {
+export const ActiveOrderModal = ({ isOpen, onClose, order, onGoToMenu, onCancelOrder }) => {
   // Close on Escape key press
   useEffect(() => {
     if (!isOpen) return;
@@ -80,6 +80,7 @@ export const ActiveOrderModal = ({ isOpen, onClose, order, onGoToMenu }) => {
                 if (onGoToMenu) onGoToMenu();
               }}
               onGoHome={onClose}
+              onCancelOrder={onCancelOrder}
             />
           </Suspense>
         </div>

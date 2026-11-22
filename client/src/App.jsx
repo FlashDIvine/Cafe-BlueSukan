@@ -237,6 +237,9 @@ function AppContent() {
         onClose={() => setIsTicketModalOpen(false)}
         order={activeOrder}
         onGoToMenu={handleGoToMenu}
+        onCancelOrder={(cancelledOrder) => {
+          setActiveOrder((prev) => (prev ? { ...prev, status: 'cancelled' } : cancelledOrder));
+        }}
       />
 
       {/* Prominent Ring Customer Notification Dialog (Bell Chime & Vibrate alert from Cashier/Barista) */}
