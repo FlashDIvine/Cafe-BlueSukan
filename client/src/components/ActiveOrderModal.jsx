@@ -1,5 +1,4 @@
 import React, { useEffect, Suspense, lazy } from 'react';
-import { X, QrCode } from 'lucide-react';
 import '../styles/active-order-tracker.css';
 
 const OrderTicket = lazy(() =>
@@ -50,40 +49,18 @@ export const ActiveOrderModal = ({ isOpen, onClose, order, onGoToMenu, onCancelO
         className="ticket-modal-window"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Top Navigation Bar */}
-        <header className="ticket-modal-top-bar">
-          <div className="ticket-modal-title-group">
-            <QrCode size={18} color="var(--color-royal-blue)" />
-            <h2 id="ticket-modal-title" className="ticket-modal-title">
-              Tiket Pesanan Digital
-            </h2>
-          </div>
-
-          <button
-            type="button"
-            className="ticket-modal-close-btn"
-            onClick={onClose}
-            aria-label="Tutup Tiket"
-            title="Tutup tiket pesanan"
-          >
-            <X size={17} />
-          </button>
-        </header>
-
-        {/* Modal Ticket Body */}
-        <div className="ticket-modal-body">
-          <Suspense fallback={<ModalLoadingFallback />}>
-            <OrderTicket
-              order={order}
-              onBackToMenu={() => {
-                onClose();
-                if (onGoToMenu) onGoToMenu();
-              }}
-              onGoHome={onClose}
-              onCancelOrder={onCancelOrder}
-            />
-          </Suspense>
-        </div>
+        <Suspense fallback={<ModalLoadingFallback />}>
+          <OrderTicket
+            order={order}
+            onBackToMenu={() => {
+              onClose();
+              if (onGoToMenu) onGoToMenu();
+            }}
+            onGoHome={onClose}
+            onClose={onClose}
+            onCancelOrder={onCancelOrder}
+          />
+        </Suspense>
       </div>
     </div>
   );

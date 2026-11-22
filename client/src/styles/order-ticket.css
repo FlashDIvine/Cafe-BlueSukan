@@ -1,490 +1,507 @@
 /* ==========================================================================
-   Order Ticket & Status Screen Styles
+   Order Ticket (Tiket Digital Gaya Nota Warung) — Blue'sukan Kopi
    ========================================================================== */
 
 .ticket-page-container {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-primary, #F4ECDC);
-  padding: 16px 16px 40px;
+  background-color: var(--paper);
+  color: var(--ink);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.nota-warung-container {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  animation: fadeInTicket 0.3s ease-out;
+  padding: 18px;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  box-sizing: border-box;
 }
 
-@keyframes fadeInTicket {
-  from { opacity: 0; transform: translateY(10px); }
-}
-
-/* Header bar */
-.ticket-header-bar {
+/* 1. Header: Judul kecil "Tiket Pesanan" & tombol tutup */
+.nota-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(58, 36, 24, 0.15);
 }
 
-.ticket-back-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-white);
-  border: 1px solid var(--color-border);
-  color: var(--color-primary);
-  font-family: inherit;
-  font-size: 13px;
+.nota-header-title {
+  font-family: var(--f-body);
+  font-size: 0.95rem;
   font-weight: 700;
-  padding: 8px 14px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  box-shadow: var(--shadow-xs);
-  transition: all var(--transition-fast);
+  color: var(--ink);
 }
 
-.ticket-back-btn:hover {
-  background-color: var(--color-sky);
-}
-
-.ticket-header-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: var(--color-primary);
-}
-
-/* Main Ticket Card */
-.ticket-card {
-  background-color: var(--color-white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-/* Ticket Top Brand Banner */
-.ticket-brand-banner {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-  color: var(--color-white);
-  padding: 20px 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 6px;
-}
-
-.ticket-cafe-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  background-color: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 2px;
-}
-
-.ticket-cafe-name {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-}
-
-.ticket-order-code-badge {
-  background-color: var(--color-white);
-  color: var(--color-primary);
-  font-size: 18px;
-  font-weight: 800;
-  padding: 6px 18px;
-  border-radius: var(--radius-pill);
-  margin-top: 6px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  letter-spacing: 0.05em;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* QR Code Section */
-.ticket-qr-section {
-  padding: 24px 20px 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.qr-code-frame {
-  background-color: var(--color-white);
-  padding: 16px;
-  border-radius: var(--radius-lg);
-  border: 2px dashed var(--color-accent);
-  box-shadow: var(--shadow-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.qr-scan-hint {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--color-slate);
-  text-align: center;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Status Banner */
-.ticket-status-box {
-  margin: 0 16px 16px;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  transition: all var(--transition-normal);
-}
-
-.ticket-status-box.waiting {
-  background-color: #FEF3C7;
-  border: 1px solid #FCD34D;
-  color: #92400E;
-}
-
-.ticket-status-box.processing {
-  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-  border: 1px solid #93C5FD;
-  color: #1E40AF;
-  animation: pulseHighlight 1s ease-in-out;
-}
-
-@keyframes pulseHighlight {
-  0% { transform: scale(0.98); }
-  50% { transform: scale(1.02); }
-  100% { transform: scale(1); }
-}
-
-.status-icon-wrap {
+.nota-close-btn {
+  background: var(--soft);
+  border: 1px solid rgba(58, 36, 24, 0.2);
+  border-radius: 50%;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  color: var(--ink);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
 }
 
-.status-text-content {
+.nota-close-btn:hover {
+  opacity: 0.8;
+}
+
+/* 2. Status Badge & Kode Pesanan Besar */
+.nota-code-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.status-title-row {
-  font-size: 13.5px;
-  font-weight: 800;
-  display: flex;
   align-items: center;
-  gap: 6px;
+  text-align: center;
+  gap: 8px;
+  padding: 4px 0;
 }
 
-.status-desc-row {
-  font-size: 12px;
-  line-height: 1.35;
-  opacity: 0.9;
+.nota-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
-.live-poll-indicator {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: #D97706;
-  animation: blinkPoll 1.5s infinite;
+.nota-status-badge.badge-waiting {
+  background-color: var(--sun);
+  color: var(--on-sun);
 }
 
-@keyframes blinkPoll {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.25; }
+.nota-status-badge.badge-waiting-qris {
+  background-color: var(--soft);
+  color: var(--ink);
+  border: 1px solid rgba(58, 36, 24, 0.25);
 }
 
-/* Perforated dashed separator */
-.ticket-perforated-line {
-  position: relative;
-  border-top: 2px dashed var(--color-border);
-  margin: 8px 0;
+.nota-status-badge.badge-processing {
+  background-color: var(--blue);
+  color: var(--on-blue);
 }
 
-.ticket-perforated-line::before,
-.ticket-perforated-line::after {
-  content: '';
-  position: absolute;
-  top: -10px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: #ECEFF3;
+.nota-status-badge.badge-completed {
+  background-color: var(--ok);
+  color: #FFFFFF;
 }
 
-.ticket-perforated-line::before {
-  left: -10px;
+.nota-status-badge.badge-cancelled {
+  background-color: var(--red);
+  color: #FFFFFF;
 }
 
-.ticket-perforated-line::after {
-  right: -10px;
+.nota-order-code {
+  font-family: var(--f-display);
+  font-size: clamp(2.2rem, 7vw, 2.6rem);
+  font-weight: 400;
+  color: var(--ink);
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  transform: none;
 }
 
-/* Order Details Section */
-.ticket-details-section {
-  padding: 16px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.ticket-meta-grid {
+/* 3. Baris Meja & Nama Pemesan */
+.nota-meta-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  background-color: var(--color-bg);
-  padding: 12px 14px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  gap: 8px;
+  background-color: var(--soft);
+  border: 1px solid rgba(58, 36, 24, 0.15);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
 
-.meta-field {
+.nota-meta-item {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.meta-field-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-slate);
-  text-transform: uppercase;
+.nota-meta-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
 }
 
-.meta-field-value {
-  font-size: 13.5px;
-  font-weight: 800;
-  color: var(--color-text-main);
+.nota-meta-val {
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 700;
 }
 
-.ticket-notes-box {
-  background-color: #F8FAFC;
-  border-left: 3px solid var(--color-accent);
+.nota-notes-box {
+  background-color: var(--soft);
+  border: 1px dashed rgba(58, 36, 24, 0.2);
+  border-radius: 8px;
   padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 12px;
-  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  color: var(--ink);
 }
 
-/* Items List in Ticket */
-.ticket-items-list {
+/* 4. Daftar Menu & Total (Gaya Titik-Titik) */
+.nota-items-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.nota-items-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.ticket-item-row {
+.nota-item-row,
+.nota-total-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  color: var(--color-text-main);
-}
-
-.ticket-item-qty-name {
-  display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 6px;
-  font-weight: 600;
+  width: 100%;
 }
 
-.ticket-item-qty-badge {
-  background-color: var(--color-sky);
-  color: var(--color-primary);
-  font-size: 11px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 4px;
+.nota-item-name {
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-.ticket-item-price {
+.nota-dots {
+  flex: 1;
+  border-bottom: 2px dotted rgba(58, 36, 24, 0.25);
+  min-width: 12px;
+  transform: translateY(-4px);
+}
+
+.nota-item-price {
+  font-size: 0.95rem;
+  color: var(--ink);
   font-weight: 700;
-  color: var(--color-primary);
+  white-space: nowrap;
 }
 
-.ticket-total-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1.5px solid var(--color-border);
-  padding-top: 12px;
+.nota-total-row {
+  padding-top: 8px;
+  border-top: 1.5px solid rgba(58, 36, 24, 0.2);
   margin-top: 4px;
 }
 
-.ticket-total-label {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-text-main);
+.nota-total-label {
+  font-family: var(--f-display);
+  font-size: 1.05rem;
+  color: var(--ink);
 }
 
-.ticket-total-val {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--color-primary);
+.nota-total-val {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
-/* Demo Simulation Action Bar — removed, status transitions via cashier polling only */
-
-
-/* Post-Order Success Banner */
-.ticket-success-alert {
-  margin: 0 16px 12px;
-  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
-  border: 1px solid #BFDBFE;
-  border-radius: var(--radius-lg);
-  padding: 12px 16px;
+/* 5. Garis Sobekan */
+.nota-tear-line {
+  position: relative;
+  width: calc(100% + 36px);
+  margin: 10px -18px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  overflow: hidden;
 }
 
-.ticket-success-icon {
-  width: 36px;
-  height: 36px;
+.tear-dashed-line {
+  flex: 1;
+  border-top: 2px dashed rgba(58, 36, 24, 0.28);
+}
+
+.tear-cutout-left,
+.tear-cutout-right {
+  width: 18px;
+  height: 18px;
+  background-color: rgba(58, 36, 24, 0.45);
   border-radius: 50%;
-  background-color: var(--color-royal-blue);
-  color: var(--color-white);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   flex-shrink: 0;
 }
 
-.ticket-success-text {
+.tear-cutout-left {
+  margin-left: -9px;
+}
+
+.tear-cutout-right {
+  margin-right: -9px;
+}
+
+/* 6. QR Kasir (~140px) */
+.nota-qr-section {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 4px 0;
 }
 
-.ticket-success-title {
-  font-size: 13.5px;
-  font-weight: 800;
-  color: var(--color-navy);
+.nota-qr-frame {
+  background-color: var(--paper);
+  padding: 10px;
+  border: 1.5px solid rgba(58, 36, 24, 0.2);
+  border-radius: 10px;
+  display: inline-flex;
 }
 
-.ticket-success-desc {
-  font-size: 11.5px;
-  color: var(--color-text-muted);
+.nota-qr-hint {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0;
 }
 
-/* Post-Order Auto-Redirect Countdown Bar */
-.ticket-countdown-bar {
-  margin: 0 16px 14px;
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: var(--radius-pill);
-  padding: 8px 14px;
+/* 7. Bagian Bayar QRIS */
+.nota-payment-box {
+  background-color: var(--soft);
+  border: 1.5px solid rgba(58, 36, 24, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nota-payment-title {
+  font-family: var(--f-display);
+  font-size: 1.15rem;
+  color: var(--ink);
+  margin: 0;
+}
+
+.nota-steps-list {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.45;
+}
+
+.nota-merchant-qris-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px;
+  background-color: var(--paper);
+  border-radius: 10px;
+  border: 1px solid rgba(58, 36, 24, 0.15);
+}
+
+.nota-merchant-qris-img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.nota-merchant-name {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.nota-qris-empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  background-color: var(--paper);
+  border: 1px dashed rgba(58, 36, 24, 0.25);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.nota-copy-code-box {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
-}
-
-.countdown-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
-
-.countdown-number {
-  font-weight: 800;
-  color: var(--color-royal-blue);
-  background: #EFF6FF;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.countdown-cancel-btn {
-  background: none;
-  border: none;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--color-royal-blue);
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 4px;
-  transition: background-color 0.15s ease;
-}
-
-.countdown-cancel-btn:hover {
-  background-color: #EFF6FF;
-}
-
-/* Action Buttons Bottom */
-.ticket-actions-bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 14px;
-}
-
-.btn-go-home {
-  width: 100%;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-royal-blue) 100%);
-  color: var(--color-white);
-  border: none;
-  font-family: inherit;
-  font-size: 14.5px;
-  font-weight: 800;
-  padding: 14px 20px;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
-  transition: all var(--transition-fast);
+  background-color: var(--paper);
+  border: 1px solid rgba(58, 36, 24, 0.15);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
 }
 
-.btn-go-home:hover {
-  opacity: 0.95;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+.nota-copy-label {
+  font-size: 0.88rem;
+  color: var(--ink);
 }
 
-.btn-order-again {
-  background-color: #FFFFFF;
-  color: var(--color-royal-blue);
-  border: 1.5px solid var(--color-royal-blue-light);
-  font-family: inherit;
-  font-size: 13.5px;
+.btn-copy-code {
+  background-color: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-family: var(--f-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-copy-code:hover {
+  opacity: 0.85;
+}
+
+.btn-sudah-bayar {
+  background-color: var(--sun);
+  color: var(--on-sun);
+  font-family: var(--f-body);
+  font-size: 0.98rem;
   font-weight: 700;
   padding: 12px 20px;
+  border: none;
   border-radius: var(--radius-pill);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all var(--transition-fast);
+  text-align: center;
+  transition: opacity 0.15s ease;
 }
 
-.btn-order-again:hover {
-  background-color: #EFF6FF;
-  border-color: var(--color-royal-blue);
-  transform: translateY(-1px);
+.btn-sudah-bayar:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn-sudah-bayar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.nota-waiting-qris-box {
+  background-color: var(--paper);
+  border: 1.5px dashed var(--sun);
+  color: var(--ink);
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-align: center;
+}
+
+/* 8. Bagian Bayar Tunai */
+.nota-cash-section {
+  background-color: var(--soft);
+  border: 1.5px solid rgba(58, 36, 24, 0.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.nota-cash-instruction {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+/* Countdown */
+.nota-countdown-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: var(--soft);
+  border: 1px solid rgba(58, 36, 24, 0.15);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.nota-countdown-box button {
+  background: none;
+  border: none;
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* 9. Tombol Aksi Bawah */
+.nota-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-nota-home {
+  background-color: var(--blue);
+  color: var(--on-blue);
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 20px;
+  font-family: var(--f-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+
+.btn-nota-home:hover {
+  opacity: 0.9;
+}
+
+.btn-nota-menu {
+  background-color: var(--soft);
+  color: var(--ink);
+  border: 1.5px solid rgba(58, 36, 24, 0.2);
+  border-radius: var(--radius-pill);
+  padding: 11px 20px;
+  font-family: var(--f-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: opacity 0.15s ease;
+}
+
+.btn-nota-menu:hover {
+  opacity: 0.85;
+}
+
+.btn-nota-cancel {
+  background-color: transparent;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  font-family: var(--f-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  margin-top: 4px;
+  transition: all 0.15s ease;
+}
+
+.btn-nota-cancel:hover:not(:disabled) {
+  background-color: rgba(196, 71, 47, 0.08);
+}
+
+.btn-nota-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
