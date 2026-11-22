@@ -233,34 +233,183 @@
   margin-left: 4px;
 }
 
-/* ─── 3. Modal Overlay for Digital Ticket ─────────────────────────────────── */
+/* ─── 3. Modal Overlay for Digital Ticket & Active Orders Sheet ─────────── */
 .ticket-modal-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(10, 15, 29, 0.72);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(26, 24, 21, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 250;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
-  animation: fadeInModal 0.22s ease-out;
+  animation: fadeInModal 0.2s ease-out;
   overflow-y: auto;
 }
 
 .ticket-modal-window {
-  background-color: #ECEFF3;
-  border-radius: var(--radius-2xl);
+  background-color: var(--paper, #F7F4EB);
+  border: 1.5px solid var(--ink, #1A1815);
+  border-radius: var(--radius-card, 1.2rem);
   width: 100%;
   max-width: 440px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 24px 60px -8px rgba(10, 15, 29, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 30px rgba(58, 36, 24, 0.2);
   position: relative;
   display: flex;
   flex-direction: column;
-  animation: scaleInModal 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Multi-order back bar above ticket */
+.ticket-multi-back-bar {
+  padding: 10px 14px 4px;
+  display: flex;
+  align-items: center;
+  background: var(--paper, #F7F4EB);
+  border-bottom: 1px dashed rgba(26, 24, 21, 0.2);
+}
+
+.btn-back-to-orders-list {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  font-family: var(--f-body);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--blue, #1B3B64);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+}
+
+.btn-back-to-orders-list:hover {
+  text-decoration: underline;
+}
+
+/* Sheet Top Bar */
+.sheet-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1.5px solid var(--ink, #1A1815);
+  background-color: var(--paper, #F7F4EB);
+}
+
+.sheet-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink, #1A1815);
+}
+
+.sheet-title {
+  margin: 0;
+  font-family: var(--f-display, 'Caprasimo', cursive);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink, #1A1815);
+  letter-spacing: -0.01em;
+}
+
+.sheet-close-btn {
+  background: transparent;
+  border: 1px solid rgba(26, 24, 21, 0.2);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink, #1A1815);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sheet-close-btn:hover {
+  background-color: rgba(26, 24, 21, 0.08);
+}
+
+.sheet-body {
+  padding: 16px 18px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sheet-caption {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted, #6F6659);
+  font-weight: 500;
+}
+
+.sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sheet-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--ink, #1A1815);
+  border-radius: var(--radius-md, 0.75rem);
+  background: var(--paper, #F7F4EB);
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.sheet-item-row:hover {
+  background-color: rgba(26, 24, 21, 0.04);
+  transform: translateY(-1px);
+}
+
+.sheet-item-row:active {
+  transform: translateY(0);
+}
+
+.sheet-item-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sheet-item-code {
+  font-family: var(--f-display, 'Caprasimo', cursive);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink, #1A1815);
+}
+
+.sheet-item-meta {
+  font-size: 0.8rem;
+  color: var(--muted, #6F6659);
+}
+
+.sheet-item-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sheet-item-total {
+  font-family: var(--f-body);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ink, #1A1815);
 }
 
 .ticket-modal-top-bar {

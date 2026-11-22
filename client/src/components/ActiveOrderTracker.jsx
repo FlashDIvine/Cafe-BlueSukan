@@ -1,34 +1,35 @@
-import React, { useState, useEffect, memo } from 'react';
+import React, { useEffect, memo } from 'react';
 import { Clock, ChefHat, CheckCircle2, AlertCircle, CreditCard, X } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import { fetchOrderStatusApi } from '../services/api';
 import '../styles/active-order-tracker.css';
 
-export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStatusChange }) => {
-  const [currentStatus, setCurrentStatus] = useState(order?.status || 'waiting_payment');
-
-  // Sync internal state when order prop changes
-  useEffect(() => {
-    if (order?.status && order.status !== currentStatus) {
-      setCurrentStatus(order.status);
-    }
-  }, [order?.status]);
+export const ActiveOrderTracker = memo(({
+  orders = [],
+  order,
+  onOpenTicket,
+  onOpenList,
+  onDismiss,
+  onStatusChange,
+}) => {
+  const effectiveOrders = orders.length > 0 ? orders : (order ? [order] : []);
+  const count = effectiveOrders.length;
 
   // Fallback Polling of Order Status (every 30 seconds as fallback to SSE)
   useEffect(() => {
-    if (!order?.order_code || currentStatus === 'completed' || currentStatus === 'cancelled') {
-      return;
-    }
+    if (effectiveOrders.length === 0) return;
 
     const intervalId = setInterval(async () => {
       try {
         if (typeof document !== 'undefined' && document.hidden) return;
 
-        const result = await fetchOrderStatusApi(order.order_code);
-        if (result && result.status && result.status !== currentStatus) {
-          setCurrentStatus(result.status);
-          if (onStatusChange) {
-            onStatusChange(result.status);
+        for (const ord of effectiveOrders) {
+          if (!ord?.order_code || ord.status === 'completed' || ord.status === 'cancelled') continue;
+          const result = await fetchOrderStatusApi(ord.order_code);
+          if (result && result.status && result.status !== ord.status) {
+            if (onStatusChange) {
+              onStatusChange(ord.order_code, result.status);
+            }
           }
         }
       } catch {
@@ -37,13 +38,13 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
     }, 30000);
 
     return () => clearInterval(intervalId);
-  }, [order?.order_code, currentStatus, onStatusChange]);
+  }, [effectiveOrders, onStatusChange]);
 
-  if (!order) return null;
+  if (count === 0) return null;
 
-  // Status Presentation configuration - Anti-Slop Vintage Riverside Warung
-  const getStatusConfig = () => {
-    switch (currentStatus) {
+  // Status presentation config - Anti-Slop Vintage
+  const getStatusConfig = (status) => {
+    switch (status) {
       case 'paid_processing':
         return {
           icon: <ChefHat size={16} strokeWidth={2.2} />,
@@ -83,9 +84,85 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
     }
   };
 
-  const statusConfig = getStatusConfig();
-  const isTerminalState = currentStatus === 'completed' || currentStatus === 'cancelled';
-  const displayCode = order.order_code?.startsWith('#') ? order.order_code : '#' + (order.order_code || '');
+  // 1. Jika hanya satu pesanan, tampilan seperti sekarang
+  if (count === 1) {
+    const singleOrder = effectiveOrders[0];
+    const statusConfig = getStatusConfig(singleOrder.status);
+    const isTerminalState = singleOrder.status === 'completed' || singleOrder.status === 'cancelled';
+    const displayCode = singleOrder.order_code?.startsWith('#')
+      ? singleOrder.order_code
+      : '#' + (singleOrder.order_code || '');
+
+    return (
+      <aside
+        className="active-order-floating-bar"
+        aria-label="Status Pesanan Aktif Anda"
+      >
+        <div className="active-order-tracker-card">
+          <div
+            className="tracker-left-group"
+            onClick={() => onOpenTicket && onOpenTicket(singleOrder)}
+            style={{ cursor: 'pointer' }}
+          >
+            <div className={`tracker-icon-badge ${statusConfig.badgeClass}`}>
+              {statusConfig.icon}
+            </div>
+
+            <div className="tracker-text-block">
+              <div className={`tracker-status-pill ${statusConfig.pillClass}`}>
+                <span className="tracker-pulse-dot" />
+                <span>{statusConfig.label}</span>
+              </div>
+
+              <div className="tracker-meta-line">
+                <span className="tracker-order-code">{displayCode}</span>
+                <span className="tracker-sep">•</span>
+                <span className="tracker-table-badge">{formatLocationDisplay(singleOrder.table_number)}</span>
+                <span className="tracker-sep">•</span>
+                <span className="tracker-total-price">{formatRupiah(singleOrder.total_price)}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="tracker-actions-group">
+            <button
+              type="button"
+              className="btn-tracker-view-ticket"
+              onClick={() => onOpenTicket && onOpenTicket(singleOrder)}
+              aria-label="Lihat tiket pesanan"
+            >
+              <span>Tiket</span>
+            </button>
+
+            {isTerminalState && onDismiss && (
+              <button
+                type="button"
+                className="btn-tracker-dismiss"
+                onClick={() => onDismiss(singleOrder.order_code)}
+                aria-label="Tutup notifikasi pesanan"
+                title="Tutup"
+              >
+                <X size={15} />
+              </button>
+            )}
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
+  // 2. Jika lebih dari satu, tracker menampilkan ringkasan: "2 pesanan aktif" dengan status pesanan terbaru
+  const latestOrder = effectiveOrders[effectiveOrders.length - 1];
+  const latestStatusConfig = getStatusConfig(latestOrder.status);
+  const totalAll = effectiveOrders.reduce((acc, ord) => acc + (Number(ord.total_price) || 0), 0);
+
+  const handleOpenMulti = () => {
+    if (onOpenList) {
+      onOpenList();
+    } else if (onOpenTicket) {
+      onOpenTicket(latestOrder);
+    }
+  };
 
   return (
     <aside
@@ -93,50 +170,38 @@ export const ActiveOrderTracker = memo(({ order, onOpenTicket, onDismiss, onStat
       aria-label="Status Pesanan Aktif Anda"
     >
       <div className="active-order-tracker-card">
-        {/* Left: Live status icon & order info */}
-        <div className="tracker-left-group" onClick={onOpenTicket} style={{ cursor: 'pointer' }}>
-          <div className={`tracker-icon-badge ${statusConfig.badgeClass}`}>
-            {statusConfig.icon}
+        <div
+          className="tracker-left-group"
+          onClick={handleOpenMulti}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className={`tracker-icon-badge ${latestStatusConfig.badgeClass}`}>
+            {latestStatusConfig.icon}
           </div>
 
           <div className="tracker-text-block">
-            <div className={`tracker-status-pill ${statusConfig.pillClass}`}>
+            <div className={`tracker-status-pill ${latestStatusConfig.pillClass}`}>
               <span className="tracker-pulse-dot" />
-              <span>{statusConfig.label}</span>
+              <span>{latestStatusConfig.label}</span>
             </div>
 
             <div className="tracker-meta-line">
-              <span className="tracker-order-code">{displayCode}</span>
+              <span className="tracker-order-code">{count} pesanan aktif</span>
               <span className="tracker-sep">•</span>
-              <span className="tracker-table-badge">{formatLocationDisplay(order.table_number)}</span>
-              <span className="tracker-sep">•</span>
-              <span className="tracker-total-price">{formatRupiah(order.total_price)}</span>
+              <span className="tracker-total-price">{formatRupiah(totalAll)}</span>
             </div>
           </div>
         </div>
 
-        {/* Right: Actions */}
         <div className="tracker-actions-group">
           <button
             type="button"
             className="btn-tracker-view-ticket"
-            onClick={onOpenTicket}
-            aria-label="Lihat tiket pesanan"
+            onClick={handleOpenMulti}
+            aria-label="Buka daftar pesanan aktif"
           >
-            <span>Tiket</span>
+            <span>Daftar ({count})</span>
           </button>
-
-          {isTerminalState && onDismiss && (
-            <button
-              type="button"
-              className="btn-tracker-dismiss"
-              onClick={onDismiss}
-              aria-label="Tutup notifikasi pesanan"
-              title="Tutup"
-            >
-              <X size={15} />
-            </button>
-          )}
         </div>
       </div>
     </aside>
