@@ -17,7 +17,6 @@ model Menu {
   price        Int
   stock        Int         @default(0)
   is_available Boolean     @default(true)
-  image_url    String
   description  String?
   is_popular   Boolean     @default(false)
   created_at   DateTime    @default(now())
