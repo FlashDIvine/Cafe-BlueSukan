@@ -8,7 +8,7 @@ import { CartDrawer } from './components/CartDrawer';
 import { ActiveOrderModal } from './components/ActiveOrderModal';
 import { ActiveOrderTracker } from './components/ActiveOrderTracker';
 import { FloatingCartBar } from './components/FloatingCartBar';
-import { submitOrderApi } from './services/api';
+import { submitOrderApi, fetchOrderByCodeApi } from './services/api';
 import { playCustomerChime } from './utils/bellSound';
 import { formatLocationDisplay } from './utils/formatters';
 
@@ -56,6 +56,19 @@ function AppContent() {
 
   const { showToast, clearCart } = useOrder();
 
+  // Refresh active order data completely from backend
+  const refreshActiveOrder = async (orderCode) => {
+    try {
+      const freshOrder = await fetchOrderByCodeApi(orderCode);
+      if (freshOrder) {
+        setActiveOrder(freshOrder);
+      }
+    } catch (err) {
+      console.error('Failed to refresh active order:', err);
+      showToast('Gagal memperbarui pesanan', 'warning');
+    }
+  };
+
   // Sync activeOrder changes to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -101,13 +114,15 @@ function AppContent() {
             });
           }
 
-          // 2. Order status update / QRIS confirmation
-          if (
-            payload?.order_code === activeOrder.order_code &&
-            payload?.status &&
-            payload.status !== activeOrder.status
-          ) {
-            setActiveOrder((prev) => (prev ? { ...prev, status: payload.status } : prev));
+          // 2. Order status / items update: ambil ulang pesanan secara menyeluruh tanpa syarat status berubah
+          if (payload?.order_code === activeOrder.order_code) {
+            if (
+              payload?.type === 'ORDER_UPDATED' ||
+              payload?.type === 'STATUS_UPDATED' ||
+              payload?.type === 'QRIS_CONFIRMED'
+            ) {
+              refreshActiveOrder(payload.order_code);
+            }
           }
         } catch {
           // Heartbeat or malformed comment
@@ -259,6 +274,7 @@ function AppContent() {
         onClose={() => setIsTicketModalOpen(false)}
         order={activeOrder}
         onGoToMenu={handleGoToMenu}
+        onOrderUpdate={setActiveOrder}
         onCancelOrder={(cancelledOrder) => {
           setActiveOrder((prev) => (prev ? { ...prev, status: 'cancelled' } : cancelledOrder));
         }}

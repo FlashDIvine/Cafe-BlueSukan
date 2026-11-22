@@ -4,13 +4,15 @@ import { X } from 'lucide-react';
 import { formatRupiah, formatLocationDisplay } from '../utils/formatters';
 import {
   fetchOrderStatusApi,
+  fetchOrderByCodeApi,
   fetchQrisSettingsApi,
   confirmQrisPaymentApi,
   cancelOrderApi,
 } from '../services/api';
 import '../styles/order-ticket.css';
 
-export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOrder }) => {
+export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOrder, onOrderUpdate }) => {
+  const [localOrder, setLocalOrder] = useState(order);
   const [currentStatus, setCurrentStatus] = useState(order?.status || 'waiting_payment');
   const [countdown, setCountdown] = useState(null); // null when inactive
   const [isCountdownCancelled, setIsCountdownCancelled] = useState(false);
@@ -36,32 +38,41 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
     };
   }, []);
 
-  // Sync internal state when order prop changes (via SSE in parent)
+  // Sync internal state when order prop changes (via SSE / parent refetch)
   useEffect(() => {
-    if (order?.status && order.status !== currentStatus) {
-      setCurrentStatus(order.status);
+    if (order) {
+      setLocalOrder(order);
+      if (order.status && order.status !== currentStatus) {
+        setCurrentStatus(order.status);
+      }
     }
-  }, [order?.status]);
+  }, [order]);
 
-  // Fallback polling interval (every 30 seconds as fallback to SSE)
+  // Fallback polling interval (every 15 seconds to fetch complete order as fallback to SSE)
   useEffect(() => {
-    if (!order?.order_code || currentStatus === 'paid_processing' || currentStatus === 'completed') {
+    if (!order?.order_code || currentStatus === 'completed' || currentStatus === 'cancelled') {
       return;
     }
 
     const intervalId = setInterval(async () => {
       try {
-        const result = await fetchOrderStatusApi(order.order_code);
-        if (result && result.status && result.status !== currentStatus) {
-          setCurrentStatus(result.status);
+        const freshOrder = await fetchOrderByCodeApi(order.order_code);
+        if (freshOrder) {
+          setLocalOrder(freshOrder);
+          if (freshOrder.status && freshOrder.status !== currentStatus) {
+            setCurrentStatus(freshOrder.status);
+          }
+          if (onOrderUpdate) {
+            onOrderUpdate(freshOrder);
+          }
         }
-      } catch {
-        // Network hiccup — keep polling
+      } catch (err) {
+        console.warn('Fallback polling order fetch failed:', err);
       }
-    }, 30000);
+    }, 15000);
 
     return () => clearInterval(intervalId);
-  }, [order?.order_code, currentStatus]);
+  }, [order?.order_code, currentStatus, onOrderUpdate]);
 
   // Optional post-order countdown redirect when order is completed
   useEffect(() => {
@@ -88,10 +99,11 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
   const isCanCancel = currentStatus === 'waiting_payment' || currentStatus === 'waiting_qris_verification';
 
   const handleConfirmQrisPayment = async () => {
-    if (!order?.order_code) return;
+    const code = (localOrder || order)?.order_code;
+    if (!code) return;
     try {
       setIsConfirmingQris(true);
-      await confirmQrisPaymentApi(order.order_code);
+      await confirmQrisPaymentApi(code);
       setCurrentStatus('waiting_qris_verification');
     } catch (err) {
       alert(err.message || 'Gagal mengirim konfirmasi QRIS');
@@ -101,17 +113,18 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
   };
 
   const handleCancelOrder = async () => {
-    if (!order) return;
-    const confirmMsg = `Yakin ingin membatalkan pesanan ${order.order_code}?\n\nPesanan belum dikonfirmasi kasir dan tindakan ini tidak dapat diurungkan.`;
+    const currentActive = localOrder || order;
+    if (!currentActive) return;
+    const confirmMsg = `Yakin ingin membatalkan pesanan ${currentActive.order_code}?\n\nPesanan belum dikonfirmasi kasir dan tindakan ini tidak dapat diurungkan.`;
     if (!window.confirm(confirmMsg)) return;
 
     try {
       setIsCancelling(true);
-      const identifier = order.order_code || order.id;
+      const identifier = currentActive.order_code || currentActive.id;
       const cancelled = await cancelOrderApi(identifier, true);
       setCurrentStatus('cancelled');
       if (onCancelOrder) {
-        onCancelOrder(cancelled || { ...order, status: 'cancelled' });
+        onCancelOrder(cancelled || { ...currentActive, status: 'cancelled' });
       }
     } catch (err) {
       alert(err.message || 'Gagal membatalkan pesanan');
@@ -137,17 +150,18 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
     }
   };
 
+  const activeData = localOrder || order;
   const statusBadge = getStatusBadge();
-  const displayCode = order?.order_code?.startsWith('#')
-    ? order.order_code
-    : '#' + (order?.order_code || 'BC-100');
+  const displayCode = activeData?.order_code?.startsWith('#')
+    ? activeData.order_code
+    : '#' + (activeData?.order_code || 'BC-100');
 
   // Value encoded in the QR code for cashier scanning
   const qrPayload = JSON.stringify({
-    order_code: order?.order_code,
-    table: order?.table_number,
-    total: order?.total_price,
-    time: order?.created_at,
+    order_code: activeData?.order_code,
+    table: activeData?.table_number,
+    total: activeData?.total_price,
+    time: activeData?.created_at,
   });
 
   const handleClose = onClose || onGoHome || onBackToMenu;
@@ -181,24 +195,24 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
       <div className="nota-meta-grid">
         <div className="nota-meta-item">
           <span className="nota-meta-label">Meja</span>
-          <span className="nota-meta-val">{formatLocationDisplay(order?.table_number)}</span>
+          <span className="nota-meta-val">{formatLocationDisplay(activeData?.table_number)}</span>
         </div>
         <div className="nota-meta-item">
           <span className="nota-meta-label">Pemesan</span>
-          <span className="nota-meta-val">{order?.customer_name || 'Pelanggan'}</span>
+          <span className="nota-meta-val">{activeData?.customer_name || 'Pelanggan'}</span>
         </div>
       </div>
 
-      {order?.notes && (
+      {activeData?.notes && (
         <div className="nota-notes-box">
-          <span className="nota-meta-label">Catatan:</span> {order.notes}
+          <span className="nota-meta-label">Catatan:</span> {activeData.notes}
         </div>
       )}
 
       {/* 4. Daftar menu dan total, menggunakan gaya daftar titik-titik */}
       <div className="nota-items-section">
         <div className="nota-items-list">
-          {order?.items?.map((item, idx) => (
+          {activeData?.items?.map((item, idx) => (
             <div key={idx} className="nota-item-row">
               <span className="nota-item-name">{item.name} ×{item.quantity}</span>
               <span className="nota-dots" aria-hidden="true" />
@@ -212,7 +226,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
         <div className="nota-total-row">
           <span className="nota-total-label">Total</span>
           <span className="nota-dots" aria-hidden="true" />
-          <span className="nota-total-val">{formatRupiah(order?.total_price || 0)}</span>
+          <span className="nota-total-val">{formatRupiah(activeData?.total_price || 0)}</span>
         </div>
       </div>
 
@@ -238,12 +252,12 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
       </div>
 
       {/* 7. Bagian bayar, hanya jika metode QRIS */}
-      {order?.payment_method === 'qris' && (
+      {activeData?.payment_method === 'qris' && (
         <div className="nota-payment-box">
           <h2 className="nota-payment-title">Cara bayar</h2>
           <ol className="nota-steps-list">
             <li>Scan kode QR QRIS toko.</li>
-            <li>Ketik nominal persis: <strong>{formatRupiah(order?.total_price || 0)}</strong>.</li>
+            <li>Ketik nominal persis: <strong>{formatRupiah(activeData?.total_price || 0)}</strong>.</li>
             <li>Tekan "Sudah bayar".</li>
           </ol>
 
@@ -274,7 +288,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
               className="btn-copy-code"
               onClick={() => {
                 if (navigator?.clipboard) {
-                  navigator.clipboard.writeText(order?.order_code || '');
+                  navigator.clipboard.writeText(activeData?.order_code || '');
                   alert(`Kode ${displayCode} disalin!`);
                 }
               }}
@@ -305,7 +319,7 @@ export const OrderTicket = ({ order, onBackToMenu, onGoHome, onClose, onCancelOr
       )}
 
       {/* 8. Bagian bayar, jika metode tunai */}
-      {order?.payment_method !== 'qris' && (
+      {activeData?.payment_method !== 'qris' && (
         <div className="nota-cash-section">
           <p className="nota-cash-instruction">
             Bayar di kasir. Sebutkan kode <strong>{displayCode}</strong> atau tunjukkan layar ini.

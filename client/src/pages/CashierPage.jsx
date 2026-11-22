@@ -152,12 +152,12 @@ export const CashierPage = () => {
             if (soundEnabled) {
               playCashierBell();
             }
-          } else if (payload?.type === 'QRIS_CONFIRMED') {
+          } else if (payload?.type === 'QRIS_CONFIRMED' || (payload?.type === 'ORDER_UPDATED' && payload?.is_qris_claim)) {
             loadData(true);
             if (soundEnabled) {
               playCashierBell();
             }
-          } else if (payload?.type === 'STATUS_UPDATED') {
+          } else if (payload?.type === 'STATUS_UPDATED' || payload?.type === 'ORDER_UPDATED') {
             loadData(true);
           }
         } catch {
